@@ -36,18 +36,17 @@ const LoginScreen = () => {
       backgroundColor: '#e6f4f1', 
     },
     loginContainer: {
-      backgroundColor: 'white',
-      padding: '30px',
-      borderRadius: '10px',
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-      textAlign: 'center',
-      width: '100%',
-      maxWidth: '400px',
-      boxSizing: 'border-box',
+    backgroundColor: 'white',
+    padding: '36px 32px',
+    borderRadius: '10px',
+    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
+    width: '100%',
+    maxWidth: '420px',
     },
     logo: {
-      width: '100px',
-      marginBottom: '20px',
+      width: '120px',
+      marginBottom: '18px',
     },
     heading: {
       margin: '10px 0',
@@ -60,7 +59,7 @@ const LoginScreen = () => {
       fontSize: '16px',
     },
     inputContainer: {
-      marginBottom: '15px',
+      marginBottom: '20px',
       textAlign: 'left',
     },
     label: {
@@ -70,20 +69,20 @@ const LoginScreen = () => {
     },
     input: {
       width: '100%',
-      padding: '10px',
+      padding: '12px',
       border: '1px solid #ccc',
-      borderRadius: '5px',
+      borderRadius: '8px',
       fontSize: '16px',
       marginBottom: '15px',
       boxSizing: 'border-box',
     },
     button: {
-      backgroundColor: '#4caf50',
+      backgroundColor: '#24886E',
       color: 'white',
       border: 'none',
-      padding: '10px 20px',
+      padding: '12px 20px',
       cursor: 'pointer',
-      borderRadius: '5px',
+      borderRadius: '8px',
       width: '100%',
       fontSize: '16px',
       boxSizing: 'border-box',
@@ -95,7 +94,7 @@ const LoginScreen = () => {
       marginTop: '15px',
     },
     authLink: {
-      color: '#4caf50',
+      color: '#24886E',
       textDecoration: 'none',
       margin: '5px 0',
       display: 'inline-block',
@@ -111,8 +110,8 @@ const LoginScreen = () => {
     <div style={styles.loginScreen}>
       <div style={styles.loginContainer}>
         <img src={logo} alt="QueueIT Logo" style={styles.logo} />
-        <h2 style={styles.heading}>QueueIT</h2>
-        <p style={styles.paragraph}>A Machine Learning Assisted Queue Management System</p>
+        <h2 style={styles.heading}>Log in</h2>
+        <p style={styles.paragraph}>Input credentials to continue</p>
 
         <form onSubmit={handleLogin}>
           <div style={styles.inputContainer}>
@@ -123,7 +122,7 @@ const LoginScreen = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Enter Username"
+              placeholder="juandlc"
               style={styles.input}
             />
           </div>
@@ -136,7 +135,7 @@ const LoginScreen = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter Password"
+              placeholder="Jdlc@123"
               style={styles.input}
             />
           </div>
@@ -151,7 +150,7 @@ const LoginScreen = () => {
         <div style={styles.authLinks}>
           Don't have an account? 
           <Link to="/signup" style={styles.authLink}>Sign up</Link>
-          <span style={{ marginLeft: 12, marginRight: 12 }}> </span>
+          <span style={{ marginLeft: 12, marginRight: 12 }}> | </span>
           <Link to="/forgot-password" style={styles.authLink}>Forgot Password?</Link>
         </div>
       </div>
