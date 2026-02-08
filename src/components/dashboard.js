@@ -8,7 +8,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
 
-  // Dynamic data - Array of Objects
   const queueData = [
     { id: 1, name: 'Queue A', status: 'Active', patients: 12, avgWaitTime: '15 min' },
     { id: 2, name: 'Queue B', status: 'Active', patients: 8, avgWaitTime: '10 min' },
@@ -26,7 +25,7 @@ const Dashboard = () => {
 
   return (
     <div style={styles.container}>
-      {/* Sidebar */}
+
       <div style={styles.sidebar}>
         <div style={styles.logoContainer}>
           <img src={logo} alt="QueueIT Logo" style={styles.logo} />
@@ -36,32 +35,9 @@ const Dashboard = () => {
             style={{
               ...styles.navLink,
               ...(activeTab === 'dashboard' ? styles.navLinkActive : {}),
-            }}>
+            }}
+            onClick={() => handleNavClick('dashboard')}>
             DASHBOARD
-          </button>
-
-          <button
-            style={{
-              ...styles.navLink,
-              ...(activeTab === 'queue' ? styles.navLinkActive : {}),
-            }}>
-            QUEUE MANAGEMENT
-          </button>
-
-          <button
-            style={{
-              ...styles.navLink,
-              ...(activeTab === 'patient' ? styles.navLinkActive : {}),
-            }}>
-            PATIENT MANAGEMENT
-          </button>
-
-          <button
-            style={{
-              ...styles.navLink,
-              ...(activeTab === 'ml' ? styles.navLinkActive : {}),
-            }}>
-            ML PREDICTIONS
           </button>
             
           <button
@@ -72,14 +48,14 @@ const Dashboard = () => {
         </nav>
       </div>
 
-      {/* Main Content */}
+
       <div style={styles.mainContent}>
         <h2 style={styles.heading}>Dashboard</h2>
         <p style={styles.subheading}>Welcome to your QueueIT Dashboard</p>
 
         {activeTab === 'dashboard' && (
           <>
-            {/* Statistics Cards */}
+
             <div style={styles.statsContainer}>
               <div style={styles.statBox}>
                 <h3 style={styles.statTitle}>Total Patients</h3>
@@ -106,7 +82,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Queue Status Table */}
             <div style={styles.tableContainer}>
               <h3 style={styles.tableTitle}>Queue Status</h3>
               <table style={styles.table}>
@@ -137,26 +112,6 @@ const Dashboard = () => {
           </>
         )}
 
-        {activeTab === 'queue' && (
-          <div style={styles.contentBox}>
-            <h3>Queue Management</h3>
-            <p>Manage your queues here...</p>
-          </div>
-        )}
-
-        {activeTab === 'patient' && (
-          <div style={styles.contentBox}>
-            <h3>Patient Management</h3>
-            <p>View and manage patient records...</p>
-          </div>
-        )}
-
-        {activeTab === 'ml' && (
-          <div style={styles.contentBox}>
-            <h3>ML Predictions</h3>
-            <p>View machine learning predictions and insights...</p>
-          </div>
-        )}
       </div>
     </div>
   );

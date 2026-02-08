@@ -24,7 +24,7 @@ const SignUpScreen = () => {
         <p style={styles.paragraph}>Input credentials to create an account</p>
 
         <form onSubmit={handleSignUp}>
-          {/* Username Field */}
+
           <div style={styles.inputContainer}>
             <label htmlFor="username" style={styles.label}>Username</label>
             <input
@@ -38,7 +38,7 @@ const SignUpScreen = () => {
             />
           </div>
 
-          {/* Full Name Field */}
+
           <div style={styles.inputContainer}>
             <label htmlFor="fullname" style={styles.label}>Full Name</label>
             <input
@@ -52,7 +52,7 @@ const SignUpScreen = () => {
             />
           </div>
 
-          {/* Password Field */}
+
           <div style={styles.inputContainer}>
             <label htmlFor="password" style={styles.label}>Password</label>
             <input
@@ -110,7 +110,7 @@ const styles = {
     fontSize: '16px',
   },
   inputContainer: {
-    marginBottom: '20px',
+    marginBottom: '10px',
     textAlign: 'left',
   },
   label: {
