@@ -20,92 +20,6 @@ const LoginScreen = () => {
     }
   };
 
-
-  const styles = {
-    body: {
-      fontFamily: "'Arial', sans-serif",
-      margin: 0,
-      padding: 0,
-      backgroundColor: "#f8f8f8",
-    },
-    loginScreen: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100vh',
-      backgroundColor: '#e6f4f1', 
-    },
-    loginContainer: {
-    backgroundColor: 'white',
-    padding: '36px 32px',
-    borderRadius: '10px',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    textAlign: 'center',
-    width: '100%',
-    maxWidth: '420px',
-    },
-    logo: {
-      width: '120px',
-      marginBottom: '18px',
-    },
-    heading: {
-      margin: '10px 0',
-      fontSize: '24px',
-      color: '#333',
-    },
-    paragraph: {
-      color: '#000000',
-      marginBottom: '20px',
-      fontSize: '16px',
-    },
-    inputContainer: {
-      marginBottom: '20px',
-      textAlign: 'left',
-    },
-    label: {
-      display: 'block',
-      fontWeight: 'bold',
-      marginBottom: '5px',
-    },
-    input: {
-      width: '100%',
-      padding: '12px',
-      border: '1px solid #ccc',
-      borderRadius: '8px',
-      fontSize: '16px',
-      marginBottom: '15px',
-      boxSizing: 'border-box',
-    },
-    button: {
-      backgroundColor: '#24886E',
-      color: 'white',
-      border: 'none',
-      padding: '12px 20px',
-      cursor: 'pointer',
-      borderRadius: '8px',
-      width: '100%',
-      fontSize: '16px',
-      boxSizing: 'border-box',
-    },
-    buttonHover: {
-      backgroundColor: '#45a049',
-    },
-    authLinks: {
-      marginTop: '15px',
-    },
-    authLink: {
-      color: '#24886E',
-      textDecoration: 'none',
-      margin: '5px 0',
-      display: 'inline-block',
-    },
-    errorMessage: {
-      color: 'red',
-      fontSize: '14px',
-      marginTop: '10px',
-    },
-  };
-
   return (
     <div style={styles.loginScreen}>
       <div style={styles.loginContainer}>
@@ -156,6 +70,91 @@ const LoginScreen = () => {
       </div>
     </div>
   );
+}
+
+const styles = {
+  body: {
+    fontFamily: "'Arial', sans-serif",
+    margin: 0,
+    padding: 0,
+    backgroundColor: "#f8f8f8",
+  },
+  loginScreen: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+    backgroundColor: '#e6f4f1', 
+  },
+  loginContainer: {
+    backgroundColor: 'white',
+    padding: '36px 32px',
+    borderRadius: '10px',
+    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
+    width: '100%',
+    maxWidth: '420px',
+  },
+  logo: {
+    width: '120px',
+    marginBottom: '18px',
+  },
+  heading: {
+    margin: '10px 0',
+    fontSize: '24px',
+    color: '#333',
+  },
+  paragraph: {
+    color: '#000000',
+    marginBottom: '20px',
+    fontSize: '16px',
+  },
+  inputContainer: {
+    marginBottom: '20px',
+    textAlign: 'left',
+  },
+  label: {
+    display: 'block',
+    fontWeight: 'bold',
+    marginBottom: '5px',
+  },
+  input: {
+    width: '100%',
+    padding: '12px',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    fontSize: '16px',
+    marginBottom: '15px',
+    boxSizing: 'border-box',
+  },
+  button: {
+    backgroundColor: '#24886E',
+    color: 'white',
+    border: 'none',
+    padding: '12px 20px',
+    cursor: 'pointer',
+    borderRadius: '8px',
+    width: '100%',
+    fontSize: '16px',
+    boxSizing: 'border-box',
+  },
+  buttonHover: {
+    backgroundColor: '#45a049',
+  },
+  authLinks: {
+    marginTop: '15px',
+  },
+  authLink: {
+    color: '#24886E',
+    textDecoration: 'none',
+    margin: '5px 0',
+    display: 'inline-block',
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: '14px',
+    marginTop: '10px',
+  },
 };
 
 export default LoginScreen;

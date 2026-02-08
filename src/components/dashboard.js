@@ -1,5 +1,4 @@
 // dashboard
-// Dashboard.jsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -37,8 +36,7 @@ const Dashboard = () => {
             style={{
               ...styles.navLink,
               ...(activeTab === 'dashboard' ? styles.navLinkActive : {}),
-            }}
-            onClick={() => handleNavClick('dashboard')}>
+            }}>
             DASHBOARD
           </button>
 
@@ -46,8 +44,7 @@ const Dashboard = () => {
             style={{
               ...styles.navLink,
               ...(activeTab === 'queue' ? styles.navLinkActive : {}),
-            }}
-            onClick={() => handleNavClick('queue')}>
+            }}>
             QUEUE MANAGEMENT
           </button>
 
@@ -55,8 +52,7 @@ const Dashboard = () => {
             style={{
               ...styles.navLink,
               ...(activeTab === 'patient' ? styles.navLinkActive : {}),
-            }}
-            onClick={() => handleNavClick('patient')}>
+            }}>
             PATIENT MANAGEMENT
           </button>
 
@@ -64,8 +60,7 @@ const Dashboard = () => {
             style={{
               ...styles.navLink,
               ...(activeTab === 'ml' ? styles.navLinkActive : {}),
-            }}
-            onClick={() => handleNavClick('ml')}>
+            }}>
             ML PREDICTIONS
           </button>
             
@@ -167,7 +162,6 @@ const Dashboard = () => {
   );
 };
 
-// Inline Styles
 const styles = {
   container: {
     display: 'flex',
