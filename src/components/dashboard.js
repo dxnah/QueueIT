@@ -39,30 +39,6 @@ const Dashboard = () => {
             }}>
             DASHBOARD
           </button>
-
-          <button
-            style={{
-              ...styles.navLink,
-              ...(activeTab === 'queue' ? styles.navLinkActive : {}),
-            }}>
-            QUEUE MANAGEMENT
-          </button>
-
-          <button
-            style={{
-              ...styles.navLink,
-              ...(activeTab === 'patient' ? styles.navLinkActive : {}),
-            }}>
-            PATIENT MANAGEMENT
-          </button>
-
-          <button
-            style={{
-              ...styles.navLink,
-              ...(activeTab === 'ml' ? styles.navLinkActive : {}),
-            }}>
-            ML PREDICTIONS
-          </button>
             
           <button
             style={{ ...styles.navLink, ...styles.logoutBtn }}
