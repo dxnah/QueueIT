@@ -15,7 +15,7 @@ const LoginScreen = () => {
     e.preventDefault();
 
     if (username === 'admin' && password === 'pass') {
-      navigate('/dashboard'); 
+      navigate('#dashboard'); 
     } else {
       setError('Invalid username or password');  
     }
@@ -72,16 +72,11 @@ const LoginScreen = () => {
         <div style={styles.authLinks}>
           Don't have an account? 
           <span style={{ marginLeft: 5, marginRight: 5 }}></span>
-          <Link to="/signup" style={styles.authLink}>Sign up</Link>
+          <Link to="#signup" style={styles.authLink}>Sign up</Link>
           <span style={{ marginLeft: 12, marginRight: 12 }}> | </span>
           <Link to="#forgot-password" style={styles.authLink}>Forgot Password?</Link>
         </div>
 
-        <div style={styles.footer}>
-          <p><Link to="#terms-of-use" style={styles.authLink}>Terms of Use</Link>   
-            <span style={{ marginLeft: 12, marginRight: 12 }}> | </span>
-          <Link to="#privacy-policy" style={styles.authLink}>Privacy Policy</Link></p>
-        </div>
       </div>
     </div>
   );

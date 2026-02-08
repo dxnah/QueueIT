@@ -84,12 +84,6 @@ const SignUpScreen = () => {
           <Link to="/login" style={styles.authLink}>Log in</Link>
         </div>
 
-        <div style={styles.footer}>
-          <p><Link to="#terms-of-use" style={styles.authLink}>Terms of Use</Link>   
-            <span style={{ marginLeft: 12, marginRight: 12 }}> | </span>
-          <Link to="#privacy-policy" style={styles.authLink}>Privacy Policy</Link></p>
-        </div>
-
       </div>
     </div>
   );
