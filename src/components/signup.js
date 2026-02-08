@@ -8,6 +8,7 @@ const SignUpScreen = () => {
   const [username, setUsername] = useState('');
   const [fullname, setFullname] = useState('');
   const [password, setPassword] = useState('');
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
   const navigate = useNavigate();
 
   const handleSignUp = (e) => {
@@ -20,8 +21,9 @@ const SignUpScreen = () => {
     <div style={styles.signupScreen}>
       <div style={styles.signupContainer}>
         <img src={logo} alt="QueueIT Logo" style={styles.logo} />
+        
         <h2 style={styles.heading}>Sign Up</h2>
-        <p style={styles.paragraph}>Input credentials to create an account</p>
+        <p style={styles.paragraph}>Input admin credentials to create an account</p>
 
         <form onSubmit={handleSignUp}>
 
@@ -66,13 +68,28 @@ const SignUpScreen = () => {
             />
           </div>
 
-          <button type="submit" style={styles.button}>Sign Up</button>
+          <button 
+            type="submit" 
+            style={isButtonHovered ? {...styles.button, ...styles.buttonHover} : styles.button}
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
+          >
+            Sign Up
+          </button>
         </form>
 
         <div style={styles.authLinks}>
           Already have an account? 
+          <span style={{ marginLeft: 5, marginRight: 5 }}></span>
           <Link to="/login" style={styles.authLink}>Log in</Link>
         </div>
+
+        <div style={styles.footer}>
+          <p><Link to="#terms-of-use" style={styles.authLink}>Terms of Use</Link>   
+            <span style={{ marginLeft: 12, marginRight: 12 }}> | </span>
+          <Link to="#privacy-policy" style={styles.authLink}>Privacy Policy</Link></p>
+        </div>
+
       </div>
     </div>
   );
@@ -137,6 +154,13 @@ const styles = {
     width: '100%',
     fontSize: '16px',
     boxSizing: 'border-box',
+    transition: 'all 0.3s ease',
+    transform: 'scale(1)',
+  },
+  buttonHover: {
+    backgroundColor: '#1a5f4f',
+    transform: 'scale(1.02)',
+    boxShadow: '0 4px 15px rgba(36, 136, 110, 0.4)',
   },
   authLinks: {
     marginTop: '15px',
@@ -146,6 +170,28 @@ const styles = {
     textDecoration: 'none',
     margin: '5px 0',
     display: 'inline-block',
+  },
+  
+    '@media (max-width: 768px)': {
+    container: {
+      flexDirection: 'column',
+    },
+    sidebar: {
+      width: '100%',
+      height: 'auto',
+      position: 'relative',
+    },
+    mainContent: {
+      padding: '20px',
+    },
+    navLink: {
+      padding: '10px 15px',
+      fontSize: '12px',
+    },
+    statsContainer: {
+      flexDirection: 'column',
+      gap: '10px',
+    },
   },
 };
 

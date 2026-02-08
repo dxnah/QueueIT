@@ -8,12 +8,13 @@ const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = (e) => {   
     e.preventDefault();
 
-    if (username === 'admin' && password === 'pass1') {
+    if (username === 'admin' && password === 'pass') {
       navigate('/dashboard'); 
     } else {
       setError('Invalid username or password');  
@@ -24,8 +25,10 @@ const LoginScreen = () => {
     <div style={styles.loginScreen}>
       <div style={styles.loginContainer}>
         <img src={logo} alt="QueueIT Logo" style={styles.logo} />
-        <h2 style={styles.heading}>Log in</h2>
-        <p style={styles.paragraph}>Input credentials to continue</p>
+        <h5 style={styles.heading}>Welcome to QueueIT</h5>
+
+        <h1 style={styles.heading}>Log in</h1>
+        <p style={styles.paragraph}>Input admin credentials to continue</p>
 
         <form onSubmit={handleLogin}>
           <div style={styles.inputContainer}>
@@ -36,7 +39,7 @@ const LoginScreen = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="juandlc"
+              placeholder="admin"
               style={styles.input}
             />
           </div>
@@ -49,23 +52,35 @@ const LoginScreen = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Jdlc@123"
+              placeholder="pass"
               style={styles.input}
             />
           </div>
 
           {error && <p style={styles.errorMessage}>{error}</p>}
 
-          <button type="submit" style={styles.button}>
+          <button 
+            type="submit" 
+            style={isButtonHovered ? {...styles.button, ...styles.buttonHover} : styles.button}
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
+          >
             Log In
           </button>
         </form>
 
         <div style={styles.authLinks}>
           Don't have an account? 
+          <span style={{ marginLeft: 5, marginRight: 5 }}></span>
           <Link to="/signup" style={styles.authLink}>Sign up</Link>
           <span style={{ marginLeft: 12, marginRight: 12 }}> | </span>
-          <Link to="/forgot-password" style={styles.authLink}>Forgot Password?</Link>
+          <Link to="#forgot-password" style={styles.authLink}>Forgot Password?</Link>
+        </div>
+
+        <div style={styles.footer}>
+          <p><Link to="#terms-of-use" style={styles.authLink}>Terms of Use</Link>   
+            <span style={{ marginLeft: 12, marginRight: 12 }}> | </span>
+          <Link to="#privacy-policy" style={styles.authLink}>Privacy Policy</Link></p>
         </div>
       </div>
     </div>
@@ -127,20 +142,24 @@ const styles = {
     marginBottom: '15px',
     boxSizing: 'border-box',
   },
-  button: {
-    backgroundColor: '#24886E',
-    color: 'white',
-    border: 'none',
-    padding: '12px 20px',
-    cursor: 'pointer',
-    borderRadius: '8px',
-    width: '100%',
-    fontSize: '16px',
-    boxSizing: 'border-box',
-  },
-  buttonHover: {
-    backgroundColor: '#45a049',
-  },
+button: {
+  backgroundColor: '#24886E',
+  color: 'white',
+  border: 'none',
+  padding: '12px 20px',
+  cursor: 'pointer',
+  borderRadius: '8px',
+  width: '100%',
+  fontSize: '16px',
+  boxSizing: 'border-box',
+  transition: 'all 0.3s ease',
+  transform: 'scale(1)',
+},
+buttonHover: {
+  backgroundColor: '#1a5f4f',
+  transform: 'scale(1.02)',
+  boxShadow: '0 4px 15px rgba(36, 136, 110, 0.4)',
+},
   authLinks: {
     marginTop: '15px',
   },
@@ -155,6 +174,29 @@ const styles = {
     fontSize: '14px',
     marginTop: '10px',
   },
+  
+    '@media (max-width: 768px)': {
+    container: {
+      flexDirection: 'column',
+    },
+    sidebar: {
+      width: '100%',
+      height: 'auto',
+      position: 'relative',
+    },
+    mainContent: {
+      padding: '20px',
+    },
+    navLink: {
+      padding: '10px 15px',
+      fontSize: '12px',
+    },
+    statsContainer: {
+      flexDirection: 'column',
+      gap: '10px',
+    },
+  },
+
 };
 
 export default LoginScreen;

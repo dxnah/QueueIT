@@ -51,7 +51,6 @@ const Dashboard = () => {
 
       <div style={styles.mainContent}>
         <h2 style={styles.heading}>Dashboard</h2>
-        <p style={styles.subheading}>Welcome to your QueueIT Dashboard</p>
 
         {activeTab === 'dashboard' && (
           <>
@@ -111,7 +110,7 @@ const Dashboard = () => {
             </div>
           </>
         )}
-
+        
       </div>
     </div>
   );
@@ -263,6 +262,28 @@ const styles = {
     borderRadius: '8px',
     padding: '30px',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  },
+
+    '@media (max-width: 768px)': {
+    container: {
+      flexDirection: 'column',
+    },
+    sidebar: {
+      width: '100%',
+      height: 'auto',
+      position: 'relative',
+    },
+    mainContent: {
+      padding: '20px',
+    },
+    navLink: {
+      padding: '10px 15px',
+      fontSize: '12px',
+    },
+    statsContainer: {
+      flexDirection: 'column',
+      gap: '10px',
+    },
   },
 };
 
