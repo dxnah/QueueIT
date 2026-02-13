@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
 import LoginScreen from './components/login';
-import SignUpScreen from './components/signup';
+import Dashboard from './components/dashboard';
 
 function App() {
   return (
@@ -13,7 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LoginScreen />} />
         <Route path="/login" element={<LoginScreen />} />
-        <Route path="/signup" element={<SignUpScreen />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
