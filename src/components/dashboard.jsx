@@ -1,8 +1,10 @@
-// Dashboard.js
+// Dashboard.jsx
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../images/logoit.png';
+import PredictionCard from './PredictionCard';
+import InsightToggle from './InsightToggle';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -17,6 +19,23 @@ const Dashboard = () => {
     vaccinesAtNormal: 4000,
     vaccinesAtPeak:   6000,
   };
+
+  //  Step 2: PredictionCard Data 
+  const predictionCards = [
+    { id: 1, label: 'Crowd Level (Normal)',  result: 'Normal - Medium',  confidence: 78, resultColor: '#f57f17' },
+    { id: 2, label: 'Crowd Level (Peak)',    result: 'High - Above High', confidence: 91, resultColor: '#c62828' },
+    { id: 3, label: 'Vaccine Demand',        result: 'High Demand',       confidence: 85, resultColor: '#c62828' },
+    { id: 4, label: 'Stock Risk',            result: 'At Risk',           confidence: 88, resultColor: '#e53935' },
+  ];
+
+  //  Step 3: ML Insights Array 
+  const mlInsights = [
+    { id: 1, label: 'Task Priority',      result: 'Urgent'  },
+    { id: 2, label: 'System Health',      result: 'Stable'  },
+    { id: 3, label: 'Anomaly Detection',  result: 'None'    },
+    { id: 4, label: 'Vaccine Risk Level', result: 'High'    },
+    { id: 5, label: 'Restock Priority',   result: 'Urgent'  },
+  ];
 
   //  VACCINE DATA 
   const vaccineData = [
@@ -45,9 +64,9 @@ const Dashboard = () => {
   const getLowStockBorder   = (count) => `4px solid ${getLowStockColor(count)}`;
   const getOutOfStockBorder = (count) => `4px solid ${getOutOfStockColor(count)}`;
 
-  const getAvailableLabel   = (total) => total > 500 ? '✅ Stock is sufficient' : total > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
-  const getLowStockLabel    = (count) => count === 0 ? '✅ All vaccines well stocked' : count <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
-  const getOutOfStockLabel  = (count) => count === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
+  const getAvailableLabel  = (total) => total > 500 ? '✅ Stock is sufficient'     : total > 100 ? '⚠️ Stock is getting low'       : '🚨 Stock is critically low';
+  const getLowStockLabel   = (count) => count === 0 ? '✅ All vaccines well stocked' : count <= 2 ? '⚠️ Some vaccines running low'   : '🚨 Many vaccines running low';
+  const getOutOfStockLabel = (count) => count === 0 ? '✅ All vaccines available'   : '🚨 Immediate restocking needed';
 
   //  ORDER URGENCY 
   const getOrderUrgencyStyle = (status) => {
@@ -122,13 +141,13 @@ const Dashboard = () => {
       {/* Main Content */}
       <div style={styles.mainContent} className="main-content">
 
-        {/*  HEADER  */}
+        {/* HEADER */}
         <h2 style={styles.heading}>Dashboard</h2>
         <p style={styles.subheading}>Welcome back, Admin</p>
 
         {activeTab === 'dashboard' && (
           <>
-            {/*  STATS CARDS  */}
+            {/* ── STATS CARDS ── */}
             <div style={styles.statsContainer} className="stats-container">
 
               <div style={{ ...styles.statBox, borderTop: getAvailableBorder(totalAvailable) }}>
@@ -165,10 +184,26 @@ const Dashboard = () => {
 
             </div>
 
+            {/*  Step 2: PredictionCard Components  */}
+            <div style={styles.predictionRow}>
+              {predictionCards.map((card) => (
+                <PredictionCard
+                  key={card.id}
+                  label={card.label}
+                  result={card.result}
+                  confidence={card.confidence}
+                  resultColor={card.resultColor}
+                />
+              ))}
+            </div>
+
+            {/*  Step 4: InsightToggle Component  */}
+            <InsightToggle insights={mlInsights} />
+
             {/*  MIDDLE ROW: ML + Vaccine Availability  */}
             <div style={styles.middleRow} className="middle-row">
 
-              {/*  ML PREDICTIONS  */}
+              {/* ML PREDICTIONS */}
               <div style={styles.mlCard}>
                 <h3 style={styles.sectionTitle}>🤖 ML Predictions in a Month</h3>
 
@@ -214,7 +249,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/*  VACCINE AVAILABILITY  */}
+              {/* VACCINE AVAILABILITY */}
               <div style={styles.vaccineCard}>
                 <h3 style={styles.sectionTitle}>💉 Vaccine Availability</h3>
                 <div style={styles.tableWrapper}>
@@ -369,15 +404,8 @@ const styles = {
     padding: '20px',
     borderBottom: '1px solid rgba(255,255,255,0.2)',
   },
-  logo: { 
-    width: '100px', 
-    height: '100px', 
-    objectFit: 'contain' 
-  },
-  nav: { display: 'flex', 
-    flexDirection: 'column', 
-    flex: 1 
-  },
+  logo: { width: '100px', height: '100px', objectFit: 'contain' },
+  nav: { display: 'flex', flexDirection: 'column', flex: 1 },
   navLink: {
     color: 'white',
     padding: '15px 20px',
@@ -413,22 +441,12 @@ const styles = {
     backgroundColor: '#f8f8f8',
     overflowY: 'auto',
   },
-  heading: { 
-    fontSize: '32px', 
-    margin: '0 0 5px 0', 
-    color: '#333', 
-    fontWeight: '600' },
-  subheading: { 
-    fontSize: '14px', 
-    color: '#888', 
-    margin: '0 0 30px 0' },
+  heading: { fontSize: '32px', margin: '0 0 5px 0', color: '#333', fontWeight: '600' },
+  subheading: { fontSize: '14px', color: '#888', margin: '0 0 30px 0' },
 
   //  Stats Cards 
   statsContainer: {
-    display: 'flex', 
-    gap: '20px', 
-    marginBottom: '30px', 
-    flexWrap: 'wrap',
+    display: 'flex', gap: '20px', marginBottom: '30px', flexWrap: 'wrap',
   },
   statBox: {
     backgroundColor: '#fff',
@@ -441,117 +459,117 @@ const styles = {
     borderTop: '4px solid #26a69a',
   },
   statTitle: {
-    fontSize: '12px', 
-    color: '#888', 
-    margin: '0 0 10px 0',
-    fontWeight: '500', 
-    textTransform: 'uppercase', 
-    letterSpacing: '0.5px',
+    fontSize: '12px', color: '#888', margin: '0 0 10px 0',
+    fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.5px',
   },
-  statNumber: { 
-    fontSize: '30px', 
-    fontWeight: 'bold', 
-    color: '#26a69a', 
-    margin: '0 0 5px 0' },
-  statNote: { 
-    fontSize: '11px', 
-    color: '#aaa', 
-    margin: '0', 
-    fontStyle: 'italic' },
+  statNumber: { fontSize: '30px', fontWeight: 'bold', color: '#26a69a', margin: '0 0 5px 0' },
+  statNote:   { fontSize: '11px', color: '#aaa', margin: '0', fontStyle: 'italic' },
+
+  //  Prediction Cards Row 
+  predictionRow: {
+    display: 'flex',
+    gap: '15px',
+    marginBottom: '30px',
+    flexWrap: 'wrap',
+  },
 
   //  Middle Row 
   middleRow: {
-    display: 'flex', 
-    gap: '20px', 
-    marginBottom: '30px', 
-    flexWrap: 'wrap', 
+    display: 'flex',
+    gap: '20px',
+    marginBottom: '30px',
+    flexWrap: 'wrap',
     alignItems: 'stretch',
   },
   mlCard: {
-    backgroundColor: '#fff', 
-    borderRadius: '8px', 
+    backgroundColor: '#fff',
+    borderRadius: '8px',
     padding: '20px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
-    flex: 1, 
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    flex: 1,
     minWidth: '280px',
   },
   vaccineCard: {
-    backgroundColor: '#fff', 
-    borderRadius: '8px', 
+    backgroundColor: '#fff',
+    borderRadius: '8px',
     padding: '20px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
-    flex: 1, 
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    flex: 1,
     minWidth: '280px',
   },
-  mlSubtitle: { 
-    fontSize: '11px', 
-    color: '#999', 
-    margin: '-5px 0 12px 0', 
-    fontStyle: 'italic' },
+
+  //  ML Predictions Content 
+  mlSubtitle: {
+    fontSize: '11px',
+    color: '#999',
+    margin: '-5px 0 12px 0',
+    fontStyle: 'italic',
+  },
   mlItem: {
-    display: 'flex', 
-    justifyContent: 'space-between', 
+    display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '12px 0', 
-    borderBottom: '1px solid #f0f0f0', 
+    padding: '12px 0',
+    borderBottom: '1px solid #f0f0f0',
     gap: '10px',
   },
-  mlLabelGroup: { 
-    flex: 1 
+  mlLabelGroup: {
+    flex: 1,
   },
-  mlLabel: { 
-    fontSize: '12px', 
-    color: '#666', 
-    fontWeight: '500', 
-    lineHeight: '1.4' 
+  mlLabel: {
+    fontSize: '12px',
+    color: '#666',
+    fontWeight: '500',
+    lineHeight: '1.4',
   },
-  mlValue: { 
-    fontSize: '13px', 
-    color: '#333', 
-    fontWeight: '600', 
-    whiteSpace: 'nowrap' },
-  mlValuePeak: {
-    fontSize: '12px', 
-    color: '#c62828', 
-    fontWeight: '700',
-    backgroundColor: '#ffebee', 
-    padding: '3px 8px', 
-    borderRadius: '10px', 
+  mlValue: {
+    fontSize: '13px',
+    color: '#333',
+    fontWeight: '600',
     whiteSpace: 'nowrap',
   },
   mlValueNormal: {
-    fontSize: '12px', 
-    color: '#2e7d32', 
+    fontSize: '12px',
+    color: '#2e7d32',
     fontWeight: '700',
-    backgroundColor: '#e8f5e9', 
-    padding: '3px 8px', 
-    borderRadius: '10px', 
+    backgroundColor: '#e8f5e9',
+    padding: '3px 8px',
+    borderRadius: '10px',
+    whiteSpace: 'nowrap',
+  },
+  mlValuePeak: {
+    fontSize: '12px',
+    color: '#c62828',
+    fontWeight: '700',
+    backgroundColor: '#ffebee',
+    padding: '3px 8px',
+    borderRadius: '10px',
     whiteSpace: 'nowrap',
   },
   mlValuePeakVaccine: {
-    fontSize: '12px', 
-    color: '#c62828', 
+    fontSize: '12px',
+    color: '#c62828',
     fontWeight: '700',
-    backgroundColor: '#ffebee', 
-    padding: '3px 8px', 
-    borderRadius: '10px', 
+    backgroundColor: '#ffebee',
+    padding: '3px 8px',
+    borderRadius: '10px',
     whiteSpace: 'nowrap',
   },
   crowdBadge: {
-    padding: '3px 10px', 
-    orderRadius: '20px', 
+    padding: '3px 10px',
+    borderRadius: '20px',
     fontSize: '11px',
-    fontWeight: '700', 
+    fontWeight: '700',
     whiteSpace: 'nowrap',
   },
-  sectionTitle: { 
-    fontSize: '16px', 
-    color: '#333', 
-    fontWeight: '600', 
-    margin: '0 0 5px 0' 
+  sectionTitle: {
+    fontSize: '16px',
+    color: '#333',
+    fontWeight: '600',
+    margin: '0 0 5px 0',
   },
 
-  //  Order Card 
+  //  Vaccines to Order Card 
   orderCard: {
     backgroundColor: '#fff',
     borderRadius: '8px',
@@ -580,105 +598,107 @@ const styles = {
 
   //  Urgency Badges 
   urgencyOut: {
-    backgroundColor: '#ffebee', 
+    backgroundColor: '#ffebee',
     color: '#c62828',
-    padding: '4px 12px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
     fontWeight: '700',
   },
   urgencyLow: {
-    backgroundColor: '#fff8e1', 
+    backgroundColor: '#fff8e1',
     color: '#f57f17',
-    padding: '4px 12px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
     fontWeight: '700',
   },
   urgencyOk: {
-    backgroundColor: '#e8f5e9', 
+    backgroundColor: '#e8f5e9',
     color: '#2e7d32',
-    padding: '4px 12px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
     fontWeight: '700',
   },
 
   //  Table 
-  tableWrapper: { 
-    overflowX: 'auto' 
+  tableWrapper: {
+    overflowX: 'auto',
   },
-  table: { 
-    width: '100%', 
-    borderCollapse: 'collapse', 
-    minWidth: '250px' 
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    minWidth: '250px',
   },
-  tableHeader: { 
-    backgroundColor: '#26a69a', 
-    color: 'white' 
+  tableHeader: {
+    backgroundColor: '#26a69a',
+    color: 'white',
   },
   tableCell: {
-    padding: '11px 12px', 
+    padding: '11px 12px',
     textAlign: 'left',
-    borderBottom: '1px solid #f0f0f0', 
+    borderBottom: '1px solid #f0f0f0',
     fontSize: '13px',
   },
-  tableRow: { 
-    transition: 'background-color 0.2s'
+  tableRow: {
+    transition: 'background-color 0.2s',
   },
-  totalRow: { 
-    backgroundColor: '#f5f5f5', 
-    fontWeight: '700' 
+  totalRow: {
+    backgroundColor: '#f5f5f5',
+    fontWeight: '700',
   },
   totalCell: {
-    padding: '11px 12px', 
-    textAlign: 'left', 
+    padding: '11px 12px',
+    textAlign: 'left',
     fontSize: '13px',
-    fontWeight: '700', 
-    color: '#333', 
+    fontWeight: '700',
+    color: '#333',
     borderTop: '2px solid #e0e0e0',
   },
 
   //  Status Badges 
-  statusInStock:    { 
-    backgroundColor: '#e8f5e9', 
-    color: '#2e7d32', 
-    padding: '4px 12px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
-    fontWeight: '600' 
+  statusInStock: {
+    backgroundColor: '#e8f5e9',
+    color: '#2e7d32',
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: '600',
   },
-  statusLowStock:   { 
-    backgroundColor: '#fff8e1', 
-    color: '#f57f17', 
-    padding: '4px 12px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
-    fontWeight: '600' 
+  statusLowStock: {
+    backgroundColor: '#fff8e1',
+    color: '#f57f17',
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: '600',
   },
-  statusOutStock:   { 
-    backgroundColor: '#ffebee', 
-    color: '#c62828', 
-    padding: '4px 12px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
-    fontWeight: '600' 
+  statusOutStock: {
+    backgroundColor: '#ffebee',
+    color: '#c62828',
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: '600',
   },
-  statusInProgress: { 
-    backgroundColor: '#e3f2fd', 
-    color: '#1565c0', 
-    padding: '3px 10px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
-    fontWeight: '600' 
+  statusInProgress: {
+    backgroundColor: '#e3f2fd',
+    color: '#1565c0',
+    padding: '3px 10px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: '600',
   },
-  statusPending:    { 
-    backgroundColor: '#fff8e1', 
-    color: '#f57f17', 
-    padding: '3px 10px', 
-    borderRadius: '20px', 
-    fontSize: '12px', 
-    fontWeight: '600' },
+  statusPending: {
+    backgroundColor: '#fff8e1',
+    color: '#f57f17',
+    padding: '3px 10px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: '600',
+  },
+
 };
 
 //  RESPONSIVE CSS 
@@ -687,21 +707,28 @@ styleSheet.innerText = `
   @media (max-width: 768px) {
     .mobile-menu-toggle { display: block !important; }
     .sidebar {
-      position: fixed !important; left: -280px !important;
-      top: 0 !important; height: 100vh !important;
-      z-index: 999 !important; transition: left 0.3s ease !important;
+      position: fixed !important;
+      left: -280px !important;
+      top: 0 !important;
+      height: 100vh !important;
+      z-index: 999 !important;
+      transition: left 0.3s ease !important;
     }
-    .sidebar.active { left: 0 !important; }
-    .main-content { padding: 70px 20px 20px 20px !important; }
+    .sidebar.active  { left: 0 !important; }
+    .main-content    { padding: 70px 20px 20px 20px !important; }
     .stats-container { flex-direction: column !important; }
     .stats-container > div { min-width: 100% !important; }
-    .middle-row { flex-direction: column !important; }
-    .middle-row > div { min-width: 100% !important; flex: 1 1 100% !important; }
+    .middle-row      { flex-direction: column !important; }
+    .middle-row > div {
+      min-width: 100% !important;
+      flex: 1 1 100% !important;
+    }
   }
+
   @media (max-width: 480px) {
     .main-content { padding: 60px 15px 15px 15px !important; }
-    table { font-size: 12px !important; }
-    th, td { padding: 8px !important; }
+    table         { font-size: 12px !important; }
+    th, td        { padding: 8px !important; }
   }
 `;
 document.head.appendChild(styleSheet);
