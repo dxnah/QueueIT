@@ -1,4 +1,4 @@
-// dashboard 
+// Dashboard.js
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,57 +9,81 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const stats = {
-    totalPatients: 40,
-    activeQueues: 3,
-    todayAppointments: 28,
-    avgWaitTime: '18 min',
-  };
-
+  //  ML PREDICTIONS 
   const mlPredictions = {
-    crowdLevel: 'High',
-    predictedVolume: 65,
-    peakHour: '9:00 AM - 11:00 AM',
-    recommendedStaff: 4,
+    crowdLevelNormal: 'Normal - Medium',
+    crowdLevelPeak:   'High - Above High',
+    peakMonths:       'June - August',
+    vaccinesAtNormal: 4000,
+    vaccinesAtPeak:   6000,
   };
 
-  const queueData = [
-    { id: 1, queueName: 'Queue A', type: 'Walk-in',     patientsWaiting: 12, avgWaitTime: '15 min', status: 'Active' },
-    { id: 2, queueName: 'Queue B', type: 'Appointment', patientsWaiting: 8,  avgWaitTime: '10 min', status: 'Active' },
-    { id: 3, queueName: 'Queue C', type: 'Walk-in',     patientsWaiting: 5,  avgWaitTime: '20 min', status: 'Paused' },
-    { id: 4, queueName: 'Queue D', type: 'Appointment', patientsWaiting: 15, avgWaitTime: '18 min', status: 'Active' },
+  //  VACCINE DATA 
+  const vaccineData = [
+    { id: 1, vaccine: 'Anti-Rabies',  available: 320, minStock: 300, mlRecommended: 200, status: 'In Stock'  },
+    { id: 2, vaccine: 'Anti-Tetanus', available: 85,  minStock: 200, mlRecommended: 350, status: 'Low Stock' },
+    { id: 3, vaccine: 'Booster',      available: 0,   minStock: 150, mlRecommended: 500, status: 'Out Stock' },
+    { id: 4, vaccine: 'Hepatitis B',  available: 2,   minStock: 100, mlRecommended: 300, status: 'Low Stock' },
+    { id: 5, vaccine: 'Flu Shot',     available: 150, minStock: 100, mlRecommended: 150, status: 'In Stock'  },
   ];
 
-  const appointments = [
-    { id: 1, time: '9:00 AM',  patientName: 'Juan Dela Cruz', vaccine: 'Anti-Rabies',  status: 'Completed'   },
-    { id: 2, time: '9:30 AM',  patientName: 'Maria Santos',   vaccine: 'Anti-Tetanus', status: 'In Progress' },
-    { id: 3, time: '10:00 AM', patientName: 'Pedro Reyes',    vaccine: 'Anti-Rabies',  status: 'Pending'     },
-    { id: 4, time: '10:30 AM', patientName: 'Ana Garcia',     vaccine: 'Anti-Tetanus', status: 'Pending'     },
-    { id: 5, time: '11:00 AM', patientName: 'Carlos Lim',     vaccine: 'Anti-Rabies',  status: 'Pending'     },
-  ];
+  //  DYNAMIC CALCULATIONS 
+  const totalAvailable  = vaccineData.reduce((sum, v) => sum + v.available, 0);
+  const lowStockCount   = vaccineData.filter(v => v.status === 'Low Stock').length;
+  const outOfStockCount = vaccineData.filter(v => v.status === 'Out Stock').length;
+  const totalToOrder    = vaccineData.reduce((sum, v) => sum + v.mlRecommended, 0);
+  const vaccinesToOrder = vaccineData.filter(v =>
+    v.status === 'Low Stock' || v.status === 'Out Stock'
+  );
 
-  const getAppointmentStatusStyle = (status) => {
-    if (status === 'Completed')   return styles.statusCompleted;
-    if (status === 'In Progress') return styles.statusInProgress;
-    return styles.statusPending;
+  //  DYNAMIC COLOR HELPERS 
+  const getAvailableColor   = (total) => total > 500 ? '#26a69a' : total > 100 ? '#f57f17' : '#c62828';
+  const getLowStockColor    = (count) => count === 0 ? '#26a69a' : count <= 2 ? '#f57f17' : '#c62828';
+  const getOutOfStockColor  = (count) => count === 0 ? '#26a69a' : '#c62828';
+
+  const getAvailableBorder  = (total) => `4px solid ${getAvailableColor(total)}`;
+  const getLowStockBorder   = (count) => `4px solid ${getLowStockColor(count)}`;
+  const getOutOfStockBorder = (count) => `4px solid ${getOutOfStockColor(count)}`;
+
+  const getAvailableLabel   = (total) => total > 500 ? '✅ Stock is sufficient' : total > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
+  const getLowStockLabel    = (count) => count === 0 ? '✅ All vaccines well stocked' : count <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
+  const getOutOfStockLabel  = (count) => count === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
+
+  //  ORDER URGENCY 
+  const getOrderUrgencyStyle = (status) => {
+    if (status === 'Out Stock') return styles.urgencyOut;
+    if (status === 'Low Stock') return styles.urgencyLow;
+    return styles.urgencyOk;
+  };
+  const getOrderUrgencyLabel = (status) => {
+    if (status === 'Out Stock') return '🚨 Urgent';
+    if (status === 'Low Stock') return '⚠️ Soon';
+    return '✅ OK';
+  };
+
+  //  VACCINE TABLE HELPERS 
+  const getVaccineStatusStyle = (status) => {
+    if (status === 'In Stock')  return styles.statusInStock;
+    if (status === 'Low Stock') return styles.statusLowStock;
+    return styles.statusOutStock;
   };
 
   const getCrowdLevelStyle = (level) => {
-    if (level === 'High')   return { ...styles.crowdBadge, backgroundColor: '#ffebee', color: '#c62828' };
-    if (level === 'Medium') return { ...styles.crowdBadge, backgroundColor: '#fff8e1', color: '#f57f17' };
+    if (level === 'High' || level === 'High - Above High')
+      return { ...styles.crowdBadge, backgroundColor: '#ffebee', color: '#c62828' };
+    if (level === 'Normal - Medium' || level === 'Medium')
+      return { ...styles.crowdBadge, backgroundColor: '#fff8e1', color: '#f57f17' };
     return { ...styles.crowdBadge, backgroundColor: '#e8f5e9', color: '#2e7d32' };
   };
 
-  const handleLogout = () => navigate('/login');
-
-  const handleNavClick = (tab) => {
-    setActiveTab(tab);
-    setIsMobileMenuOpen(false);
-  };
+  //  HANDLERS 
+  const handleLogout   = () => navigate('/login');
+  const handleNavClick = (tab) => { setActiveTab(tab); setIsMobileMenuOpen(false); };
 
   return (
     <div style={styles.container}>
 
+      {/* Hamburger */}
       <button
         style={styles.mobileMenuToggle}
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -67,6 +91,7 @@ const Dashboard = () => {
         ☰
       </button>
 
+      {/* Sidebar */}
       <div
         style={isMobileMenuOpen ? { ...styles.sidebar, ...styles.sidebarOpen } : styles.sidebar}
         className={isMobileMenuOpen ? 'sidebar active' : 'sidebar'}>
@@ -81,7 +106,6 @@ const Dashboard = () => {
             onClick={() => handleNavClick('dashboard')}>
             DASHBOARD
           </button>
-
           <button
             style={{ ...styles.navLink, ...styles.logoutBtn }}
             onClick={handleLogout}>
@@ -90,124 +114,210 @@ const Dashboard = () => {
         </nav>
       </div>
 
+      {/* Overlay */}
       {isMobileMenuOpen && (
         <div style={styles.overlay} onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
+      {/* Main Content */}
       <div style={styles.mainContent} className="main-content">
+
+        {/*  HEADER  */}
         <h2 style={styles.heading}>Dashboard</h2>
         <p style={styles.subheading}>Welcome back, Admin</p>
 
         {activeTab === 'dashboard' && (
           <>
-
+            {/*  STATS CARDS  */}
             <div style={styles.statsContainer} className="stats-container">
-              <div style={styles.statBox}>
-                <h3 style={styles.statTitle}>Total Patients</h3>
-                <p style={styles.statNumber}>{stats.totalPatients}</p>
+
+              <div style={{ ...styles.statBox, borderTop: getAvailableBorder(totalAvailable) }}>
+                <h3 style={styles.statTitle}>Vaccines Available</h3>
+                <p style={{ ...styles.statNumber, color: getAvailableColor(totalAvailable) }}>
+                  {totalAvailable.toLocaleString()}
+                </p>
+                <p style={styles.statNote}>{getAvailableLabel(totalAvailable)}</p>
               </div>
-              <div style={styles.statBox}>
-                <h3 style={styles.statTitle}>Active Queues</h3>
-                <p style={styles.statNumber}>{stats.activeQueues}</p>
+
+              <div style={{ ...styles.statBox, borderTop: '4px solid #e53935' }}>
+                <h3 style={styles.statTitle}>Vaccines to Order</h3>
+                <p style={{ ...styles.statNumber, color: '#e53935' }}>
+                  {totalToOrder.toLocaleString()}
+                </p>
+                <p style={styles.statNote}>💊 {vaccinesToOrder.length} vaccine types need restocking</p>
               </div>
-              <div style={styles.statBox}>
-                <h3 style={styles.statTitle}>Today's Appointments</h3>
-                <p style={styles.statNumber}>{stats.todayAppointments}</p>
+
+              <div style={{ ...styles.statBox, borderTop: getLowStockBorder(lowStockCount) }}>
+                <h3 style={styles.statTitle}>Low Stock</h3>
+                <p style={{ ...styles.statNumber, color: getLowStockColor(lowStockCount) }}>
+                  {lowStockCount}
+                </p>
+                <p style={styles.statNote}>{getLowStockLabel(lowStockCount)}</p>
               </div>
-              <div style={styles.statBox}>
-                <h3 style={styles.statTitle}>Avg Wait Time</h3>
-                <p style={styles.statNumber}>{stats.avgWaitTime}</p>
+
+              <div style={{ ...styles.statBox, borderTop: getOutOfStockBorder(outOfStockCount) }}>
+                <h3 style={styles.statTitle}>Out of Stock</h3>
+                <p style={{ ...styles.statNumber, color: getOutOfStockColor(outOfStockCount) }}>
+                  {outOfStockCount}
+                </p>
+                <p style={styles.statNote}>{getOutOfStockLabel(outOfStockCount)}</p>
               </div>
+
             </div>
 
-            <div style={styles.middleRow}>
+            {/*  MIDDLE ROW: ML + Vaccine Availability  */}
+            <div style={styles.middleRow} className="middle-row">
 
+              {/*  ML PREDICTIONS  */}
               <div style={styles.mlCard}>
-                <h3 style={styles.sectionTitle}>🤖 ML Predictions</h3>
+                <h3 style={styles.sectionTitle}>🤖 ML Predictions in a Month</h3>
 
                 <div style={styles.mlItem}>
-                  <span style={styles.mlLabel}>Crowd Level</span>
-                  <span style={getCrowdLevelStyle(mlPredictions.crowdLevel)}>
-                    {mlPredictions.crowdLevel}
+                  <div style={styles.mlLabelGroup}>
+                    <span style={styles.mlLabel}>Crowd Level at Normal Operations</span>
+                  </div>
+                  <span style={getCrowdLevelStyle(mlPredictions.crowdLevelNormal)}>
+                    {mlPredictions.crowdLevelNormal}
                   </span>
                 </div>
 
                 <div style={styles.mlItem}>
-                  <span style={styles.mlLabel}>Predicted Volume</span>
-                  <span style={styles.mlValue}>{mlPredictions.predictedVolume} patients</span>
+                  <div style={styles.mlLabelGroup}>
+                    <span style={styles.mlLabel}>Crowd Level during Peak Months</span>
+                  </div>
+                  <span style={getCrowdLevelStyle(mlPredictions.crowdLevelPeak)}>
+                    {mlPredictions.crowdLevelPeak}
+                  </span>
                 </div>
 
                 <div style={styles.mlItem}>
-                  <span style={styles.mlLabel}>Peak Hour</span>
-                  <span style={styles.mlValue}>{mlPredictions.peakHour}</span>
+                  <span style={styles.mlLabel}>Peak Months</span>
+                  <span style={styles.mlValuePeak}>📅 {mlPredictions.peakMonths}</span>
                 </div>
 
                 <div style={styles.mlItem}>
-                  <span style={styles.mlLabel}>Recommended Staff</span>
-                  <span style={styles.mlValue}>{mlPredictions.recommendedStaff} staff</span>
+                  <div style={styles.mlLabelGroup}>
+                    <span style={styles.mlLabel}>Predicted Vaccines at Normal Operation</span>
+                  </div>
+                  <span style={styles.mlValueNormal}>
+                    💉 {mlPredictions.vaccinesAtNormal.toLocaleString()}
+                  </span>
+                </div>
+
+                <div style={{ ...styles.mlItem, borderBottom: 'none' }}>
+                  <div style={styles.mlLabelGroup}>
+                    <span style={styles.mlLabel}>Predicted Vaccines during Peak Months</span>
+                  </div>
+                  <span style={styles.mlValuePeakVaccine}>
+                    💉 {mlPredictions.vaccinesAtPeak.toLocaleString()}
+                  </span>
                 </div>
               </div>
 
-              <div style={styles.queueCard}>
-                <h3 style={styles.sectionTitle}>📋 Queue Status</h3>
+              {/*  VACCINE AVAILABILITY  */}
+              <div style={styles.vaccineCard}>
+                <h3 style={styles.sectionTitle}>💉 Vaccine Availability</h3>
                 <div style={styles.tableWrapper}>
                   <table style={styles.table}>
                     <thead>
                       <tr style={styles.tableHeader}>
-                        <th style={styles.tableCell}>Queue</th>
-                        <th style={styles.tableCell}>Type</th>
-                        <th style={styles.tableCell}>Patients</th>
-                        <th style={styles.tableCell}>Wait Time</th>
+                        <th style={styles.tableCell}>Vaccine</th>
+                        <th style={styles.tableCell}>Available</th>
                         <th style={styles.tableCell}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {queueData.map((queue) => (
-                        <tr key={queue.id} style={styles.tableRow}>
-                          <td style={styles.tableCell}>{queue.queueName}</td>
-                          <td style={styles.tableCell}>{queue.type}</td>
-                          <td style={styles.tableCell}>{queue.patientsWaiting}</td>
-                          <td style={styles.tableCell}>{queue.avgWaitTime}</td>
+                      {vaccineData.map((vaccine) => (
+                        <tr key={vaccine.id} style={styles.tableRow}>
+                          <td style={styles.tableCell}>{vaccine.vaccine}</td>
+                          <td style={styles.tableCell}>{vaccine.available.toLocaleString()}</td>
                           <td style={styles.tableCell}>
-                            <span style={queue.status === 'Active' ? styles.statusActive : styles.statusPaused}>
-                              {queue.status}
+                            <span style={getVaccineStatusStyle(vaccine.status)}>
+                              {vaccine.status}
                             </span>
                           </td>
                         </tr>
                       ))}
                     </tbody>
+                    <tfoot>
+                      <tr style={styles.totalRow}>
+                        <td style={styles.totalCell}>Total</td>
+                        <td style={styles.totalCell}>
+                          {vaccineData.reduce((sum, v) => sum + v.available, 0).toLocaleString()}
+                        </td>
+                        <td style={styles.tableCell}></td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               </div>
 
             </div>
 
-            <div style={styles.appointmentsCard}>
-              <h3 style={styles.sectionTitle}>📅 Today's Appointments</h3>
+            {/*  VACCINES TO ORDER TABLE  */}
+            <div style={styles.orderCard}>
+              <div style={styles.orderCardHeader}>
+                <div>
+                  <h3 style={styles.sectionTitle}>📦 Vaccines to Order</h3>
+                  <p style={styles.mlSubtitle}>
+                    ML recommended restock list — {vaccinesToOrder.length} vaccine/s need ordering
+                  </p>
+                </div>
+                <div style={styles.orderTotalBadge}>
+                  Total to Order: <strong>{totalToOrder.toLocaleString()}</strong> doses
+                </div>
+              </div>
+
               <div style={styles.tableWrapper}>
                 <table style={styles.table}>
                   <thead>
                     <tr style={styles.tableHeader}>
-                      <th style={styles.tableCell}>Time</th>
-                      <th style={styles.tableCell}>Patient Name</th>
                       <th style={styles.tableCell}>Vaccine</th>
-                      <th style={styles.tableCell}>Status</th>
+                      <th style={styles.tableCell}>Current Stock</th>
+                      <th style={styles.tableCell}>Min. Required</th>
+                      <th style={styles.tableCell}>ML Recommended Order</th>
+                      <th style={styles.tableCell}>Urgency</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {appointments.map((appt) => (
-                      <tr key={appt.id} style={styles.tableRow}>
-                        <td style={styles.tableCell}>{appt.time}</td>
-                        <td style={styles.tableCell}>{appt.patientName}</td>
-                        <td style={styles.tableCell}>{appt.vaccine}</td>
+                    {vaccinesToOrder.map((vaccine) => (
+                      <tr key={vaccine.id} style={styles.tableRow}>
+                        <td style={{ ...styles.tableCell, fontWeight: '600' }}>
+                          {vaccine.vaccine}
+                        </td>
                         <td style={styles.tableCell}>
-                          <span style={getAppointmentStatusStyle(appt.status)}>
-                            {appt.status}
+                          <span style={{
+                            color: vaccine.available === 0 ? '#c62828' : '#f57f17',
+                            fontWeight: '700',
+                          }}>
+                            {vaccine.available.toLocaleString()}
+                          </span>
+                        </td>
+                        <td style={styles.tableCell}>
+                          {vaccine.minStock.toLocaleString()}
+                        </td>
+                        <td style={styles.tableCell}>
+                          <strong style={{ color: '#26a69a', fontSize: '14px' }}>
+                            💉 {vaccine.mlRecommended.toLocaleString()} doses
+                          </strong>
+                        </td>
+                        <td style={styles.tableCell}>
+                          <span style={getOrderUrgencyStyle(vaccine.status)}>
+                            {getOrderUrgencyLabel(vaccine.status)}
                           </span>
                         </td>
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot>
+                    <tr style={styles.totalRow}>
+                      <td style={styles.totalCell} colSpan={3}>Total Doses to Order</td>
+                      <td style={{ ...styles.totalCell, color: '#e53935' }}>
+                        💉 {totalToOrder.toLocaleString()} doses
+                      </td>
+                      <td style={styles.totalCell}></td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             </div>
@@ -219,6 +329,7 @@ const Dashboard = () => {
   );
 };
 
+//  STYLES 
 const styles = {
   container: {
     display: 'flex',
@@ -258,15 +369,14 @@ const styles = {
     padding: '20px',
     borderBottom: '1px solid rgba(255,255,255,0.2)',
   },
-  logo: {
-    width: '100px',
-    height: '100px',
-    objectFit: 'contain',
+  logo: { 
+    width: '100px', 
+    height: '100px', 
+    objectFit: 'contain' 
   },
-  nav: {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
+  nav: { display: 'flex', 
+    flexDirection: 'column', 
+    flex: 1 
   },
   navLink: {
     color: 'white',
@@ -303,22 +413,21 @@ const styles = {
     backgroundColor: '#f8f8f8',
     overflowY: 'auto',
   },
-  heading: {
-    fontSize: '32px',
-    margin: '0 0 5px 0',
-    color: '#333',
-    fontWeight: '600',
-  },
-  subheading: {
-    fontSize: '14px',
-    color: '#888',
-    margin: '0 0 30px 0',
-  },
+  heading: { 
+    fontSize: '32px', 
+    margin: '0 0 5px 0', 
+    color: '#333', 
+    fontWeight: '600' },
+  subheading: { 
+    fontSize: '14px', 
+    color: '#888', 
+    margin: '0 0 30px 0' },
 
+  //  Stats Cards 
   statsContainer: {
-    display: 'flex',
-    gap: '20px',
-    marginBottom: '30px',
+    display: 'flex', 
+    gap: '20px', 
+    marginBottom: '30px', 
     flexWrap: 'wrap',
   },
   statBox: {
@@ -326,167 +435,269 @@ const styles = {
     padding: '25px 20px',
     borderRadius: '8px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    flex: '1 1 calc(25% - 20px)',
-    minWidth: '150px',
+    flex: '1 1 0',
+    minWidth: '0',
     textAlign: 'center',
     borderTop: '4px solid #26a69a',
   },
   statTitle: {
-    fontSize: '12px',
-    color: '#888',
+    fontSize: '12px', 
+    color: '#888', 
     margin: '0 0 10px 0',
-    fontWeight: '500',
-    textTransform: 'uppercase',
+    fontWeight: '500', 
+    textTransform: 'uppercase', 
     letterSpacing: '0.5px',
   },
-  statNumber: {
-    fontSize: '30px',
-    fontWeight: 'bold',
-    color: '#26a69a',
-    margin: '0',
-  },
+  statNumber: { 
+    fontSize: '30px', 
+    fontWeight: 'bold', 
+    color: '#26a69a', 
+    margin: '0 0 5px 0' },
+  statNote: { 
+    fontSize: '11px', 
+    color: '#aaa', 
+    margin: '0', 
+    fontStyle: 'italic' },
+
+  //  Middle Row 
   middleRow: {
-    display: 'flex',
-    gap: '20px',
-    marginBottom: '30px',
-    flexWrap: 'wrap',
+    display: 'flex', 
+    gap: '20px', 
+    marginBottom: '30px', 
+    flexWrap: 'wrap', 
+    alignItems: 'stretch',
   },
   mlCard: {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
+    backgroundColor: '#fff', 
+    borderRadius: '8px', 
     padding: '20px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    flex: '0 0 280px',
-    minWidth: '250px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
+    flex: 1, 
+    minWidth: '280px',
   },
+  vaccineCard: {
+    backgroundColor: '#fff', 
+    borderRadius: '8px', 
+    padding: '20px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)', 
+    flex: 1, 
+    minWidth: '280px',
+  },
+  mlSubtitle: { 
+    fontSize: '11px', 
+    color: '#999', 
+    margin: '-5px 0 12px 0', 
+    fontStyle: 'italic' },
   mlItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
+    display: 'flex', 
+    justifyContent: 'space-between', 
     alignItems: 'center',
-    padding: '12px 0',
-    borderBottom: '1px solid #f0f0f0',
+    padding: '12px 0', 
+    borderBottom: '1px solid #f0f0f0', 
+    gap: '10px',
   },
-  mlLabel: {
-    fontSize: '13px',
-    color: '#666',
-    fontWeight: '500',
+  mlLabelGroup: { 
+    flex: 1 
   },
-  mlValue: {
-    fontSize: '13px',
-    color: '#333',
-    fontWeight: '600',
+  mlLabel: { 
+    fontSize: '12px', 
+    color: '#666', 
+    fontWeight: '500', 
+    lineHeight: '1.4' 
+  },
+  mlValue: { 
+    fontSize: '13px', 
+    color: '#333', 
+    fontWeight: '600', 
+    whiteSpace: 'nowrap' },
+  mlValuePeak: {
+    fontSize: '12px', 
+    color: '#c62828', 
+    fontWeight: '700',
+    backgroundColor: '#ffebee', 
+    padding: '3px 8px', 
+    borderRadius: '10px', 
+    whiteSpace: 'nowrap',
+  },
+  mlValueNormal: {
+    fontSize: '12px', 
+    color: '#2e7d32', 
+    fontWeight: '700',
+    backgroundColor: '#e8f5e9', 
+    padding: '3px 8px', 
+    borderRadius: '10px', 
+    whiteSpace: 'nowrap',
+  },
+  mlValuePeakVaccine: {
+    fontSize: '12px', 
+    color: '#c62828', 
+    fontWeight: '700',
+    backgroundColor: '#ffebee', 
+    padding: '3px 8px', 
+    borderRadius: '10px', 
+    whiteSpace: 'nowrap',
   },
   crowdBadge: {
-    padding: '4px 12px',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '700',
+    padding: '3px 10px', 
+    orderRadius: '20px', 
+    fontSize: '11px',
+    fontWeight: '700', 
+    whiteSpace: 'nowrap',
   },
-  queueCard: {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    flex: 1,
-    minWidth: '300px',
+  sectionTitle: { 
+    fontSize: '16px', 
+    color: '#333', 
+    fontWeight: '600', 
+    margin: '0 0 5px 0' 
   },
-  appointmentsCard: {
+
+  //  Order Card 
+  orderCard: {
     backgroundColor: '#fff',
     borderRadius: '8px',
     padding: '20px',
     boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
     marginBottom: '30px',
+    borderTop: '4px solid #e53935',
   },
-  sectionTitle: {
-    fontSize: '16px',
-    color: '#333',
+  orderCardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: '15px',
+    flexWrap: 'wrap',
+    gap: '10px',
+  },
+  orderTotalBadge: {
+    backgroundColor: '#ffebee',
+    color: '#c62828',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    fontSize: '13px',
     fontWeight: '600',
-    margin: '0 0 15px 0',
+    alignSelf: 'center',
   },
-  tableWrapper: { overflowX: 'auto' },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    minWidth: '400px',
+
+  //  Urgency Badges 
+  urgencyOut: {
+    backgroundColor: '#ffebee', 
+    color: '#c62828',
+    padding: '4px 12px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '700',
   },
-  tableHeader: {
-    backgroundColor: '#26a69a',
-    color: 'white',
+  urgencyLow: {
+    backgroundColor: '#fff8e1', 
+    color: '#f57f17',
+    padding: '4px 12px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '700',
+  },
+  urgencyOk: {
+    backgroundColor: '#e8f5e9', 
+    color: '#2e7d32',
+    padding: '4px 12px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '700',
+  },
+
+  //  Table 
+  tableWrapper: { 
+    overflowX: 'auto' 
+  },
+  table: { 
+    width: '100%', 
+    borderCollapse: 'collapse', 
+    minWidth: '250px' 
+  },
+  tableHeader: { 
+    backgroundColor: '#26a69a', 
+    color: 'white' 
   },
   tableCell: {
-    padding: '11px 12px',
+    padding: '11px 12px', 
     textAlign: 'left',
-    borderBottom: '1px solid #f0f0f0',
+    borderBottom: '1px solid #f0f0f0', 
     fontSize: '13px',
   },
-  tableRow: {
-    transition: 'background-color 0.2s',
+  tableRow: { 
+    transition: 'background-color 0.2s'
   },
-  statusActive: {
-    color: '#26a69a',
-    fontWeight: '700',
+  totalRow: { 
+    backgroundColor: '#f5f5f5', 
+    fontWeight: '700' 
+  },
+  totalCell: {
+    padding: '11px 12px', 
+    textAlign: 'left', 
     fontSize: '13px',
+    fontWeight: '700', 
+    color: '#333', 
+    borderTop: '2px solid #e0e0e0',
   },
-  statusPaused: {
-    color: '#ff9800',
-    fontWeight: '700',
-    fontSize: '13px',
+
+  //  Status Badges 
+  statusInStock:    { 
+    backgroundColor: '#e8f5e9', 
+    color: '#2e7d32', 
+    padding: '4px 12px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '600' 
   },
-  statusCompleted: {
-    backgroundColor: '#e8f5e9',
-    color: '#2e7d32',
-    padding: '3px 10px',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
+  statusLowStock:   { 
+    backgroundColor: '#fff8e1', 
+    color: '#f57f17', 
+    padding: '4px 12px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '600' 
   },
-  statusInProgress: {
-    backgroundColor: '#e3f2fd',
-    color: '#1565c0',
-    padding: '3px 10px',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
+  statusOutStock:   { 
+    backgroundColor: '#ffebee', 
+    color: '#c62828', 
+    padding: '4px 12px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '600' 
   },
-  statusPending: {
-    backgroundColor: '#fff8e1',
-    color: '#f57f17',
-    padding: '3px 10px',
-    borderRadius: '20px',
-    fontSize: '12px',
-    fontWeight: '600',
+  statusInProgress: { 
+    backgroundColor: '#e3f2fd', 
+    color: '#1565c0', 
+    padding: '3px 10px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '600' 
   },
+  statusPending:    { 
+    backgroundColor: '#fff8e1', 
+    color: '#f57f17', 
+    padding: '3px 10px', 
+    borderRadius: '20px', 
+    fontSize: '12px', 
+    fontWeight: '600' },
 };
 
+//  RESPONSIVE CSS 
 const styleSheet = document.createElement('style');
 styleSheet.innerText = `
   @media (max-width: 768px) {
     .mobile-menu-toggle { display: block !important; }
-
     .sidebar {
-      position: fixed !important;
-      left: -280px !important;
-      top: 0 !important;
-      height: 100vh !important;
-      z-index: 999 !important;
-      transition: left 0.3s ease !important;
+      position: fixed !important; left: -280px !important;
+      top: 0 !important; height: 100vh !important;
+      z-index: 999 !important; transition: left 0.3s ease !important;
     }
-
     .sidebar.active { left: 0 !important; }
-
-    .main-content {
-      padding: 70px 20px 20px 20px !important;
-    }
-
-    .stats-container {
-      flex-direction: column !important;
-    }
-
-    .stats-container > div {
-      min-width: 100% !important;
-    }
+    .main-content { padding: 70px 20px 20px 20px !important; }
+    .stats-container { flex-direction: column !important; }
+    .stats-container > div { min-width: 100% !important; }
+    .middle-row { flex-direction: column !important; }
+    .middle-row > div { min-width: 100% !important; flex: 1 1 100% !important; }
   }
-
   @media (max-width: 480px) {
     .main-content { padding: 60px 15px 15px 15px !important; }
     table { font-size: 12px !important; }
