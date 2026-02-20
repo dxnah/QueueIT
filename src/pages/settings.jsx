@@ -139,8 +139,8 @@ const Settings = () => {
                 value={settings.language}
                 onChange={handleChange}
                 className="settings-select">
-                <option value="en">🇺🇸 English</option>
-                <option value="fil">🇵🇭 Filipino</option>
+                <option value="en">English</option>
+                <option value="fil">Filipino</option>
               </select>
             </div>
           </div>

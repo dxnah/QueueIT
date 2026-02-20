@@ -172,10 +172,9 @@
 /*  Middle Row  */
 .middle-row {
   display: flex;
+  flex-direction: column;
   gap: 20px;
   margin-bottom: 30px;
-  flex-wrap: wrap;
-  align-items: stretch;
 }
 
 .ml-card,
@@ -184,8 +183,8 @@
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  flex: 1;
-  min-width: 280px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /*  ML Predictions Content  */
@@ -387,10 +386,142 @@
   font-weight: 600;
 }
 
-/* Confidence level colors — used by PredictionCard */
+/* Confidence level colors */
 .high   { color: #2e7d32; }
 .medium { color: #f57f17; }
 .low    { color: #c62828; }
+
+/* ═══════════════════════════════════════════════════════════
+   ML FORECAST CARD - NEW SECTIONS
+   ═══════════════════════════════════════════════════════════ */
+
+.ml-forecast-card {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ml-forecast-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.ml-view-toggle {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ml-toggle-btn {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  color: #666;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ml-toggle-btn:hover {
+  border-color: #26a69a;
+  background-color: rgba(38, 166, 154, 0.1);
+  color: #1a8174;
+}
+
+.ml-toggle-btn.ml-toggle-active {
+  background: #26a69a;
+  color: white;
+  border-color: #26a69a;
+}
+
+.ml-toggle-btn.ml-toggle-active:hover {
+  background: #1a8174;
+  border-color: #1a8174;
+}
+
+.ml-divider {
+  border-top: 2px dashed #f0f0f0;
+  margin: 14px 0 10px 0;
+}
+
+/* Period Sections */
+.ml-period-section {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 2px solid #e8f5e9;
+}
+
+.ml-period-section.ml-period-peak {
+  border-color: #ffebee;
+  background: #fffbfb;
+}
+
+.ml-period-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #2e7d32;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ml-period-title-peak {
+  color: #c62828;
+}
+
+.ml-period-subtitle {
+  font-size: 11px;
+  color: #888;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ml-table-wrapper {
+  overflow-x: auto;
+}
+
+.ml-forecast-table {
+  min-width: 420px;
+  table-layout: fixed;
+  width: 100%;
+  background: white;
+}
+
+.ml-forecast-table th:nth-child(1) { width: 22%; }
+.ml-forecast-table th:nth-child(2) { width: 20%; }
+.ml-forecast-table th:nth-child(3) { width: 22%; }
+.ml-forecast-table th:nth-child(4) { width: 18%; }
+.ml-forecast-table th:nth-child(5) { width: 18%; }
+
+.ml-stock-cell          { font-weight: 600; }
+.ml-stock-critical      { color: #c62828; }
+.ml-stock-warning       { color: #f57f17; }
+.ml-stock-ok            { color: #333; }
+
+.ml-need-cell           { color: #26a69a; font-weight: 600; }
+.ml-peak-cell           { color: #e53935; font-weight: 600; }
+
+.ml-weeks-cell          { font-weight: 700; }
+.ml-weeks-critical      { color: #c62828; }
+.ml-weeks-warning       { color: #f57f17; }
+.ml-weeks-ok            { color: #2e7d32; }
+
+.urgency-sm             { font-size: 11px !important; padding: 3px 8px !important; }
+.ml-rec-text            { color: #26a69a; font-size: 14px; }
+.order-total-cell       { color: #e53935; }
 
 /*  Responsive  */
 @media (max-width: 768px) {
@@ -409,10 +540,16 @@
   .main-content        { padding: 70px 20px 20px 20px; }
   .stats-container     { flex-direction: column; }
   .stats-container > div { min-width: 100%; }
-  .middle-row          { flex-direction: column; }
-  .middle-row > div    { min-width: 100%; flex: 1 1 100%; }
   .prediction-row      { flex-direction: column; }
   .prediction-row > div { min-width: 100%; }
+
+  .ml-period-section {
+    padding: 12px;
+  }
+
+  .ml-period-title {
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -420,4 +557,8 @@
   .data-table    { font-size: 12px; }
   .data-table th,
   .data-table td { padding: 8px; }
+
+  .ml-forecast-table {
+    min-width: 380px;
+  }
 }
