@@ -1,0 +1,605 @@
+/* vaccine.css */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.page-header > div {
+  flex: 1;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ALERT BANNER
+   ───────────────────────────────────────────────────────── */
+
+.alert {
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.alert-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* ─────────────────────────────────────────────────────────
+   STATS CARDS  (identical to dashboard .stat-box)
+   ───────────────────────────────────────────────────────── */
+
+.stats-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background-color: #fff;
+  padding: 25px 20px;
+  margin-bottom: -15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  border-top: 4px solid #26a69a;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-title {
+  font-size: 12px;
+  color: #888;
+  margin: 0 0 10px 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-number {
+  font-size: 30px;
+  font-weight: bold;
+  color: #26a69a;
+  margin: 0 0 5px 0;
+}
+
+.stat-note {
+  font-size: 11px;
+  color: #aaa;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────
+   MODAL OVERLAY
+   ───────────────────────────────────────────────────────── */
+
+.form-modal {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.form-modal-content {
+  background: white;
+  border-radius: 10px;
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+}
+
+.form-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.form-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 700;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.form-modal form {
+  padding: 20px 24px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   FORM INSIDE MODAL  (mirrors dashboard form style)
+   ───────────────────────────────────────────────────────── */
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 7px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #26a69a;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+}
+
+/* ─────────────────────────────────────────────────────────
+   FILTERS & SEARCH BAR
+   ───────────────────────────────────────────────────────── */
+
+.filters-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  margin-bottom: 25px;
+  flex-wrap: nowrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  height: 42px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  line-height: 1;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #26a69a;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.filter-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+}
+
+.filter-btn {
+  padding: 0 16px;
+  height: 42px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  color: #555;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.filter-btn:hover {
+  border-color: #26a69a;
+  color: #26a69a;
+  background-color: #f0fffe;
+}
+
+.filter-btn.active {
+  background-color: #26a69a;
+  color: white;
+  border-color: #26a69a;
+}
+
+/* ─────────────────────────────────────────────────────────
+   VACCINE CARDS GRID
+   ───────────────────────────────────────────────────────── */
+
+.vaccines-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 20px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   INDIVIDUAL VACCINE CARD
+   Same card treatment as dashboard .ml-card / .vaccine-card
+   ───────────────────────────────────────────────────────── */
+
+.vaccine-card-item {
+  background: white;
+  margin-top: -15px;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-top: 4px solid #26a69a;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.vaccine-card-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.vaccine-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.vaccine-name {
+  margin: 0;
+  font-size: 17px;
+  color: #333;
+  font-weight: 700;
+}
+
+.vaccine-card-body {
+  margin-bottom: 14px;
+}
+
+.vaccine-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 13px;
+}
+
+.vaccine-info-row:last-child {
+  border-bottom: none;
+}
+
+/* ML recommended highlight row */
+.vaccine-info-row.highlight {
+  background-color: #f0fffe;
+  padding: 9px 10px;
+  margin-top: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #26a69a;
+  border-bottom: none;
+}
+
+.info-label {
+  color: #777;
+  font-weight: 500;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.info-value-highlight {
+  color: #26a69a;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.vaccine-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   STATUS BADGES  (identical to dashboard palette)
+   ───────────────────────────────────────────────────────── */
+
+.status-in-stock {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-low-stock {
+  background-color: #fff8e1;
+  color: #f57f17;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-out-stock {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Urgency labels in card footer */
+.urgency-critical {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.urgency-warning {
+  background-color: #fff8e1;
+  color: #f57f17;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.urgency-normal {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ICON BUTTONS (edit / delete)
+   ───────────────────────────────────────────────────────── */
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 17px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+  transform: scale(1.1);
+}
+
+.btn-edit:hover   { background-color: #e3f2fd; }
+.btn-delete:hover { background-color: #ffebee; }
+
+/* ─────────────────────────────────────────────────────────
+   PAGE-LEVEL BUTTONS
+   ───────────────────────────────────────────────────────── */
+
+.btn {
+  padding: 10px 20px;
+  display: inline-block;
+  width: auto;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-primary {
+  background-color: #26a69a;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1a8174;
+  box-shadow: 0 4px 14px rgba(38, 166, 154, 0.3);
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #666;
+  border: 2px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+  background-color: #f5f5f5;
+  border-color: #bbb;
+}
+
+/* Compact Add New Vaccine button in page header */
+.page-header .btn {
+  flex-shrink: 0;
+  width: auto;
+  padding: 10px 22px;
+  align-self: center;
+}
+
+/* ─────────────────────────────────────────────────────────
+   EMPTY STATE
+   ───────────────────────────────────────────────────────── */
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 70px 20px;
+  color: #bbb;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  font-size: 16px;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ANIMATIONS
+   ───────────────────────────────────────────────────────── */
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats-container {
+    flex-direction: column;
+  }
+
+  .stats-container > div {
+    min-width: 100%;
+  }
+
+  .vaccines-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-modal-content {
+    max-height: 100vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .vaccine-card-item { padding: 15px; }
+  .vaccine-name      { font-size: 15px; }
+
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .form-modal-content {
+    border-radius: 0;
+  }
+}

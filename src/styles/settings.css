@@ -1,0 +1,643 @@
+/* settings.css*/
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.status-badges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  animation: pulse 2s infinite;
+}
+
+.badge-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ALERTS & MESSAGES
+   ───────────────────────────────────────────────────────── */
+
+.alert {
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  animation: slideDown 0.3s ease-out;
+}
+
+.alert-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+.alert-info {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border: 1px solid #90caf9;
+}
+
+/* ─────────────────────────────────────────────────────────
+   TABS NAVIGATION
+   ───────────────────────────────────────────────────────── */
+
+.settings-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 5px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: #666;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.tab-btn.active {
+  background-color: #26a69a;
+  color: white;
+}
+
+/* ─────────────────────────────────────────────────────────
+   SETTINGS CARDS
+   ───────────────────────────────────────────────────────── */
+
+.settings-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
+  border-top: 4px solid #26a69a;
+  transition: all 0.3s ease;
+}
+
+.settings-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ─────────────────────────────────────────────────────────
+   FORM INPUTS
+   ───────────────────────────────────────────────────────── */
+
+.settings-input-container {
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.settings-input-container:last-child {
+  border-bottom: none;
+}
+
+.settings-input-label {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.settings-input-field {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.settings-input-field:focus {
+  outline: none;
+  border-color: #26a69a;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.settings-input-field.error {
+  border-color: #e53935;
+}
+
+.settings-input-field.error:focus {
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+}
+
+.settings-select {
+  width: 100%;
+  padding: 10px 35px 10px 10px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background-color: white;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.settings-select:focus {
+  outline: none;
+  border-color: #26a69a;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+.settings-helper-text {
+  font-size: 11px;
+  color: #888;
+  margin: 8px 0 0 0;
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────
+   PASSWORD INPUT
+   ───────────────────────────────────────────────────────── */
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .settings-input-field {
+  padding-right: 45px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  color: #666;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.password-toggle-btn:hover {
+  color: #26a69a;
+  transform: scale(1.1);
+}
+
+.password-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.password-strength {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  font-size: 12px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.error-text {
+  color: #e53935;
+  font-size: 12px;
+  margin: 8px 0 0 0;
+  padding: 5px 10px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  border-left: 3px solid #e53935;
+  animation: shake 0.3s ease-in-out;
+}
+
+/* ─────────────────────────────────────────────────────────
+   TOGGLE SWITCHES
+   ───────────────────────────────────────────────────────── */
+
+.settings-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.3s ease;
+}
+
+.settings-toggle-row:hover {
+  background-color: #fafafa;
+}
+
+.settings-toggle-row:last-child {
+  border-bottom: none;
+}
+
+.settings-toggle-info {
+  flex: 1;
+  margin-right: 15px;
+}
+
+.settings-toggle-title {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.settings-toggle-description {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.toggle-slider.active {
+  background-color: #26a69a;
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-slider.active::before {
+  transform: translateX(26px);
+}
+
+/* ─────────────────────────────────────────────────────────
+   NOTIFICATION PREVIEW
+   ───────────────────────────────────────────────────────── */
+
+.notification-preview {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  animation: slideDown 0.3s ease-out;
+}
+
+.notification-preview h5 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+}
+
+.notification-preview p {
+  margin: 5px 0;
+  font-size: 12px;
+  color: #555;
+}
+
+.notification-preview.disabled {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  text-align: center;
+}
+
+.notification-note {
+  font-size: 11px;
+  color: #666;
+  margin: 10px 0 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed #ddd;
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────
+   LANGUAGE PREVIEW
+   ───────────────────────────────────────────────────────── */
+
+.language-preview {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  border-left: 3px solid #26a69a;
+  font-size: 12px;
+  color: #555;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ACTION BUTTONS
+   ───────────────────────────────────────────────────────── */
+
+.settings-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 14px 30px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  flex: 1;
+  min-width: 200px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #26a69a;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1a8174;
+  box-shadow: 0 6px 16px rgba(38, 166, 154, 0.3);
+}
+
+.btn-secondary {
+  background-color: #fff;
+  color: #e53935;
+  border: 2px solid #e53935;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #e53935;
+  color: white;
+  box-shadow: 0 6px 16px rgba(229, 57, 53, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────
+   SETTINGS SUMMARY
+   ───────────────────────────────────────────────────────── */
+
+.settings-summary {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  animation: fadeIn 0.5s ease-out;
+}
+
+.settings-summary h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.summary-item:hover {
+  transform: translateX(5px);
+  border-color: #26a69a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.summary-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+.summary-value {
+  font-size: 12px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────
+   ANIMATIONS
+   ───────────────────────────────────────────────────────── */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* ─────────────────────────────────────────────────────────
+   PASSWORD WRAPPER + EYE TOGGLE
+   ───────────────────────────────────────────────────────── */
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .settings-input-field {
+  padding-right: 44px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.password-toggle-btn:hover {
+  color: #26a69a;
+  background-color: transparent;
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE DESIGN
+   ───────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .settings-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status-badges {
+    width: 100%;
+  }
+
+  .settings-tabs {
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+  }
+
+  .settings-toggle-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .toggle-switch {
+    align-self: flex-end;
+  }
+
+  .settings-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    min-width: 100%;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-card {
+    padding: 15px;
+  }
+
+  .settings-input-field,
+  .settings-select {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .password-toggle-btn {
+    font-size: 16px;
+    right: 8px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 4px 10px;
+  }
+}

@@ -1,0 +1,219 @@
+/* login.css */
+
+/*  Screen & Container  */
+.login-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #e6f4f1;
+  padding: 20px;
+}
+
+.login-container {
+  background-color: white;
+  padding: 40px 32px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  max-width: 420px;
+}
+
+/*  Logo Section  */
+.logo-section {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 15px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.title-section {
+  flex: 1;
+  text-align: left;
+}
+
+.system-title {
+  margin: 0 0 5px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.system-subtitle {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: normal;
+}
+
+/*  Login Heading  */
+.login-heading {
+  margin: -30px 0 5px 0;
+  font-size: 18px;
+  color: #333;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+/*  Form Inputs  */
+.input-container {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.input-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 14px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #26a69a;
+}
+
+/*  Button  */
+.login-button {
+  background-color: #24886E;
+  color: white;
+  border: none;
+  padding: 14px 20px;
+  cursor: pointer;
+  border-radius: 6px;
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  transform: scale(1);
+  margin-bottom: 15px;
+}
+
+.login-button:hover {
+  background-color: #1a5f4f;
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(36, 136, 110, 0.4);
+}
+
+/*  Auth Links  */
+.simulate-link {
+  margin-top: 5px;
+  margin-bottom: -15px;
+  color: #24886E;
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.auth-links {
+  margin-top: 13px;
+  margin-bottom: -12px;
+  font-size: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+
+.auth-link {
+  color: #24886E;
+  font-size: 14px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/*  Error Message  */
+.error-message {
+  color: #c33;
+  background-color: #fee;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  border: 1px solid #fcc;
+}
+
+/* ─────────────────────────────────────────────────────────
+   PASSWORD EYE TOGGLE
+   ───────────────────────────────────────────────────────── */
+
+.login-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-password-wrapper .input-field {
+  padding-right: 44px;
+}
+
+.login-eye-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.login-eye-btn:hover {
+  color: #26a69a;
+  background-color: transparent;
+}
+
+.login-eye-btn:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+/*  Responsive  */
+@media (max-width: 480px) {
+  .login-container  { padding: 30px 20px; }
+  .logo-section     { align-items: center; }
+  .logo             { width: 60px; height: 60px; }
+  .system-title     { font-size: 16px; }
+  .system-subtitle  { font-size: 10px; }
+  .auth-links       { flex-direction: column; gap: 8px; }
+  .auth-links span  { display: none; }
+}
+
+@media (max-width: 360px) {
+  .login-container { padding: 25px 15px; }
+  .logo            { width: 50px; height: 50px; }
+}

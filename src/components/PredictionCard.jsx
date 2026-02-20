@@ -52,12 +52,4 @@ const styles = {
   },
 };
 
-const styleSheet = document.createElement('style');
-styleSheet.innerText = `
-  .high   { color: green; }
-  .medium { color: orange; }
-  .low    { color: red; }
-`;
-document.head.appendChild(styleSheet);
-
 export default PredictionCard;

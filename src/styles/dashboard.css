@@ -1,0 +1,423 @@
+/* dashboard.css */
+
+/*  Layout  */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  position: relative;
+}
+
+/*  Hamburger Button  */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  z-index: 1000;
+  background-color: #26a69a;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/*  Sidebar  */
+.sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+/*  Navigation  */
+.nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.nav-link {
+  color: white;
+  padding: 15px 20px;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.nav-link-active {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-left: 4px solid white;
+  padding-left: 16px;
+}
+
+.logout-btn {
+  margin-top: auto;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/*  Overlay  */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+}
+
+/*  Main Content  */
+.main-content {
+  flex: 1;
+  padding: 40px;
+  background-color: #f8f8f8;
+  overflow-y: auto;
+}
+
+.dashboard-heading {
+  font-size: 32px;
+  margin: 0 0 5px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.dashboard-subheading {
+  font-size: 14px;
+  color: #888;
+  margin: 0 0 30px 0;
+}
+
+/*  Stats Cards  */
+.stats-container {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background-color: #fff;
+  padding: 25px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  border-top: 4px solid #26a69a;
+}
+
+.stat-title {
+  font-size: 12px;
+  color: #888;
+  margin: 0 0 10px 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-number {
+  font-size: 30px;
+  font-weight: bold;
+  color: #26a69a;
+  margin: 0 0 5px 0;
+}
+
+.stat-note {
+  font-size: 11px;
+  color: #aaa;
+  margin: 0;
+  font-style: italic;
+}
+
+/*  Prediction Cards Row  */
+.prediction-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+/*  Middle Row  */
+.middle-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.ml-card,
+.vaccine-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex: 1;
+  min-width: 280px;
+}
+
+/*  ML Predictions Content  */
+.section-title {
+  font-size: 16px;
+  color: #333;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+}
+
+.ml-subtitle {
+  font-size: 11px;
+  color: #999;
+  margin: -5px 0 12px 0;
+  font-style: italic;
+}
+
+.ml-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 10px;
+}
+
+.ml-item:last-child {
+  border-bottom: none;
+}
+
+.ml-label-group {
+  flex: 1;
+}
+
+.ml-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.ml-value-normal {
+  font-size: 12px;
+  color: #2e7d32;
+  font-weight: 700;
+  background-color: #e8f5e9;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.ml-value-peak {
+  font-size: 12px;
+  color: #c62828;
+  font-weight: 700;
+  background-color: #ffebee;
+  padding: 3px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.crowd-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.crowd-normal { background-color: #fff8e1; color: #f57f17; }
+.crowd-high   { background-color: #ffebee; color: #c62828; }
+.crowd-low    { background-color: #e8f5e9; color: #2e7d32; }
+
+/*  Vaccines to Order Card  */
+.order-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+  border-top: 4px solid #e53935;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.order-total-badge {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  align-self: center;
+}
+
+/*  Urgency Badges  */
+.urgency-out {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.urgency-low {
+  background-color: #fff8e1;
+  color: #f57f17;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.urgency-ok {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/*  Table  */
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 250px;
+}
+
+.data-table thead tr {
+  background-color: #26a69a;
+  color: white;
+}
+
+.data-table th,
+.data-table td {
+  padding: 11px 12px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+
+.data-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.total-row {
+  background-color: #f5f5f5;
+  font-weight: 700;
+}
+
+.total-row td {
+  font-weight: 700;
+  color: #333;
+  border-top: 2px solid #e0e0e0;
+}
+
+/*  Status Badges  */
+.status-in-stock {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-low-stock {
+  background-color: #fff8e1;
+  color: #f57f17;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-out-stock {
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Confidence level colors — used by PredictionCard */
+.high   { color: #2e7d32; }
+.medium { color: #f57f17; }
+.low    { color: #c62828; }
+
+/*  Responsive  */
+@media (max-width: 768px) {
+  .mobile-menu-toggle  { display: block; }
+
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    height: 100vh;
+    z-index: 999;
+    transition: left 0.3s ease;
+  }
+
+  .sidebar.active      { left: 0; }
+  .main-content        { padding: 70px 20px 20px 20px; }
+  .stats-container     { flex-direction: column; }
+  .stats-container > div { min-width: 100%; }
+  .middle-row          { flex-direction: column; }
+  .middle-row > div    { min-width: 100%; flex: 1 1 100%; }
+  .prediction-row      { flex-direction: column; }
+  .prediction-row > div { min-width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .main-content  { padding: 60px 15px 15px 15px; }
+  .data-table    { font-size: 12px; }
+  .data-table th,
+  .data-table td { padding: 8px; }
+}
