@@ -2,34 +2,21 @@
 
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
+import { reportsData } from '../data/dashboardData';
 import '../styles/dashboard.css';
 import '../styles/reports.css';
 
 const Reports = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [selectedPeriod, setSelectedPeriod] = useState('monthly');
-  const [selectedReport, setSelectedReport] = useState('vaccine-usage');
-  const [dateRange, setDateRange] = useState({
+  const [selectedPeriod, setSelectedPeriod]     = useState('monthly');
+  const [selectedReport, setSelectedReport]     = useState('vaccine-usage');
+  const [dateRange, setDateRange]               = useState({
     startDate: '2025-01-01',
-    endDate: '2025-02-19'
+    endDate:   '2025-02-19',
   });
 
-  // Report data state
-  const [reportData] = useState({
-    'vaccine-usage': [
-      { vaccine: 'Anti-Rabies', administered: 450, wasted: 12, remaining: 320 },
-      { vaccine: 'Anti-Tetanus', administered: 280, wasted: 5, remaining: 85 },
-      { vaccine: 'Booster', administered: 150, wasted: 0, remaining: 0 },
-      { vaccine: 'Hepatitis B', administered: 98, wasted: 3, remaining: 2 },
-      { vaccine: 'Flu Shot', administered: 120, wasted: 8, remaining: 150 },
-    ],
-    'stock-levels': [
-      { date: 'Week 1', inStock: 800, lowStock: 2, outStock: 0 },
-      { date: 'Week 2', inStock: 650, lowStock: 3, outStock: 1 },
-      { date: 'Week 3', inStock: 550, lowStock: 3, outStock: 1 },
-      { date: 'Week 4', inStock: 480, lowStock: 4, outStock: 1 },
-    ],
-  });
+  // Seeded from dashboardData — replace with API call when backend is added
+  const [reportData] = useState(reportsData);
 
   const handleDateChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +40,7 @@ const Reports = () => {
         ☰
       </button>
 
-      <Sidebar 
+      <Sidebar
         isMobileMenuOpen={isMobileMenuOpen}
         onMenuClose={() => setIsMobileMenuOpen(false)}
       />
@@ -74,7 +61,7 @@ const Reports = () => {
           <div className="form-row">
             <div className="form-group">
               <label>Report Type</label>
-              <select 
+              <select
                 value={selectedReport}
                 onChange={(e) => setSelectedReport(e.target.value)}
                 className="form-control">
@@ -85,7 +72,7 @@ const Reports = () => {
 
             <div className="form-group">
               <label>Time Period</label>
-              <select 
+              <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
                 className="form-control">
@@ -110,7 +97,6 @@ const Reports = () => {
                   className="form-control"
                 />
               </div>
-
               <div className="form-group">
                 <label>End Date</label>
                 <input
@@ -163,9 +149,9 @@ const Reports = () => {
                       </td>
                       <td>{row.remaining} doses</td>
                       <td>
-                        <span style={{ 
+                        <span style={{
                           color: row.wasted < 5 ? '#2e7d32' : '#f57f17',
-                          fontWeight: 'bold'
+                          fontWeight: 'bold',
                         }}>
                           {((row.administered / (row.administered + row.wasted)) * 100).toFixed(1)}%
                         </span>
@@ -198,13 +184,11 @@ const Reports = () => {
                       <td style={{ color: '#e53935' }}>{row.outStock} types</td>
                       <td>
                         <span className={
-                          row.outStock === 0 && row.lowStock < 2 ? 'status-in-stock' : 
-                          row.outStock > 0 ? 'status-out-stock' : 
-                          'status-low-stock'
+                          row.outStock === 0 && row.lowStock < 2 ? 'status-in-stock' :
+                          row.outStock > 0 ? 'status-out-stock' : 'status-low-stock'
                         }>
-                          {row.outStock === 0 && row.lowStock < 2 ? '✅ Healthy' : 
-                           row.outStock > 0 ? '🚨 Critical' : 
-                           '⚠️ Needs Attention'}
+                          {row.outStock === 0 && row.lowStock < 2 ? '✅ Healthy' :
+                           row.outStock > 0 ? '🚨 Critical' : '⚠️ Needs Attention'}
                         </span>
                       </td>
                     </tr>
@@ -220,4 +204,4 @@ const Reports = () => {
   );
 };
 
-export default Reports;
+export default Reports; 

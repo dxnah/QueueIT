@@ -542,6 +542,55 @@
 }
 
 /* ─────────────────────────────────────────────────────────
+   EXPIRY DATE URGENCY STYLING
+   ───────────────────────────────────────────────────────── */
+
+.expiry-row {
+  border-radius: 6px;
+  padding: 6px 8px !important;
+  margin: 4px 0;
+}
+
+.expiry-expired {
+  background-color: #ffebee;
+  border-left: 3px solid #c62828;
+}
+
+.expiry-urgent {
+  background-color: #ffebee;
+  border-left: 3px solid #e53935;
+}
+
+.expiry-soon {
+  background-color: #fff8e1;
+  border-left: 3px solid #f57f17;
+}
+
+.expiry-approaching {
+  background-color: #fff3e0;
+  border-left: 3px solid #fb8c00;
+}
+
+.expiry-ok {
+  background-color: #f5f5f5;
+  border-left: 3px solid #bdbdbd;
+}
+
+.expiry-unknown {
+  background-color: #f5f5f5;
+  border-left: 3px solid #bdbdbd;
+}
+
+/* Expiry value text colors */
+.expiry-value.expiry-expired     { color: #c62828; font-weight: 700; font-size: 12px; }
+.expiry-value.expiry-urgent      { color: #e53935; font-weight: 700; font-size: 12px; }
+.expiry-value.expiry-soon        { color: #f57f17; font-weight: 700; font-size: 12px; }
+.expiry-value.expiry-approaching { color: #fb8c00; font-weight: 600; font-size: 12px; }
+.expiry-value.expiry-ok          { color: #555;    font-weight: 500; font-size: 12px; }
+.expiry-value.expiry-unknown     { color: #aaa;    font-weight: 500; font-size: 12px; }
+
+
+/* ─────────────────────────────────────────────────────────
    RESPONSIVE
    ───────────────────────────────────────────────────────── */
 

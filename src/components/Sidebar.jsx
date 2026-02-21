@@ -36,7 +36,7 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
         <button
           className={isActive('/vaccine') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/vaccine')}>
-          💉 VACCINES
+          💉 VACCINE MANAGEMENT
         </button>
 
         <button

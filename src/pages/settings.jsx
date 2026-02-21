@@ -126,10 +126,6 @@ const Settings = () => {
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
-
-              <p className="settings-helper-text">
-                🔒 Changing credentials will update the login screen automatically.
-              </p>
             </div>
 
             <div className="settings-input-container">

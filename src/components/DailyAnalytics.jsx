@@ -1,8 +1,6 @@
 // DailyAnalytics.jsx
-// Drop this component anywhere inside Dashboard.jsx's main-content div
-// Import: import DailyAnalytics from '../components/DailyAnalytics';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import {
   AreaChart, Area,
   BarChart, Bar,
@@ -11,70 +9,82 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
-// ── Simulate realistic hourly vaccine dispensing data ──────────────
+// Import data from dashboardData
+import { vaccineData } from '../data/dashboardData';
+
+// ── Generate hourly data based on actual vaccine stock ──────────────
 const generateHourlyData = () => {
   const hours = [];
-  const vaccineNames = ['Anti-Rabies', 'Anti-Tetanus', 'Booster', 'Hepatitis B', 'Flu Shot'];
-  const baseRates   = [18, 12, 6, 4, 9]; // avg dispensed per hour
   const now = new Date();
+  const currentHour = now.getHours();
 
-  for (let h = 7; h <= now.getHours(); h++) {
+  // Only show hours from 7 AM to current hour
+  for (let h = 7; h <= currentHour; h++) {
     const label = h < 12 ? `${h}:00 AM` : h === 12 ? `12:00 PM` : `${h - 12}:00 PM`;
-    const isPeak = h >= 9 && h <= 11 || h >= 14 && h <= 16;
-    const multiplier = isPeak ? 1.6 : h < 9 || h > 16 ? 0.5 : 1;
+    const isPeak = (h >= 9 && h <= 11) || (h >= 14 && h <= 16);
+    const multiplier = isPeak ? 1.4 : h < 9 || h > 16 ? 0.6 : 1;
 
     const entry = { time: label };
     let totalDispensed = 0;
     let totalWasted = 0;
 
-    vaccineNames.forEach((name, i) => {
-      const dispensed = Math.round(baseRates[i] * multiplier * (0.8 + Math.random() * 0.4));
-      const wasted    = Math.round(dispensed * (0.02 + Math.random() * 0.04));
-      entry[name]          = dispensed;
-      entry[`${name}_w`]   = wasted;
-      totalDispensed += dispensed;
-      totalWasted    += wasted;
+    vaccineData.forEach((vaccine) => {
+      // Base dispensing rate proportional to actual stock levels
+      const baseRate = Math.round((vaccine.mlRecommended / 30) * multiplier * (0.9 + Math.random() * 0.2));
+      const wasted = Math.round(baseRate * (0.02 + Math.random() * 0.03));
+      
+      entry[vaccine.vaccine] = baseRate;
+      entry[`${vaccine.vaccine}_w`] = wasted;
+      totalDispensed += baseRate;
+      totalWasted += wasted;
     });
 
     entry.totalDispensed = totalDispensed;
-    entry.totalWasted    = totalWasted;
-    entry.efficiency     = parseFloat(((totalDispensed / (totalDispensed + totalWasted)) * 100).toFixed(1));
+    entry.totalWasted = totalWasted;
+    entry.efficiency = parseFloat(((totalDispensed / (totalDispensed + totalWasted)) * 100).toFixed(1));
     hours.push(entry);
   }
   return hours;
 };
 
-// ── Stock level snapshots per hour ─────────────────────────────────
+// ── Generate stock snapshots showing current levels ─────────────────
 const generateStockSnapshots = () => {
-  const initial = { 'Anti-Rabies': 320, 'Anti-Tetanus': 85, 'Booster': 0, 'Hepatitis B': 2, 'Flu Shot': 150 };
-  const now = new Date();
   const snapshots = [];
+  const now = new Date();
+  const currentHour = now.getHours();
 
-  for (let h = 7; h <= now.getHours(); h++) {
+  // Create a mutable copy of current stock levels
+  const stockLevels = {};
+  vaccineData.forEach(v => {
+    stockLevels[v.vaccine] = v.available;
+  });
+
+  for (let h = 7; h <= currentHour; h++) {
     const label = h < 12 ? `${h}:00 AM` : h === 12 ? `12:00 PM` : `${h - 12}:00 PM`;
     const entry = { time: label };
-    Object.keys(initial).forEach(name => {
-      const deducted = Math.round((2 + Math.random() * 6));
-      initial[name] = Math.max(0, initial[name] - deducted);
-      entry[name]   = initial[name];
+    
+    vaccineData.forEach(vaccine => {
+      entry[vaccine.vaccine] = stockLevels[vaccine.vaccine];
     });
+    
     snapshots.push(entry);
   }
+  
   return snapshots;
 };
 
 // ── Color palette matching dashboard ──────────────────────────────
 const COLORS = {
-  'Anti-Rabies':  '#26a69a',
+  'Anti-Rabies': '#26a69a',
   'Anti-Tetanus': '#f57f17',
-  'Booster':      '#e53935',
-  'Hepatitis B':  '#5c6bc0',
-  'Flu Shot':     '#2e7d32',
+  'Booster': '#e53935',
+  'Hepatitis B': '#5c6bc0',
+  'Flu Shot': '#2e7d32',
 };
 
 const CHART_COLORS = ['#26a69a', '#f57f17', '#e53935', '#5c6bc0', '#2e7d32'];
 
-// ── Custom tooltip style ───────────────────────────────────────────
+// ── Custom tooltip ───────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -97,37 +107,18 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ── Main Component ─────────────────────────────────────────────────
+// ── Main Component ───────────────────────────────────────────────────
 const DailyAnalytics = () => {
-  const [hourlyData,    setHourlyData]    = useState(generateHourlyData());
-  const [stockData,     setStockData]     = useState(generateStockSnapshots());
-  const [activeChart,   setActiveChart]   = useState('dispensed');
-  const [lastUpdated,   setLastUpdated]   = useState(new Date());
-  const [isLive,        setIsLive]        = useState(true);
-  const [selectedVax,   setSelectedVax]   = useState('all');
-  const [pulse,         setPulse]         = useState(false);
+  const [hourlyData] = useState(generateHourlyData());
+  const [stockData] = useState(generateStockSnapshots());
+  const [activeChart, setActiveChart] = useState('dispensed');
+  const [selectedVax, setSelectedVax] = useState('all');
 
-  const vaccineNames = ['Anti-Rabies', 'Anti-Tetanus', 'Booster', 'Hepatitis B', 'Flu Shot'];
+  const vaccineNames = vaccineData.map(v => v.vaccine);
 
-  // ── Simulate live tick every 30 seconds ───────────────────────
-  const tick = useCallback(() => {
-    setHourlyData(generateHourlyData());
-    setStockData(generateStockSnapshots());
-    setLastUpdated(new Date());
-    setPulse(true);
-    setTimeout(() => setPulse(false), 800);
-  }, []);
-
-  useEffect(() => {
-    if (!isLive) return;
-    const interval = setInterval(tick, 30000);
-    return () => clearInterval(interval);
-  }, [isLive, tick]);
-
-  // ── Derived summary stats from latest data ─────────────────────
-  const latestHour    = hourlyData[hourlyData.length - 1] || {};
-  const totalToday    = hourlyData.reduce((s, h) => s + (h.totalDispensed || 0), 0);
-  const wastedToday   = hourlyData.reduce((s, h) => s + (h.totalWasted || 0), 0);
+  // ── Derived summary stats ────────────────────────────────────────
+  const totalToday = hourlyData.reduce((s, h) => s + (h.totalDispensed || 0), 0);
+  const wastedToday = hourlyData.reduce((s, h) => s + (h.totalWasted || 0), 0);
   const avgEfficiency = hourlyData.length
     ? (hourlyData.reduce((s, h) => s + (h.efficiency || 0), 0) / hourlyData.length).toFixed(1)
     : 0;
@@ -135,7 +126,7 @@ const DailyAnalytics = () => {
     (best, h) => h.totalDispensed > (best.totalDispensed || 0) ? h : best, {}
   );
 
-  // ── Chart data filtered by selected vaccine ────────────────────
+  // ── Chart data filtered by vaccine ───────────────────────────────
   const chartData = selectedVax === 'all' ? hourlyData : hourlyData.map(h => ({
     time: h.time,
     [selectedVax]: h[selectedVax],
@@ -147,56 +138,29 @@ const DailyAnalytics = () => {
 
   const keysToShow = selectedVax === 'all' ? vaccineNames : [selectedVax];
 
-  // ─────────────────────────────────────────────────────────────
   return (
     <div style={styles.wrapper}>
 
-      {/* ── Header Row ─────────────────────────────────────────── */}
+      {/* ── Header Row ───────────────────────────────────────────── */}
       <div style={styles.headerRow}>
         <div>
           <h3 style={styles.sectionTitle}>📊 Today's Vaccine Analytics</h3>
           <p style={styles.subtext}>
-            Live dispensing data — {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            Daily dispensing data — {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
-        </div>
-        <div style={styles.headerRight}>
-          {/* Live indicator */}
-          <div style={styles.liveTag}>
-            <span style={{ ...styles.dot, background: isLive ? '#26a69a' : '#ccc',
-              boxShadow: isLive ? '0 0 0 3px rgba(38,166,154,0.25)' : 'none',
-              animation: isLive ? 'livePulse 1.8s infinite' : 'none' }} />
-            <span style={{ fontSize: '12px', fontWeight: '600', color: isLive ? '#26a69a' : '#aaa' }}>
-              {isLive ? 'LIVE' : 'PAUSED'}
-            </span>
-          </div>
-          <button
-            onClick={() => setIsLive(p => !p)}
-            style={{ ...styles.ctaBtn, background: isLive ? '#fff' : '#26a69a',
-              color: isLive ? '#e53935' : 'white',
-              border: isLive ? '2px solid #e53935' : 'none' }}>
-            {isLive ? '⏸ Pause' : '▶ Resume'}
-          </button>
-          <button onClick={tick} style={{ ...styles.ctaBtn, background: '#f5f5f5', color: '#555', border: '2px solid #e0e0e0' }}>
-            🔄 Refresh
-          </button>
-          <span style={{ fontSize: '11px', color: '#aaa', alignSelf: 'center' }}>
-            Updated {lastUpdated.toLocaleTimeString()}
-          </span>
         </div>
       </div>
 
-      {/* ── Summary Stat Chips ──────────────────────────────────── */}
+      {/* ── Summary Stat Chips ────────────────────────────────────── */}
       <div style={styles.statChips}>
         {[
           { label: 'Total Dispensed Today', value: totalToday.toLocaleString(), unit: 'doses', color: '#26a69a', icon: '💉' },
-          { label: 'Total Wasted Today',    value: wastedToday.toLocaleString(), unit: 'doses', color: '#e53935', icon: '🗑️' },
-          { label: 'Avg. Efficiency',       value: `${avgEfficiency}%`,          unit: '',       color: '#2e7d32', icon: '📈' },
-          { label: 'Peak Hour',             value: peakHour.time || '—',         unit: `${peakHour.totalDispensed || 0} doses`, color: '#f57f17', icon: '⏰' },
-          { label: 'Hours Tracked',         value: hourlyData.length,            unit: 'hrs',    color: '#5c6bc0', icon: '🕐' },
+          { label: 'Total Wasted Today', value: wastedToday.toLocaleString(), unit: 'doses', color: '#e53935', icon: '🗑️' },
+          { label: 'Avg. Efficiency', value: `${avgEfficiency}%`, unit: '', color: '#2e7d32', icon: '📈' },
+          { label: 'Peak Hour', value: peakHour.time || '—', unit: `${peakHour.totalDispensed || 0} doses`, color: '#f57f17', icon: '⏰' },
+          { label: 'Hours Tracked', value: hourlyData.length, unit: 'hrs', color: '#5c6bc0', icon: '🕐' },
         ].map((chip, i) => (
-          <div key={i} style={{ ...styles.chip, borderTop: `3px solid ${chip.color}`,
-            boxShadow: pulse ? `0 4px 16px ${chip.color}22` : '0 2px 8px rgba(0,0,0,0.08)',
-            transition: 'box-shadow 0.4s ease' }}>
+          <div key={i} style={{ ...styles.chip, borderTop: `3px solid ${chip.color}` }}>
             <span style={styles.chipIcon}>{chip.icon}</span>
             <span style={{ ...styles.chipValue, color: chip.color }}>{chip.value}</span>
             <span style={styles.chipUnit}>{chip.unit}</span>
@@ -205,14 +169,14 @@ const DailyAnalytics = () => {
         ))}
       </div>
 
-      {/* ── Chart Controls ──────────────────────────────────────── */}
+      {/* ── Chart Controls ────────────────────────────────────────── */}
       <div style={styles.controlsRow}>
         <div style={styles.tabGroup}>
           {[
             { key: 'dispensed', label: '💉 Dispensed by Hour' },
-            { key: 'stacked',   label: '📊 Vaccine Breakdown' },
-            { key: 'stock',     label: '📦 Stock Levels' },
-            { key: 'efficiency',label: '📈 Efficiency Trend' },
+            { key: 'stacked', label: '📊 Vaccine Breakdown' },
+            { key: 'stock', label: '📦 Stock Levels' },
+            { key: 'efficiency', label: '📈 Efficiency Trend' },
           ].map(tab => (
             <button
               key={tab.key}
@@ -223,7 +187,7 @@ const DailyAnalytics = () => {
           ))}
         </div>
 
-        {/* Vaccine filter — only shown on relevant charts */}
+        {/* Vaccine filter */}
         {activeChart !== 'stock' && (
           <select
             value={selectedVax}
@@ -235,7 +199,7 @@ const DailyAnalytics = () => {
         )}
       </div>
 
-      {/* ── Chart Area ──────────────────────────────────────────── */}
+      {/* ── Chart Area ────────────────────────────────────────────── */}
       <div style={styles.chartBox}>
 
         {/* 1. Dispensed per Hour — Area Chart */}
@@ -248,8 +212,8 @@ const DailyAnalytics = () => {
               <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                 <defs>
                   {keysToShow.map(name => (
-                    <linearGradient key={name} id={`grad_${name.replace(/\s/g,'')}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor={COLORS[name]} stopOpacity={0.3} />
+                    <linearGradient key={name} id={`grad_${name.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={COLORS[name]} stopOpacity={0.3} />
                       <stop offset="95%" stopColor={COLORS[name]} stopOpacity={0.02} />
                     </linearGradient>
                   ))}
@@ -262,7 +226,7 @@ const DailyAnalytics = () => {
                 {keysToShow.map(name => (
                   <Area key={name} type="monotone" dataKey={name}
                     stroke={COLORS[name]} strokeWidth={2}
-                    fill={`url(#grad_${name.replace(/\s/g,'')})`}
+                    fill={`url(#grad_${name.replace(/\s/g, '')})`}
                     dot={{ r: 3, fill: COLORS[name] }} activeDot={{ r: 5 }} />
                 ))}
               </AreaChart>
@@ -292,11 +256,11 @@ const DailyAnalytics = () => {
           </>
         )}
 
-        {/* 3. Stock Level Line Chart — all vaccines throughout day */}
+        {/* 3. Stock Level Line Chart */}
         {activeChart === 'stock' && (
           <>
             <p style={styles.chartCaption}>
-              Remaining stock levels per vaccine as the day progresses — declining lines show consumption
+              Current stock levels per vaccine — based on available inventory
             </p>
             <ResponsiveContainer width="100%" height={320}>
               <LineChart data={stockData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
@@ -315,17 +279,17 @@ const DailyAnalytics = () => {
           </>
         )}
 
-        {/* 4. Efficiency Trend — Line Chart */}
+        {/* 4. Efficiency Trend — Area Chart */}
         {activeChart === 'efficiency' && (
           <>
             <p style={styles.chartCaption}>
-              Dispensing efficiency % per hour — how much was actually administered vs. wasted
+              Dispensing efficiency % per hour — administered vs. wasted doses
             </p>
             <ResponsiveContainer width="100%" height={320}>
               <AreaChart data={hourlyData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="effGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#2e7d32" stopOpacity={0.25} />
+                    <stop offset="5%" stopColor="#2e7d32" stopOpacity={0.25} />
                     <stop offset="95%" stopColor="#2e7d32" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
@@ -344,15 +308,15 @@ const DailyAnalytics = () => {
         )}
       </div>
 
-      {/* ── Dispensed vs Wasted comparison bar at bottom ──────── */}
+      {/* ── Dispensed vs Wasted Comparison ──────────────────────── */}
       <div style={styles.comparisonRow}>
         <h4 style={styles.compLabel}>Today's Dispensed vs. Wasted per Vaccine</h4>
         <div style={styles.compBars}>
           {vaccineNames.map((name, i) => {
-            const disp   = hourlyData.reduce((s, h) => s + (h[name] || 0), 0);
+            const disp = hourlyData.reduce((s, h) => s + (h[name] || 0), 0);
             const wasted = hourlyData.reduce((s, h) => s + (h[`${name}_w`] || 0), 0);
-            const total  = disp + wasted;
-            const pct    = total > 0 ? ((disp / total) * 100).toFixed(0) : 0;
+            const total = disp + wasted;
+            const pct = total > 0 ? ((disp / total) * 100).toFixed(0) : 0;
             return (
               <div key={name} style={styles.compItem}>
                 <div style={styles.compHeader}>
@@ -372,20 +336,11 @@ const DailyAnalytics = () => {
         </div>
       </div>
 
-      {/* ── CSS keyframes injected inline ─────────────────────── */}
-      <style>{`
-        @keyframes livePulse {
-          0%   { box-shadow: 0 0 0 0 rgba(38,166,154,0.5); }
-          70%  { box-shadow: 0 0 0 6px rgba(38,166,154,0); }
-          100% { box-shadow: 0 0 0 0 rgba(38,166,154,0); }
-        }
-      `}</style>
-
     </div>
   );
 };
 
-// ── Styles ─────────────────────────────────────────────────────────
+// ── Styles ───────────────────────────────────────────────────────────
 const styles = {
   wrapper: {
     background: '#fff',
@@ -415,35 +370,6 @@ const styles = {
     margin: 0,
     fontStyle: 'italic',
   },
-  headerRight: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    flexWrap: 'wrap',
-  },
-  liveTag: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    background: '#f0fffe',
-    border: '1px solid #b2dfdb',
-    borderRadius: '20px',
-    padding: '5px 12px',
-  },
-  dot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    display: 'inline-block',
-  },
-  ctaBtn: {
-    padding: '7px 14px',
-    borderRadius: '6px',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  },
   statChips: {
     display: 'flex',
     gap: '14px',
@@ -458,10 +384,11 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
   },
-  chipIcon:  { fontSize: '20px', marginBottom: '4px' },
+  chipIcon: { fontSize: '20px', marginBottom: '4px' },
   chipValue: { fontSize: '22px', fontWeight: '800', lineHeight: '1' },
-  chipUnit:  { fontSize: '11px', color: '#aaa', fontWeight: '500' },
+  chipUnit: { fontSize: '11px', color: '#aaa', fontWeight: '500' },
   chipLabel: { fontSize: '11px', color: '#666', fontWeight: '600', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.4px' },
   controlsRow: {
     display: 'flex',

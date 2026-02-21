@@ -62,7 +62,7 @@ const LoginScreen = () => {
           <div className="title-section">
             <h1 className="system-title">QueueIT</h1>
             <p className="system-subtitle">
-              A Machine Learning Assisted Queue Management System
+              A Machine Learning Assisted Vaccine Management System
             </p>
           </div>
         </div>
