@@ -6,7 +6,6 @@ import DailyAnalytics from '../components/DailyAnalytics';
 import '../styles/dashboard.css';
 
 import {
-  mlPredictions,
   vaccineData,
 } from '../data/dashboardData';
 
@@ -80,10 +79,11 @@ const Dashboard = () => {
 
   const getWeeksLeftLabel = (weeksLeft) => {
     const w = parseFloat(weeksLeft);
-    if (w === 0)  return '🚨 No stock — order immediately';
-    if (w < 1)    return '🚨 Gone before the week ends';
-    if (w <= 2)   return `⚠️ Only ${weeksLeft} week left — order now`;
-    if (w <= 4)   return `⚠️ About ${weeksLeft} weeks — order soon`;
+    if (isNaN(w) || w === 0)  return '🚨 No stock — order immediately';
+    if (w < 0.5)              return '🚨 Runs out in days — order now';
+    if (w < 1)                return `⚠️ Less than 1 week left (${weeksLeft} wks)`;
+    if (w < 2)                return `⚠️ About ${weeksLeft} week left — order soon`;
+    if (w < 4)                return `⚠️ ${weeksLeft} weeks left — monitor closely`;
     return `✅ Good for ${weeksLeft} more weeks`;
   };
 
@@ -189,7 +189,7 @@ const Dashboard = () => {
                   <tr style={{ background: '#26a69a', color: 'white' }}>
                     <th style={thStyle}>Vaccine</th>
                     <th style={thStyle}>Stock Left</th>
-                    <th style={thStyle}>{mlView === 'weekly' ? 'Needed in Normal Week' : 'Needed in Normal Month'}</th>
+                    <th style={thStyle}>{mlView === 'weekly' ? 'Needed/Week' : 'Needed/Month'}</th>
                     <th style={thStyle}>Peak Season Need</th>
                     <th style={thStyle}>Stock Will Last</th>
                     <th style={{ ...thStyle, textAlign: 'center' }}>Action</th>
