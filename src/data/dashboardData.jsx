@@ -135,7 +135,7 @@ export const vaccineData = [
   {
     id:            5,
     vaccine:       'Flu Shot',
-    available:     150,
+    available:     21,
     minStock:      100,
     mlRecommended: 150,
     status:        'In Stock',

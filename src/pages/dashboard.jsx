@@ -1,7 +1,6 @@
 // Dashboard.jsx
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import DailyAnalytics from '../components/DailyAnalytics';
 import '../styles/dashboard.css';
@@ -11,11 +10,9 @@ import {
   vaccineData,
 } from '../data/dashboardData';
 
-
 const Dashboard = () => {
-  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mlView, setMlView] = useState('monthly');
+  const [mlView, setMlView] = useState('weekly');
 
   // ── DYNAMIC CALCULATIONS ───────────────────────────────
   const totalAvailable  = vaccineData.reduce((sum, v) => sum + v.available, 0);
@@ -56,12 +53,6 @@ const Dashboard = () => {
     return 'status-out-stock';
   };
 
-  const getCrowdLevelClass = (level) => {
-    if (level === 'High' || level === 'High - Above High') return 'crowd-badge crowd-high';
-    if (level === 'Normal - Medium' || level === 'Medium') return 'crowd-badge crowd-normal';
-    return 'crowd-badge crowd-low';
-  };
-
   // ── PER-VACCINE WEEKLY / MONTHLY PREDICTIONS ──────────
   const vaccineForecasts = vaccineData.map(v => {
     const monthlyNeed = v.mlRecommended;
@@ -69,9 +60,35 @@ const Dashboard = () => {
     const peakMonthly = Math.round(monthlyNeed * 1.5);
     const peakWeekly  = Math.round(weeklyNeed * 1.5);
     const weeksLeft   = weeklyNeed > 0 ? (v.available / weeklyNeed).toFixed(1) : '∞';
-    const risk        = parseFloat(weeksLeft) < 1 ? 'critical' : parseFloat(weeksLeft) < 2 ? 'warning' : 'ok';
+    // Risk: ≤20 doses = critical, 21 to below minStock = warning, at/above minStock = ok
+    const risk        = v.available <= 20 ? 'critical' : v.available < v.minStock ? 'warning' : 'ok';
     return { ...v, weeklyNeed, monthlyNeed, peakWeekly, peakMonthly, weeksLeft, risk };
   });
+
+  // ── VACCINE TABLE HELPERS ──────────────────────────────
+  const getStockBarPercent = (available, minStock) => {
+    if (minStock === 0) return 100;
+    const pct = Math.round((available / (minStock * 2)) * 100);
+    return Math.min(pct, 100);
+  };
+
+  const getStockBarColor = (risk) => {
+    if (risk === 'critical') return '#e53935';
+    if (risk === 'warning')  return '#f57f17';
+    return '#26a69a';
+  };
+
+  const getWeeksLeftLabel = (weeksLeft) => {
+    const w = parseFloat(weeksLeft);
+    if (w === 0)  return '🚨 No stock — order immediately';
+    if (w < 1)    return '🚨 Gone before the week ends';
+    if (w <= 2)   return `⚠️ Only ${weeksLeft} week left — order now`;
+    if (w <= 4)   return `⚠️ About ${weeksLeft} weeks — order soon`;
+    return `✅ Good for ${weeksLeft} more weeks`;
+  };
+
+  const thStyle = { padding: '10px 12px', fontSize: '12px', fontWeight: 600, textAlign: 'left', letterSpacing: '0.3px' };
+  const tdStyle = { padding: '10px 12px', fontSize: '13px', verticalAlign: 'middle' };
 
   return (
     <div className="dashboard-container">
@@ -137,7 +154,14 @@ const Dashboard = () => {
 
             {/* Header + toggle */}
             <div className="ml-forecast-header">
-              <h3 className="section-title">🤖 ML Vaccine Demand Forecast</h3>
+              <div>
+                <h3 className="section-title">🤖 ML Vaccine Demand Forecast</h3>
+                <p className="ml-subtitle" style={{ margin: '4px 0 0 0' }}>
+                  {mlView === 'weekly'
+                    ? 'How long will each vaccine last this week?'
+                    : 'How long will each vaccine last this month?'}
+                </p>
+              </div>
               <div className="ml-view-toggle">
                 {['weekly', 'monthly'].map(v => (
                   <button
@@ -150,121 +174,78 @@ const Dashboard = () => {
               </div>
             </div>
 
-            <p className="ml-subtitle">
-              {mlView === 'weekly'
-                ? 'Estimated doses needed this week vs. peak week'
-                : 'Estimated doses needed this month vs. peak month'}
-            </p>
+            {/* ── VACCINE FORECAST TABLE ── */}
+            <div style={{ overflowX: 'auto', marginTop: '12px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed' }}>
+                <colgroup>
+                  <col style={{ width: '16%' }} />
+                  <col style={{ width: '24%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '14%' }} />
+                  <col style={{ width: '22%' }} />
+                  <col style={{ width: '10%' }} />
+                </colgroup>
+                <thead>
+                  <tr style={{ background: '#26a69a', color: 'white' }}>
+                    <th style={thStyle}>Vaccine</th>
+                    <th style={thStyle}>Stock Left</th>
+                    <th style={thStyle}>{mlView === 'weekly' ? 'Needed in Normal Week' : 'Needed in Normal Month'}</th>
+                    <th style={thStyle}>Peak Season Need</th>
+                    <th style={thStyle}>Stock Will Last</th>
+                    <th style={{ ...thStyle, textAlign: 'center' }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {vaccineForecasts.map((v, i) => {
+                    const need     = mlView === 'weekly' ? v.weeklyNeed : v.monthlyNeed;
+                    const peakNeed = mlView === 'weekly' ? v.peakWeekly : v.peakMonthly;
+                    const barPct   = getStockBarPercent(v.available, v.minStock);
+                    const barColor = getStockBarColor(v.risk);
 
-            {/* Show general forecast ONLY when Monthly is selected */}
-            {mlView === 'monthly' && (
-              <>
-                <div className="ml-item">
-                  <span className="ml-label">Predicted Doses — Normal Month</span>
-                  <span className="ml-value-normal">
-                    💉 {mlPredictions.vaccinesAtNormal.toLocaleString()}
-                  </span>
-                </div>
-                <div className="ml-item">
-                  <span className="ml-label">Predicted Doses — Peak Month</span>
-                  <span className="ml-value-peak">
-                    💉 {mlPredictions.vaccinesAtPeak.toLocaleString()}
-                  </span>
-                </div>
+                    return (
+                      <tr key={v.id} style={{ background: i % 2 === 0 ? '#fff' : '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
 
-                <div className="ml-divider" />
-              </>
-            )}
+                        {/* Vaccine name */}
+                        <td style={tdStyle}>
+                          <strong style={{ fontSize: '13px' }}>{v.vaccine}</strong>
+                        </td>
 
-            {/* NORMAL PERIOD SECTION */}
-            <div className="ml-period-section">
-              <h4 className="ml-period-title">
-                📊 {mlView === 'weekly' ? 'NORMAL WEEKLY' : 'NORMAL MONTHLY'} BREAKDOWN
-              </h4>
-              <div className="ml-table-wrapper">
-                <table className="data-table ml-forecast-table">
-                  <thead>
-                    <tr>
-                      <th>Vaccine</th>
-                      <th>Current Stock</th>
-                      <th>{mlView === 'weekly' ? 'Needed/Week' : 'Needed/Month'}</th>
-                      <th>Weeks Left</th>
-                      <th>Risk</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vaccineForecasts.map(v => (
-                      <tr key={v.id}>
-                        <td><strong>{v.vaccine}</strong></td>
-                        <td className={`ml-stock-cell ml-stock-${v.risk}`}>
-                          {v.available.toLocaleString()}
+                        {/* Stock left + mini bar */}
+                        <td style={tdStyle}>
+                          <span style={{ fontWeight: 700, color: barColor, fontSize: '13px' }}>{v.available.toLocaleString()}</span>
+                          <span style={{ fontSize: '11px', color: '#aaa' }}> / min {v.minStock}</span>
+                          <div style={{ background: '#f0f0f0', borderRadius: '99px', height: '6px', marginTop: '5px', overflow: 'hidden' }}>
+                            <div style={{ width: `${barPct}%`, background: barColor, height: '100%', borderRadius: '99px' }} />
+                          </div>
                         </td>
-                        <td className="ml-need-cell">
-                          {(mlView === 'weekly' ? v.weeklyNeed : v.monthlyNeed).toLocaleString()}
+
+                        {/* Needed this period */}
+                        <td style={{ ...tdStyle, color: '#26a69a', fontWeight: 700 }}>
+                          {need.toLocaleString()}
                         </td>
-                        <td className={`ml-weeks-cell ${parseFloat(v.weeksLeft) < 1 ? 'ml-weeks-critical' : parseFloat(v.weeksLeft) < 2 ? 'ml-weeks-warning' : 'ml-weeks-ok'}`}>
-                          {v.weeksLeft} wks
+
+                        {/* Peak need */}
+                        <td style={{ ...tdStyle, color: '#e53935', fontWeight: 700 }}>
+                          {peakNeed.toLocaleString()}
                         </td>
-                        <td>
-                          <span className={`${getOrderUrgencyClass(v.status)} urgency-sm`}>
-                            {v.risk === 'critical' ? '🚨 Critical' : v.risk === 'warning' ? '⚠️ Warning' : '✅ Stable'}
+
+                        {/* Stock will last — plain English */}
+                        <td style={{ ...tdStyle, fontWeight: 600, color: barColor, fontSize: '12px' }}>
+                          {getWeeksLeftLabel(v.weeksLeft)}
+                        </td>
+
+                        {/* Action — based on v.risk (≤20 = critical, 21+ below min = warning) */}
+                        <td style={{ ...tdStyle, textAlign: 'center' }}>
+                          <span className={`${v.risk === 'critical' ? 'urgency-out' : v.risk === 'warning' ? 'urgency-low' : 'urgency-ok'} urgency-sm`}>
+                            {v.risk === 'critical' ? '🚨 Order Now' : v.risk === 'warning' ? '⚠️ Order Soon' : '✅ OK'}
                           </span>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
 
-            {/* PEAK PERIOD SECTION */}
-            <div className="ml-period-section ml-period-peak">
-              <h4 className="ml-period-title ml-period-title-peak">
-                🔥 {mlView === 'weekly' ? 'PEAK WEEKLY' : 'PEAK MONTHLY'} BREAKDOWN
-                <span className="ml-period-subtitle">
-                  ({mlView === 'weekly' ? 'During high-traffic weeks' : `June - August`})
-                </span>
-              </h4>
-              <div className="ml-table-wrapper">
-                <table className="data-table ml-forecast-table">
-                  <thead>
-                    <tr>
-                      <th>Vaccine</th>
-                      <th>Current Stock</th>
-                      <th>{mlView === 'weekly' ? 'Peak Week Need' : 'Peak Month Need'}</th>
-                      <th>Weeks Left</th>
-                      <th>Risk</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vaccineForecasts.map(v => {
-                      const peakNeed = mlView === 'weekly' ? v.peakWeekly : v.peakMonthly;
-                      const peakWeeksLeft = peakNeed > 0 ? (v.available / peakNeed).toFixed(1) : '∞';
-                      const peakRisk = parseFloat(peakWeeksLeft) < 1 ? 'critical' : parseFloat(peakWeeksLeft) < 2 ? 'warning' : 'ok';
-                      
-                      return (
-                        <tr key={v.id}>
-                          <td><strong>{v.vaccine}</strong></td>
-                          <td className={`ml-stock-cell ml-stock-${peakRisk}`}>
-                            {v.available.toLocaleString()}
-                          </td>
-                          <td className="ml-peak-cell">
-                            {peakNeed.toLocaleString()}
-                          </td>
-                          <td className={`ml-weeks-cell ${parseFloat(peakWeeksLeft) < 1 ? 'ml-weeks-critical' : parseFloat(peakWeeksLeft) < 2 ? 'ml-weeks-warning' : 'ml-weeks-ok'}`}>
-                            {peakWeeksLeft} wks
-                          </td>
-                          <td>
-                            <span className={`urgency-sm ${peakRisk === 'critical' ? 'urgency-out' : peakRisk === 'warning' ? 'urgency-low' : 'urgency-ok'}`}>
-                              {peakRisk === 'critical' ? '🚨 Critical' : peakRisk === 'warning' ? '⚠️ Warning' : '✅ Stable'}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
 
           </div>

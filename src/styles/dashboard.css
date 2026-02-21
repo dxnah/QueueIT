@@ -291,28 +291,31 @@
 .urgency-out {
   background-color: #ffebee;
   color: #c62828;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
+  border: 2px solid #c62828;
 }
 
 .urgency-low {
-  background-color: #fff8e1;
-  color: #f57f17;
-  padding: 4px 12px;
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
+  border: 2px solid #e65100;
 }
 
 .urgency-ok {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  padding: 4px 12px;
+  background-color: #e0f2f1;
+  color: #00796b;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
+  border: 2px solid #00796b;
 }
 
 /*  Table  */
@@ -360,30 +363,33 @@
 
 /*  Status Badges  */
 .status-in-stock {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  padding: 4px 12px;
+  background-color: #e0f2f1;
+  color: #00796b;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  border: 2px solid #00796b;
 }
 
 .status-low-stock {
-  background-color: #fff8e1;
-  color: #f57f17;
-  padding: 4px 12px;
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  border: 2px solid #e65100;
 }
 
 .status-out-stock {
   background-color: #ffebee;
   color: #c62828;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
+  border: 2px solid #c62828;
 }
 
 /* Confidence level colors */
@@ -392,7 +398,7 @@
 .low    { color: #c62828; }
 
 /* ═══════════════════════════════════════════════════════════
-   ML FORECAST CARD - NEW SECTIONS
+   ML FORECAST CARD
    ═══════════════════════════════════════════════════════════ */
 
 .ml-forecast-card {
@@ -450,45 +456,6 @@
   margin: 14px 0 10px 0;
 }
 
-/* Period Sections */
-.ml-period-section {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 20px;
-  border: 2px solid #e8f5e9;
-}
-
-.ml-period-section.ml-period-peak {
-  border-color: #ffebee;
-  background: #fffbfb;
-}
-
-.ml-period-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #2e7d32;
-  margin: 0 0 12px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.ml-period-title-peak {
-  color: #c62828;
-}
-
-.ml-period-subtitle {
-  font-size: 11px;
-  color: #888;
-  font-weight: 500;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
 .ml-table-wrapper {
   overflow-x: auto;
 }
@@ -499,12 +466,6 @@
   width: 100%;
   background: white;
 }
-
-.ml-forecast-table th:nth-child(1) { width: 22%; }
-.ml-forecast-table th:nth-child(2) { width: 20%; }
-.ml-forecast-table th:nth-child(3) { width: 22%; }
-.ml-forecast-table th:nth-child(4) { width: 18%; }
-.ml-forecast-table th:nth-child(5) { width: 18%; }
 
 .ml-stock-cell          { font-weight: 600; }
 .ml-stock-critical      { color: #c62828; }
@@ -542,14 +503,6 @@
   .stats-container > div { min-width: 100%; }
   .prediction-row      { flex-direction: column; }
   .prediction-row > div { min-width: 100%; }
-
-  .ml-period-section {
-    padding: 12px;
-  }
-
-  .ml-period-title {
-    font-size: 12px;
-  }
 }
 
 @media (max-width: 480px) {
@@ -557,8 +510,4 @@
   .data-table    { font-size: 12px; }
   .data-table th,
   .data-table td { padding: 8px; }
-
-  .ml-forecast-table {
-    min-width: 380px;
-  }
 }
