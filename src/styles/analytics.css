@@ -1,0 +1,284 @@
+/* analytics.css */
+
+.analytics-wrapper {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 30px;
+  border-top: 4px solid #26a69a;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════════════ */
+
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.analytics-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.analytics-subtext {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STAT CHIPS
+   ═══════════════════════════════════════════════════════════ */
+
+.analytics-stat-chips {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.analytics-chip {
+  flex: 1 1 140px;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.analytics-chip-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.analytics-chip-value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.analytics-chip-unit {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 500;
+}
+
+.analytics-chip-label {
+  font-size: 11px;
+  color: #666;
+  font-weight: 600;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHART CONTROLS
+   ═══════════════════════════════════════════════════════════ */
+
+.analytics-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.analytics-tab-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.analytics-tab-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 2px solid #e0e0e0;
+  background: white;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.analytics-tab-btn:hover {
+  border-color: #26a69a;
+  background-color: rgba(38, 166, 154, 0.1);
+}
+
+.analytics-tab-btn.active {
+  background: #26a69a;
+  color: white;
+  border: 2px solid #26a69a;
+}
+
+.analytics-vaccine-select {
+  padding: 8px 28px 8px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+  color: #333;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: all 0.2s ease;
+}
+
+.analytics-vaccine-select:focus {
+  outline: none;
+  border-color: #26a69a;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHART AREA
+   ═══════════════════════════════════════════════════════════ */
+
+.analytics-chart-box {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border: 1px solid #f0f0f0;
+}
+
+.analytics-chart-caption {
+  font-size: 12px;
+  color: #888;
+  margin: 0 0 12px 0;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPARISON BARS
+   ═══════════════════════════════════════════════════════════ */
+
+.analytics-comparison {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20px;
+}
+
+.analytics-comparison-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 14px 0;
+}
+
+.analytics-comparison-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.analytics-comparison-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.analytics-comparison-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.analytics-comparison-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.analytics-comparison-efficiency {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.analytics-track-bar {
+  height: 10px;
+  background: #ffebee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.analytics-track-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.analytics-comparison-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .analytics-wrapper {
+    padding: 16px;
+  }
+
+  .analytics-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .analytics-stat-chips {
+    flex-direction: column;
+  }
+
+  .analytics-chip {
+    flex: 1 1 auto;
+  }
+
+  .analytics-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .analytics-tab-group {
+    justify-content: flex-start;
+  }
+
+  .analytics-vaccine-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-title {
+    font-size: 16px;
+  }
+
+  .analytics-chip-value {
+    font-size: 20px;
+  }
+
+  .analytics-tab-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}

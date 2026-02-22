@@ -3,18 +3,22 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import logo from '../images/logoit.png';
+import { authData } from '../data/dashboardData';
 import '../styles/login.css';
 
 const LoginScreen = () => {
-  const [username, setUsername]       = useState('');
-  const [password, setPassword]       = useState('');
-  const [error, setError]             = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // ── Read credentials from localStorage (set by Settings.jsx) ──
-  const getStoredUsername = () => localStorage.getItem('adminUsername') || 'admin';
-  const getStoredPassword = () => localStorage.getItem('adminPassword') || 'pass1';
+  // ── Get credentials (localStorage overrides default from dashboardData) ──
+  const getStoredUsername = () => 
+    localStorage.getItem('adminUsername') || authData.defaultUsername;
+  
+  const getStoredPassword = () => 
+    localStorage.getItem('adminPassword') || authData.defaultPassword;
 
   // ── HANDLERS ──
   const handleLogin = (e) => {
@@ -85,7 +89,7 @@ const LoginScreen = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="admin"
+              placeholder="Username"
               className="input-field"
             />
           </div>
@@ -102,7 +106,7 @@ const LoginScreen = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Password@123"
+                placeholder="Password"
                 className="input-field"
               />
               <button

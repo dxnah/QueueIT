@@ -1,41 +1,41 @@
 // InsightToggle.jsx
 
 import { useState } from "react";
+import '../styles/insights.css';
 
 function InsightToggle({ insights }) {
   const [showInsights, setShowInsights] = useState(false);
 
+  const getResultClass = (result) => {
+    if (result === 'Urgent' || result === 'High') return 'insights-result-urgent';
+    if (result === 'Stable' || result === 'None') return 'insights-result-stable';
+    return 'insights-result-warning';
+  };
+
   return (
-    <section style={styles.container}>
-      <div style={styles.headerRow}>
-        <h3 style={styles.title}>💡 ML Insights</h3>
+    <section className="insights-container">
+      <div className="insights-header">
+        <h3 className="insights-title">💡 ML Insights</h3>
         <button
-          style={showInsights ? styles.btnHide : styles.btnShow}
+          className={showInsights ? 'insights-btn insights-btn-hide' : 'insights-btn insights-btn-show'}
           onClick={() => setShowInsights(!showInsights)}>
           {showInsights ? 'Hide Insights' : 'Show Insights'}
         </button>
       </div>
 
       {showInsights && (
-        <div style={styles.insightBox}>
-          <ul style={styles.list}>
+        <div className="insights-box">
+          <ul className="insights-list">
             {insights.map((item) => (
-              <li key={item.id} style={styles.listItem}>
-                <span style={styles.itemLabel}>{item.label}:</span>
-                <span style={{
-                  ...styles.itemResult,
-                  color: item.result === 'Urgent' || item.result === 'High'
-                    ? '#c62828'
-                    : item.result === 'Stable' || item.result === 'None'
-                    ? '#2e7d32'
-                    : '#f57f17',
-                }}>
+              <li key={item.id} className="insights-list-item">
+                <span className="insights-item-label">{item.label}:</span>
+                <span className={`insights-item-result ${getResultClass(item.result)}`}>
                   {item.result}
                 </span>
               </li>
             ))}
           </ul>
-          <p style={styles.recommendation}>
+          <p className="insights-recommendation">
             🤖 ML Recommendation: Review high-risk items immediately.
           </p>
         </div>
@@ -43,82 +43,5 @@ function InsightToggle({ insights }) {
     </section>
   );
 }
-
-const styles = {
-  container: {
-    backgroundColor: '#fff',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-    marginBottom: '30px',
-    borderTop: '4px solid #26a69a',
-  },
-  headerRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: '16px',
-    color: '#333',
-    fontWeight: '600',
-    margin: '0',
-  },
-  btnShow: {
-    backgroundColor: '#26a69a',
-    color: 'white',
-    border: 'none',
-    padding: '8px 16px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '600',
-  },
-  btnHide: {
-    backgroundColor: '#fff',
-    color: '#26a69a',
-    border: '2px solid #26a69a',
-    padding: '8px 16px',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: '600',
-  },
-  insightBox: {
-    marginTop: '16px',
-    padding: '15px',
-    backgroundColor: '#f8f8f8',
-    borderRadius: '6px',
-  },
-  list: {
-    listStyle: 'none',
-    padding: '0',
-    margin: '0 0 12px 0',
-  },
-  listItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '8px 0',
-    borderBottom: '1px solid #eee',
-    fontSize: '13px',
-  },
-  itemLabel: {
-    color: '#666',
-    fontWeight: '500',
-  },
-  itemResult: {
-    fontWeight: '700',
-  },
-  recommendation: {
-    fontSize: '13px',
-    color: '#555',
-    margin: '0',
-    fontStyle: 'italic',
-    backgroundColor: '#fff8e1',
-    padding: '10px',
-    borderRadius: '6px',
-    borderLeft: '3px solid #f57f17',
-  },
-};
 
 export default InsightToggle;

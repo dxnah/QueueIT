@@ -4,10 +4,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import DailyAnalytics from '../components/DailyAnalytics';
 import '../styles/dashboard.css';
-
-import {
-  vaccineData,
-} from '../data/dashboardData';
+import { vaccineData, } from '../data/dashboardData';
 
 const Dashboard = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

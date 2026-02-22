@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import '../styles/dashboard.css';
 import '../styles/settings.css';
+import { authData } from '../data/dashboardData';
 
 const Settings = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -17,8 +18,8 @@ const Settings = () => {
     autoRefresh: true,
     refreshInterval: 30,
     language: 'en',
-    adminUsername: localStorage.getItem('adminUsername') || 'admin',
-    adminPassword: localStorage.getItem('adminPassword') || 'pass1',
+    adminUsername: localStorage.getItem('adminUsername') || authData.defaultUsername,
+    adminPassword: localStorage.getItem('adminPassword') || authData.defaultPassword,
   });
 
   const handleToggle = (key) => {
@@ -32,9 +33,11 @@ const Settings = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
+    
+    // Save to localStorage
     localStorage.setItem('adminUsername', settings.adminUsername);
     localStorage.setItem('adminPassword', settings.adminPassword);
-    setSaveMessage('✅ Settings saved successfully! Login credentials updated.');
+    setSaveMessage('✅ Settings saved successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
   };
 

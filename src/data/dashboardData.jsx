@@ -1,8 +1,16 @@
-// dashboardData.jsX
+// dashboardData.js
+
+// ── AUTHENTICATION DATA ───────────────────────────────────────────────────────
+// Used by: Login.jsx, Settings.jsx
+// Default admin credentials - can be updated via Settings page
+export const authData = {
+  defaultUsername: 'admin',
+  defaultPassword: 'pass1',
+};
+
 
 // ── ML PREDICTIONS ────────────────────────────────────────────────────────────
 // Used by: Dashboard.jsx (ML Vaccine Demand Forecast card)
-// Crowd level fields removed — not within system control.
 export const mlPredictions = {
   peakMonths:       'June - August',
   vaccinesAtNormal: 4000,   // predicted total doses needed in a normal month
@@ -12,7 +20,6 @@ export const mlPredictions = {
 
 // ── ML INSIGHTS ───────────────────────────────────────────────────────────────
 // Used by: Dashboard.jsx (ML Insights & System Status section)
-// Three categories only: Anomaly Detection, System Health, Restock Priority.
 export const mlInsights = [
   {
     category: '🔍 Anomaly Detection',
@@ -87,10 +94,7 @@ export const mlInsights = [
 
 
 // ── VACCINE DATA ──────────────────────────────────────────────────────────────
-// Used by: Dashboard.jsx, DailyAnalytics.jsx (charts + stock snapshots)
-// NOTE: This is the dashboard read-only view.
-// Full CRUD lives in Vaccine.jsx (vaccineState) but references this for
-// initial seed data. When backend is added, both will call the same API.
+// Used by: Dashboard.jsx, DailyAnalytics.jsx, VaccineManagement.jsx
 export const vaccineData = [
   {
     id:            1,
@@ -146,8 +150,7 @@ export const vaccineData = [
 
 
 // ── VACCINE COLORS ────────────────────────────────────────────────────────────
-// Used by: DailyAnalytics.jsx (chart line/area colors per vaccine)
-// Keyed by vaccine name to match vaccineData[].vaccine exactly.
+// Used by: DailyAnalytics.jsx (chart colors)
 export const vaccineColors = {
   'Anti-Rabies':  '#26a69a',
   'Anti-Tetanus': '#f57f17',
@@ -156,7 +159,6 @@ export const vaccineColors = {
   'Flu Shot':     '#2e7d32',
 };
 
-// Ordered array version for indexed chart libraries (BarChart, etc.)
 export const vaccineColorList = [
   '#26a69a',
   '#f57f17',
