@@ -21,9 +21,10 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
 
   return (
     <div className={isMobileMenuOpen ? 'sidebar active' : 'sidebar'}>
-      
+
       <div className="logo-container">
-        <img src={logo} alt="QueueIT Logo" className="sidebar-logo" />
+        <img src={logo} alt="VaxFlow Logo" className="sidebar-logo" />
+        <h1 className="sidebar-title">VaxFlow</h1>
       </div>
 
       <nav className="nav">

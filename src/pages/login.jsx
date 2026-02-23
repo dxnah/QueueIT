@@ -62,9 +62,9 @@ const LoginScreen = () => {
 
         {/* Logo & Title */}
         <div className="logo-section">
-          <img src={logo} alt="QueueIT Logo" className="logo" />
+          <img src={logo} alt="VaxFlow Logo" className="logo" />
           <div className="title-section">
-            <h1 className="system-title">QueueIT</h1>
+            <h1 className="system-title">VaxFlow</h1>
             <p className="system-subtitle">
               A Machine Learning Assisted Vaccine Management System
             </p>
@@ -86,7 +86,7 @@ const LoginScreen = () => {
             <input
               type="text"
               id="username"
-              value={username}
+              value={username} //controls the input value
               onChange={(e) => setUsername(e.target.value)}
               required
               placeholder="Username"

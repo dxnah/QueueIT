@@ -12,13 +12,13 @@ import {
 import { vaccineData } from '../data/dashboardData';
 import '../styles/analytics.css';
 
-// ── Seeded random ──────────────────────────────────────────────────
+//  Seeded random 
 const seededRand = (seed) => {
   const x = Math.sin(seed + 1) * 10000;
   return x - Math.floor(x);
 };
 
-// ── Generate hourly data ───────────────────────────────────────────
+//  Generate hourly data ─
 const generateHourlyData = () => {
   const hours = [];
   for (let h = 7; h <= 17; h++) {
@@ -50,7 +50,7 @@ const generateHourlyData = () => {
   return hours;
 };
 
-// ── Generate stock snapshots ───────────────────────────────────────
+//  Generate stock snapshots ─
 const generateStockSnapshots = () => {
   const hours = [];
   for (let h = 7; h <= 17; h++) {
@@ -62,7 +62,7 @@ const generateStockSnapshots = () => {
   return hours;
 };
 
-// ── Colors ─────────────────────────────────────────────────────────
+//  Colors ─
 const COLORS = {
   'Anti-Rabies': '#26a69a',
   'Anti-Tetanus': '#f57f17',
@@ -72,7 +72,7 @@ const COLORS = {
 };
 const CHART_COLORS = ['#26a69a', '#f57f17', '#e53935', '#5c6bc0', '#2e7d32'];
 
-// ── Custom Tooltip ─────────────────────────────────────────────────
+//  Custom Tooltip ─
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -92,7 +92,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ── Main Component ─────────────────────────────────────────────────
+//  Main Component 
 const DailyAnalytics = () => {
   const [hourlyData] = useState(generateHourlyData);
   const [stockData] = useState(generateStockSnapshots);
@@ -101,7 +101,7 @@ const DailyAnalytics = () => {
 
   const vaccineNames = vaccineData.map(v => v.vaccine);
 
-  // ── Summary stats ────────────────────────────────────────────────
+  //  Summary stats 
   const totalToday = hourlyData.reduce((s, h) => s + (h.totalDispensed || 0), 0);
   const wastedToday = hourlyData.reduce((s, h) => s + (h.totalWasted || 0), 0);
   const avgEfficiency = hourlyData.length
@@ -111,7 +111,7 @@ const DailyAnalytics = () => {
     (best, h) => h.totalDispensed > (best.totalDispensed || 0) ? h : best, {}
   );
 
-  // ── Filter by vaccine ────────────────────────────────────────────
+  //  Filter by vaccine 
   const chartData = selectedVax === 'all' ? hourlyData : hourlyData.map(h => ({
     time: h.time,
     [selectedVax]: h[selectedVax],
@@ -157,10 +157,10 @@ const DailyAnalytics = () => {
       <div className="analytics-controls">
         <div className="analytics-tab-group">
           {[
-            { key: 'dispensed', label: '💉 Dispensed by Hour' },
-            { key: 'stacked', label: '📊 Vaccine Breakdown' },
-            { key: 'stock', label: '📦 Stock Levels' },
-            { key: 'efficiency', label: '📈 Efficiency Trend' },
+            { key: 'dispensed', label: '💉 Dispensed by Hour' }, //area chart
+            { key: 'stacked', label: '📊 Vaccine Breakdown' }, //bar chart
+            { key: 'stock', label: '📦 Stock Levels' }, //line chart
+            { key: 'efficiency', label: '📈 Efficiency Trend' }, //effiency chart
           ].map(tab => (
             <button
               key={tab.key}

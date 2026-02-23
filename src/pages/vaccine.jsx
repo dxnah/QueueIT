@@ -15,7 +15,7 @@ const VaccineManagement = () => {
   const [searchQuery, setSearchQuery]           = useState('');
   const [saveMessage, setSaveMessage]           = useState('');
 
-  // ── Seed from dashboardData — replace useState with API fetch when backend added
+  // Seed from dashboardData — replace useState with API fetch when backend added
   // vaccineData uses `vaccine` key; VaccineCard expects `name` — map on load
   const [vaccines, setVaccines] = useState(
     vaccineData.map(v => ({ ...v, name: v.vaccine }))
@@ -153,6 +153,11 @@ const VaccineManagement = () => {
             <p className="dashboard-subheading">Manage vaccine inventory and stock levels</p>
           </div>
 
+          <button  // ← ADDED THIS
+            className="btn btn-primary"
+            onClick={() => { setShowAddForm(true); setEditingVaccine(null); }}>
+            ➕ Add New Vaccine
+          </button>
         </div>
 
         {saveMessage && (
@@ -186,6 +191,7 @@ const VaccineManagement = () => {
         {/* Add / Edit Modal */}
         {showAddForm && (
           <div className="form-modal">
+            
             <div className="form-modal-content">
               <div className="form-modal-header">
                 <h3>{editingVaccine ? '✏️ Edit Vaccine' : '➕ Add New Vaccine'}</h3>

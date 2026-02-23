@@ -38,10 +38,20 @@
 
 .logo-container {
   display: flex;
+  flex-direction: column;   /* ← stacks items vertically */
   align-items: center;
   justify-content: center;
   padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-title {
+  color: white;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 8px 0 0 0;   /* space between logo and text */
+  letter-spacing: 1px;
+  text-align: center;
 }
 
 .sidebar-logo {

@@ -1,6 +1,6 @@
 // dashboardData.js
 
-// ── AUTHENTICATION DATA ───────────────────────────────────────────────────────
+//  AUTHENTICATION DATA 
 // Used by: Login.jsx, Settings.jsx
 // Default admin credentials - can be updated via Settings page
 export const authData = {
@@ -9,7 +9,7 @@ export const authData = {
 };
 
 
-// ── ML PREDICTIONS ────────────────────────────────────────────────────────────
+//  ML PREDICTIONS 
 // Used by: Dashboard.jsx (ML Vaccine Demand Forecast card)
 export const mlPredictions = {
   peakMonths:       'June - August',
@@ -18,7 +18,7 @@ export const mlPredictions = {
 };
 
 
-// ── ML INSIGHTS ───────────────────────────────────────────────────────────────
+//  ML INSIGHTS 
 // Used by: Dashboard.jsx (ML Insights & System Status section)
 export const mlInsights = [
   {
@@ -93,7 +93,7 @@ export const mlInsights = [
 ];
 
 
-// ── VACCINE DATA ──────────────────────────────────────────────────────────────
+//  VACCINE DATA 
 // Used by: Dashboard.jsx, DailyAnalytics.jsx, VaccineManagement.jsx
 export const vaccineData = [
   {
@@ -149,7 +149,7 @@ export const vaccineData = [
 ];
 
 
-// ── VACCINE COLORS ────────────────────────────────────────────────────────────
+//  VACCINE COLORS 
 // Used by: DailyAnalytics.jsx (chart colors)
 export const vaccineColors = {
   'Anti-Rabies':  '#26a69a',
@@ -168,7 +168,7 @@ export const vaccineColorList = [
 ];
 
 
-// ── REPORTS DATA ──────────────────────────────────────────────────────────────
+//  REPORTS DATA 
 // Used by: Reports.jsx
 export const reportsData = {
   'vaccine-usage': [
@@ -187,7 +187,7 @@ export const reportsData = {
 };
 
 
-// ── NOTIFICATIONS DATA ────────────────────────────────────────────────────────
+//  NOTIFICATIONS DATA 
 // Used by: Notifications.jsx
 export const notificationsData = [
   {
