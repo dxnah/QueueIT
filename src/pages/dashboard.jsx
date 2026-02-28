@@ -1,35 +1,35 @@
-// Dashboard.jsx
+// Dashboard.jsx - FULLY OPTIMIZED FOR LAB 5
 
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import DailyAnalytics from '../components/DailyAnalytics';
 import '../styles/dashboard.css';
-import { vaccineData, } from '../data/dashboardData';
+import { vaccineData } from '../data/dashboardData';
 
 const Dashboard = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mlView, setMlView] = useState('weekly');
 
   // ── DYNAMIC CALCULATIONS ───────────────────────────────
-  const totalAvailable  = vaccineData.reduce((sum, v) => sum + v.available, 0);
-  const lowStockCount   = vaccineData.filter(v => v.status === 'Low Stock').length;
+  const totalAvailable = vaccineData.reduce((sum, v) => sum + v.available, 0);
+  const lowStockCount = vaccineData.filter(v => v.status === 'Low Stock').length;
   const outOfStockCount = vaccineData.filter(v => v.status === 'Out Stock').length;
-  const totalToOrder    = vaccineData.reduce((sum, v) => sum + v.mlRecommended, 0);
+  const totalToOrder = vaccineData.reduce((sum, v) => sum + v.mlRecommended, 0);
   const vaccinesToOrder = vaccineData.filter(v =>
     v.status === 'Low Stock' || v.status === 'Out Stock'
   );
 
   // ── DYNAMIC COLOR HELPERS ──────────────────────────────
-  const getAvailableColor  = (total) => total > 500 ? '#26a69a' : total > 100 ? '#f57f17' : '#c62828';
-  const getLowStockColor   = (count) => count === 0 ? '#26a69a' : count <= 2 ? '#f57f17' : '#c62828';
+  const getAvailableColor = (total) => total > 500 ? '#26a69a' : total > 100 ? '#f57f17' : '#c62828';
+  const getLowStockColor = (count) => count === 0 ? '#26a69a' : count <= 2 ? '#f57f17' : '#c62828';
   const getOutOfStockColor = (count) => count === 0 ? '#26a69a' : '#c62828';
 
-  const getAvailableBorder  = (total) => `4px solid ${getAvailableColor(total)}`;
-  const getLowStockBorder   = (count) => `4px solid ${getLowStockColor(count)}`;
+  const getAvailableBorder = (total) => `4px solid ${getAvailableColor(total)}`;
+  const getLowStockBorder = (count) => `4px solid ${getLowStockColor(count)}`;
   const getOutOfStockBorder = (count) => `4px solid ${getOutOfStockColor(count)}`;
 
-  const getAvailableLabel  = (total) => total > 500 ? '✅ Stock is sufficient' : total > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
-  const getLowStockLabel   = (count) => count === 0 ? '✅ All vaccines well stocked' : count <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
+  const getAvailableLabel = (total) => total > 500 ? '✅ Stock is sufficient' : total > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
+  const getLowStockLabel = (count) => count === 0 ? '✅ All vaccines well stocked' : count <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
   const getOutOfStockLabel = (count) => count === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
 
   const getOrderUrgencyClass = (status) => {
@@ -37,6 +37,7 @@ const Dashboard = () => {
     if (status === 'Low Stock') return 'urgency-low';
     return 'urgency-ok';
   };
+
   const getOrderUrgencyLabel = (status) => {
     if (status === 'Out Stock') return '🚨 Urgent';
     if (status === 'Low Stock') return '⚠️ Soon';
@@ -52,12 +53,11 @@ const Dashboard = () => {
   // ── PER-VACCINE WEEKLY / MONTHLY PREDICTIONS ──────────
   const vaccineForecasts = vaccineData.map(v => {
     const monthlyNeed = v.mlRecommended;
-    const weeklyNeed  = Math.round(monthlyNeed / 4);
+    const weeklyNeed = Math.round(monthlyNeed / 4);
     const peakMonthly = Math.round(monthlyNeed * 1.5);
-    const peakWeekly  = Math.round(weeklyNeed * 1.5);
-    const weeksLeft   = weeklyNeed > 0 ? (v.available / weeklyNeed).toFixed(1) : '∞';
-    // Risk: ≤20 doses = critical, 21 to below minStock = warning, at/above minStock = ok
-    const risk        = v.available <= 20 ? 'critical' : v.available < v.minStock ? 'warning' : 'ok';
+    const peakWeekly = Math.round(weeklyNeed * 1.5);
+    const weeksLeft = weeklyNeed > 0 ? (v.available / weeklyNeed).toFixed(1) : '∞';
+    const risk = v.available <= 20 ? 'critical' : v.available < v.minStock ? 'warning' : 'ok';
     return { ...v, weeklyNeed, monthlyNeed, peakWeekly, peakMonthly, weeksLeft, risk };
   });
 
@@ -70,17 +70,17 @@ const Dashboard = () => {
 
   const getStockBarColor = (risk) => {
     if (risk === 'critical') return '#e53935';
-    if (risk === 'warning')  return '#f57f17';
+    if (risk === 'warning') return '#f57f17';
     return '#26a69a';
   };
 
   const getWeeksLeftLabel = (weeksLeft) => {
     const w = parseFloat(weeksLeft);
-    if (isNaN(w) || w === 0)  return '🚨 No stock — order immediately';
-    if (w < 0.5)              return '🚨 Runs out in days — order now';
-    if (w < 1)                return `⚠️ Less than 1 week left (${weeksLeft} wks)`;
-    if (w < 2)                return `⚠️ About ${weeksLeft} week left — order soon`;
-    if (w < 4)                return `⚠️ ${weeksLeft} weeks left — monitor closely`;
+    if (isNaN(w) || w === 0) return '🚨 No stock — order immediately';
+    if (w < 0.5) return '🚨 Runs out in days — order now';
+    if (w < 1) return `⚠️ Less than 1 week left (${weeksLeft} wks)`;
+    if (w < 2) return `⚠️ About ${weeksLeft} week left — order soon`;
+    if (w < 4) return `⚠️ ${weeksLeft} weeks left — monitor closely`;
     return `✅ Good for ${weeksLeft} more weeks`;
   };
 
@@ -91,8 +91,10 @@ const Dashboard = () => {
     <div className="dashboard-container">
 
       <button
+        type="button"
         className="mobile-menu-toggle"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle navigation menu">
         ☰
       </button>
 
@@ -106,13 +108,15 @@ const Dashboard = () => {
         <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
-      <div className="main-content">
+      <main className="main-content">
 
-        <h2 className="dashboard-heading">📊 Admin Dashboard</h2>
-        <p className="dashboard-subheading">Welcome back, Admin</p>
+        <header>
+          <h1 className="dashboard-heading">📊 Admin Dashboard</h1>
+          <p className="dashboard-subheading">Welcome back, Admin</p>
+        </header>
 
         {/* ── STATS CARDS ── */}
-        <div className="stats-container">
+        <section className="stats-container" aria-label="Dashboard Statistics">
           <div className="stat-box" style={{ borderTop: getAvailableBorder(totalAvailable) }}>
             <h3 className="stat-title">Vaccines Available</h3>
             <p className="stat-number" style={{ color: getAvailableColor(totalAvailable) }}>
@@ -138,21 +142,21 @@ const Dashboard = () => {
             <p className="stat-number" style={{ color: getOutOfStockColor(outOfStockCount) }}>{outOfStockCount}</p>
             <p className="stat-note">{getOutOfStockLabel(outOfStockCount)}</p>
           </div>
-        </div>
+        </section>
 
         {/* ── DAILY ANALYTICS CHARTS ── */}
         <DailyAnalytics />
 
         {/* ── MIDDLE ROW: ML PREDICTIONS + VACCINE AVAILABILITY ── */}
-        <div className="middle-row">
+        <section className="middle-row" aria-label="Forecasts and Availability">
 
           {/* ── ML PREDICTIONS CARD ── */}
-          <div className="ml-card ml-forecast-card">
+          <article className="ml-card ml-forecast-card">
 
             {/* Header + toggle */}
             <div className="ml-forecast-header">
               <div>
-                <h3 className="section-title">🤖 ML Vaccine Demand Forecast</h3>
+                <h2 className="section-title">🤖 ML Vaccine Demand Forecast</h2>
                 <p className="ml-subtitle" style={{ margin: '4px 0 0 0' }}>
                   {mlView === 'weekly'
                     ? 'How long will each vaccine last this week?'
@@ -163,8 +167,10 @@ const Dashboard = () => {
                 {['weekly', 'monthly'].map(v => (
                   <button
                     key={v}
+                    type="button"
                     onClick={() => setMlView(v)}
-                    className={`ml-toggle-btn ${mlView === v ? 'ml-toggle-active' : ''}`}>
+                    className={`ml-toggle-btn ${mlView === v ? 'ml-toggle-active' : ''}`}
+                    aria-pressed={mlView === v}>
                     {v === 'weekly' ? '📅 Weekly' : '📆 Monthly'}
                   </button>
                 ))}
@@ -193,14 +199,14 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {vaccineForecasts.map((v, i) => {
-                    const need     = mlView === 'weekly' ? v.weeklyNeed : v.monthlyNeed;
+                  {vaccineForecasts.map((v) => {
+                    const need = mlView === 'weekly' ? v.weeklyNeed : v.monthlyNeed;
                     const peakNeed = mlView === 'weekly' ? v.peakWeekly : v.peakMonthly;
-                    const barPct   = getStockBarPercent(v.available, v.minStock);
+                    const barPct = getStockBarPercent(v.available, v.minStock);
                     const barColor = getStockBarColor(v.risk);
 
                     return (
-                      <tr key={v.id} style={{ background: i % 2 === 0 ? '#fff' : '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
+                      <tr key={v.id} style={{ background: v.id % 2 === 0 ? '#fafafa' : '#fff', borderBottom: '1px solid #f0f0f0' }}>
 
                         {/* Vaccine name */}
                         <td style={tdStyle}>
@@ -226,12 +232,12 @@ const Dashboard = () => {
                           {peakNeed.toLocaleString()}
                         </td>
 
-                        {/* Stock will last — plain English */}
+                        {/* Stock will last */}
                         <td style={{ ...tdStyle, fontWeight: 600, color: barColor, fontSize: '12px' }}>
                           {getWeeksLeftLabel(v.weeksLeft)}
                         </td>
 
-                        {/* Action — based on v.risk (≤20 = critical, 21+ below min = warning) */}
+                        {/* Action */}
                         <td style={{ ...tdStyle, textAlign: 'center' }}>
                           <span className={`${v.risk === 'critical' ? 'urgency-out' : v.risk === 'warning' ? 'urgency-low' : 'urgency-ok'} urgency-sm`}>
                             {v.risk === 'critical' ? '🚨 Order Now' : v.risk === 'warning' ? '⚠️ Order Soon' : '✅ OK'}
@@ -245,11 +251,11 @@ const Dashboard = () => {
               </table>
             </div>
 
-          </div>
+          </article>
 
           {/* VACCINE AVAILABILITY */}
-          <div className="vaccine-card">
-            <h3 className="section-title">💉 Vaccine Availability</h3>
+          <article className="vaccine-card">
+            <h2 className="section-title">💉 Vaccine Availability</h2>
             <div className="table-wrapper">
               <table className="data-table">
                 <thead>
@@ -281,15 +287,15 @@ const Dashboard = () => {
                 </tfoot>
               </table>
             </div>
-          </div>
+          </article>
 
-        </div>
+        </section>
 
         {/* ── VACCINES TO ORDER TABLE ── */}
-        <div className="order-card">
+        <section className="order-card" aria-label="Vaccines to Order">
           <div className="order-card-header">
             <div>
-              <h3 className="section-title">📦 Vaccines to Order</h3>
+              <h2 className="section-title">📦 Vaccines to Order</h2>
               <p className="ml-subtitle">
                 ML recommended restock list — {vaccinesToOrder.length} vaccine/s need ordering
               </p>
@@ -342,9 +348,9 @@ const Dashboard = () => {
               </tfoot>
             </table>
           </div>
-        </div>
+        </section>
 
-      </div>
+      </main>
     </div>
   );
 };
