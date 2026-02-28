@@ -25,8 +25,21 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
+<<<<<<< HEAD
 /*  Sidebar */
 aside.sidebar,
+=======
+aside.sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .sidebar {
   width: 280px;
   background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
@@ -63,7 +76,6 @@ aside.sidebar header,
   object-fit: contain;
 }
 
-/*  Navigation  */
 .nav {
   display: flex;
   flex-direction: column;
@@ -100,7 +112,6 @@ aside.sidebar header,
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/*  Overlay  */
 .overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -108,7 +119,10 @@ aside.sidebar header,
   z-index: 998;
 }
 
+<<<<<<< HEAD
 /*  Main Content  */
+=======
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 main.main-content,
 .main-content {
   flex: 1;
@@ -135,7 +149,11 @@ main.main-content > header,
   margin: 0;
 }
 
+<<<<<<< HEAD
 /*  Stats Cards  */
+=======
+/* ── Stats Cards ── */
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .stats-container,
 section.stats-container {
   display: flex;
@@ -147,12 +165,24 @@ section.stats-container {
 .stat-box {
   background-color: #fff;
   padding: 25px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.10),
+    0 12px 28px rgba(0, 0, 0, 0.07);
   flex: 1 1 0;
   min-width: 0;
   text-align: center;
   border-top: 4px solid #26a69a;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 12px 28px rgba(0, 0, 0, 0.13),
+    0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
 .stat-title {
@@ -178,7 +208,6 @@ section.stats-container {
   font-style: italic;
 }
 
-/*  Prediction Cards Row  */
 .prediction-row {
   display: flex;
   gap: 15px;
@@ -186,7 +215,10 @@ section.stats-container {
   flex-wrap: wrap;
 }
 
+<<<<<<< HEAD
 /*  Middle Row  */
+=======
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .middle-row,
 section.middle-row {
   display: flex;
@@ -195,20 +227,36 @@ section.middle-row {
   margin-bottom: 30px;
 }
 
+<<<<<<< HEAD
 /* Cards */
+=======
+/* ── Dashboard content cards ── */
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .ml-card,
 .vaccine-card,
 article.ml-card,
 article.vaccine-card {
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.10),
+    0 12px 28px rgba(0, 0, 0, 0.07);
   width: 100%;
   box-sizing: border-box;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/*  ML Predictions Content  */
+.ml-card:hover,
+.vaccine-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 12px 28px rgba(0, 0, 0, 0.13),
+    0 20px 40px rgba(0, 0, 0, 0.08);
+}
+
 .section-title {
   font-size: 16px;
   color: #333;
@@ -275,15 +323,32 @@ article.vaccine-card {
 .crowd-high   { background-color: #ffebee; color: #c62828; }
 .crowd-low    { background-color: #e8f5e9; color: #2e7d32; }
 
+<<<<<<< HEAD
 /*  Vaccines to Order Card  */
+=======
+/* ── Vaccines to Order Card ── */
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .order-card,
 section.order-card {
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.10),
+    0 12px 28px rgba(0, 0, 0, 0.07);
   margin-bottom: 30px;
   border-top: 4px solid #e53935;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.order-card:hover,
+section.order-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+    0 12px 28px rgba(0, 0, 0, 0.13),
+    0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
 .order-card-header {
@@ -305,7 +370,6 @@ section.order-card {
   align-self: center;
 }
 
-/*  Urgency Badges  */
 .urgency-out {
   background-color: #ffebee;
   color: #c62828;
@@ -336,7 +400,10 @@ section.order-card {
   border: 2px solid #00796b;
 }
 
+<<<<<<< HEAD
 /*  Table  */
+=======
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .table-wrapper { overflow-x: auto; }
 
 .data-table {
@@ -362,6 +429,7 @@ section.order-card {
 .data-table tbody tr:hover { background-color: #f9f9f9; }
 
 .total-row { background-color: #f5f5f5; font-weight: 700; }
+<<<<<<< HEAD
 .total-row td {
   font-weight: 700;
   color: #333;
@@ -369,6 +437,10 @@ section.order-card {
 }
 
 /*  Status Badges  */
+=======
+.total-row td { font-weight: 700; color: #333; border-top: 2px solid #e0e0e0; }
+
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .status-in-stock {
   background-color: #e0f2f1;
   color: #00796b;
@@ -451,7 +523,10 @@ section.order-card {
 }
 
 .ml-divider { border-top: 2px dashed #f0f0f0; margin: 14px 0 10px 0; }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9fc84cf9859958591762d8d20c5a7fbb12b8c31e
 .ml-table-wrapper { overflow-x: auto; }
 
 .ml-forecast-table {
@@ -461,22 +536,22 @@ section.order-card {
   background: white;
 }
 
-.ml-stock-cell          { font-weight: 600; }
-.ml-stock-critical      { color: #c62828; }
-.ml-stock-warning       { color: #f57f17; }
-.ml-stock-ok            { color: #333; }
+.ml-stock-cell     { font-weight: 600; }
+.ml-stock-critical { color: #c62828; }
+.ml-stock-warning  { color: #f57f17; }
+.ml-stock-ok       { color: #333; }
 
-.ml-need-cell           { color: #26a69a; font-weight: 600; }
-.ml-peak-cell           { color: #e53935; font-weight: 600; }
+.ml-need-cell  { color: #26a69a; font-weight: 600; }
+.ml-peak-cell  { color: #e53935; font-weight: 600; }
 
-.ml-weeks-cell          { font-weight: 700; }
-.ml-weeks-critical      { color: #c62828; }
-.ml-weeks-warning       { color: #f57f17; }
-.ml-weeks-ok            { color: #2e7d32; }
+.ml-weeks-cell     { font-weight: 700; }
+.ml-weeks-critical { color: #c62828; }
+.ml-weeks-warning  { color: #f57f17; }
+.ml-weeks-ok       { color: #2e7d32; }
 
-.urgency-sm             { font-size: 11px !important; padding: 3px 8px !important; }
-.ml-rec-text            { color: #26a69a; font-size: 14px; }
-.order-total-cell       { color: #e53935; }
+.urgency-sm       { font-size: 11px !important; padding: 3px 8px !important; }
+.ml-rec-text      { color: #26a69a; font-size: 14px; }
+.order-total-cell { color: #e53935; }
 
 /* ═══════════════════════════════════════════════════════════
    DARK MODE
