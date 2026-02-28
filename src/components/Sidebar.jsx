@@ -1,4 +1,4 @@
-// Sidebar.jsx
+// Sidebar.jsx - OPTIMIZED
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -20,50 +20,60 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
   };
 
   return (
-    <div className={isMobileMenuOpen ? 'sidebar active' : 'sidebar'}>
-
-      <div className="logo-container">
-        <img src={logo} alt="VaxFlow Logo" className="sidebar-logo" />
+    <aside className={isMobileMenuOpen ? 'sidebar active' : 'sidebar'} role="navigation">
+      
+      <header className="logo-container">
+        <img src={logo} alt="VaxFlow - Vaccine Management System Logo" className="sidebar-logo" />
         <h1 className="sidebar-title">VaxFlow</h1>
-      </div>
+      </header>
 
       <nav className="nav">
         <button
+          type="button"
           className={isActive('/dashboard') ? 'nav-link nav-link-active' : 'nav-link'}
-          onClick={() => handleNavClick('/dashboard')}>
+          onClick={() => handleNavClick('/dashboard')}
+          aria-current={isActive('/dashboard') ? 'page' : undefined}>
           📊 DASHBOARD
         </button>
 
         <button
+          type="button"
           className={isActive('/vaccine') ? 'nav-link nav-link-active' : 'nav-link'}
-          onClick={() => handleNavClick('/vaccine')}>
+          onClick={() => handleNavClick('/vaccine')}
+          aria-current={isActive('/vaccine') ? 'page' : undefined}>
           💉 VACCINE MANAGEMENT
         </button>
 
         <button
+          type="button"
           className={isActive('/reports') ? 'nav-link nav-link-active' : 'nav-link'}
-          onClick={() => handleNavClick('/reports')}>
+          onClick={() => handleNavClick('/reports')}
+          aria-current={isActive('/reports') ? 'page' : undefined}>
           📈 REPORTS
         </button>
 
         <button
+          type="button"
           className={isActive('/notifications') ? 'nav-link nav-link-active' : 'nav-link'}
-          onClick={() => handleNavClick('/notifications')}>
+          onClick={() => handleNavClick('/notifications')}
+          aria-current={isActive('/notifications') ? 'page' : undefined}>
           🔔 NOTIFICATIONS
         </button>
 
         <button
+          type="button"
           className={isActive('/settings') ? 'nav-link nav-link-active' : 'nav-link'}
-          onClick={() => handleNavClick('/settings')}>
+          onClick={() => handleNavClick('/settings')}
+          aria-current={isActive('/settings') ? 'page' : undefined}>
           ⚙️ SETTINGS
         </button>
 
-        <button className="nav-link logout-btn" onClick={handleLogout}>
+        <button type="button" className="nav-link logout-btn" onClick={handleLogout}>
           🚪 LOGOUT
         </button>
       </nav>
 
-    </div>
+    </aside>
   );
 };
 

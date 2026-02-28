@@ -138,13 +138,13 @@ const DailyAnalytics = () => {
       {/* Summary chips */}
       <div className="analytics-stat-chips">
         {[
-          { label: 'Total Dispensed Today', value: totalToday.toLocaleString(), unit: 'doses', color: '#26a69a', icon: '💉' },
-          { label: 'Total Wasted Today', value: wastedToday.toLocaleString(), unit: 'doses', color: '#e53935', icon: '🗑️' },
-          { label: 'Avg. Efficiency', value: `${avgEfficiency}%`, unit: '', color: '#2e7d32', icon: '📈' },
-          { label: 'Peak Hour', value: peakHour.time || '—', unit: `${peakHour.totalDispensed || 0} doses`, color: '#f57f17', icon: '⏰' },
-          { label: 'Hours Tracked', value: hourlyData.length, unit: 'hrs', color: '#5c6bc0', icon: '🕐' },
-        ].map((chip, i) => (
-          <div key={i} className="analytics-chip" style={{ borderTop: `3px solid ${chip.color}` }}>
+          { id: 'dispensed', label: 'Total Dispensed Today', value: totalToday.toLocaleString(), unit: 'doses', color: '#26a69a', icon: '💉' },
+          { id: 'wasted', label: 'Total Wasted Today', value: wastedToday.toLocaleString(), unit: 'doses', color: '#e53935', icon: '🗑️' },
+          { id: 'efficiency', label: 'Avg. Efficiency', value: `${avgEfficiency}%`, unit: '', color: '#2e7d32', icon: '📈' },
+          { id: 'peak', label: 'Peak Hour', value: peakHour.time || '—', unit: `${peakHour.totalDispensed || 0} doses`, color: '#f57f17', icon: '⏰' },
+          { id: 'hours', label: 'Hours Tracked', value: hourlyData.length, unit: 'hrs', color: '#5c6bc0', icon: '🕐' },
+        ].map((chip) => (  // ← Using chip.id instead of index
+          <div key={chip.id} className="analytics-chip" style={{ borderTop: `3px solid ${chip.color}` }}>
             <span className="analytics-chip-icon">{chip.icon}</span>
             <span className="analytics-chip-value" style={{ color: chip.color }}>{chip.value}</span>
             <span className="analytics-chip-unit">{chip.unit}</span>
@@ -156,20 +156,22 @@ const DailyAnalytics = () => {
       {/* Chart controls */}
       <div className="analytics-controls">
         <div className="analytics-tab-group">
-          {[
-            { key: 'dispensed', label: '💉 Dispensed by Hour' }, //area chart
-            { key: 'stacked', label: '📊 Vaccine Breakdown' }, //bar chart
-            { key: 'stock', label: '📦 Stock Levels' }, //line chart
-            { key: 'efficiency', label: '📈 Efficiency Trend' }, //effiency chart
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveChart(tab.key)}
-              className={`analytics-tab-btn ${activeChart === tab.key ? 'active' : ''}`}>
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {[
+          { key: 'dispensed', label: '💉 Dispensed by Hour' },
+          { key: 'stacked', label: '📊 Vaccine Breakdown' },
+          { key: 'stock', label: '📦 Stock Levels' },
+          { key: 'efficiency', label: '📈 Efficiency Trend' },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            type="button"  // ← Added type
+            onClick={() => setActiveChart(tab.key)}
+            className={`analytics-tab-btn ${activeChart === tab.key ? 'active' : ''}`}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+        
         {activeChart !== 'stock' && (
           <select 
             value={selectedVax} 

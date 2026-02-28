@@ -1,4 +1,4 @@
-/* dashboard.css */
+/* dashboard.css - FULLY OPTIMIZED FOR LAB 5 */
 
 /*  Layout  */
 .dashboard-container {
@@ -25,7 +25,18 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/*  Sidebar  */
+/*  Sidebar - Semantic <aside> tag */
+aside.sidebar {
+  width: 280px;
+  background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Also support .sidebar class for backward compatibility */
 .sidebar {
   width: 280px;
   background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
@@ -36,9 +47,12 @@
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-.logo-container {
+/* Sidebar header */
+.logo-container,
+aside.sidebar header,
+.sidebar header {
   display: flex;
-  flex-direction: column;   /* ← stacks items vertically */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px;
@@ -49,7 +63,7 @@
   color: white;
   font-size: 20px;
   font-weight: 700;
-  margin: 8px 0 0 0;   /* space between logo and text */
+  margin: 8px 0 0 0;
   letter-spacing: 1px;
   text-align: center;
 }
@@ -108,12 +122,19 @@
   z-index: 998;
 }
 
-/*  Main Content  */
+/*  Main Content - Semantic <main> tag */
+main.main-content,
 .main-content {
   flex: 1;
   padding: 40px;
   background-color: #f8f8f8;
   overflow-y: auto;
+}
+
+/* Page header */
+main.main-content > header,
+.main-content > header {
+  margin-bottom: 30px;
 }
 
 .dashboard-heading {
@@ -126,11 +147,12 @@
 .dashboard-subheading {
   font-size: 14px;
   color: #888;
-  margin: 0 0 30px 0;
+  margin: 0;
 }
 
-/*  Stats Cards  */
-.stats-container {
+/*  Stats Cards - Semantic <section> */
+.stats-container,
+section.stats-container {
   display: flex;
   gap: 20px;
   margin-bottom: 30px;
@@ -179,16 +201,20 @@
   flex-wrap: wrap;
 }
 
-/*  Middle Row  */
-.middle-row {
+/*  Middle Row - Semantic <section> */
+.middle-row,
+section.middle-row {
   display: flex;
   flex-direction: column;
   gap: 20px;
   margin-bottom: 30px;
 }
 
+/* Cards - Semantic <article> */
 .ml-card,
-.vaccine-card {
+.vaccine-card,
+article.ml-card,
+article.vaccine-card {
   background-color: #fff;
   border-radius: 8px;
   padding: 20px;
@@ -268,8 +294,9 @@
 .crowd-high   { background-color: #ffebee; color: #c62828; }
 .crowd-low    { background-color: #e8f5e9; color: #2e7d32; }
 
-/*  Vaccines to Order Card  */
-.order-card {
+/*  Vaccines to Order Card - Semantic <section> */
+.order-card,
+section.order-card {
   background-color: #fff;
   border-radius: 8px;
   padding: 20px;
@@ -496,8 +523,9 @@
 
 /*  Responsive  */
 @media (max-width: 768px) {
-  .mobile-menu-toggle  { display: block; }
+  .mobile-menu-toggle { display: block; }
 
+  aside.sidebar,
   .sidebar {
     position: fixed;
     left: -280px;
@@ -507,17 +535,46 @@
     transition: left 0.3s ease;
   }
 
-  .sidebar.active      { left: 0; }
-  .main-content        { padding: 70px 20px 20px 20px; }
-  .stats-container     { flex-direction: column; }
-  .stats-container > div { min-width: 100%; }
-  .prediction-row      { flex-direction: column; }
-  .prediction-row > div { min-width: 100%; }
+  aside.sidebar.active,
+  .sidebar.active {
+    left: 0;
+  }
+
+  main.main-content,
+  .main-content {
+    padding: 70px 20px 20px 20px;
+  }
+
+  .stats-container,
+  section.stats-container {
+    flex-direction: column;
+  }
+
+  .stats-container > div {
+    min-width: 100%;
+  }
+
+  .prediction-row {
+    flex-direction: column;
+  }
+
+  .prediction-row > div {
+    min-width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
-  .main-content  { padding: 60px 15px 15px 15px; }
-  .data-table    { font-size: 12px; }
+  main.main-content,
+  .main-content {
+    padding: 60px 15px 15px 15px;
+  }
+
+  .data-table {
+    font-size: 12px;
+  }
+
   .data-table th,
-  .data-table td { padding: 8px; }
+  .data-table td {
+    padding: 8px;
+  }
 }
