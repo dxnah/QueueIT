@@ -1,4 +1,4 @@
-/* dashboard.css */
+/* dashboard.css - FULLY OPTIMIZED FOR LAB 5 */
 
 /*  Layout  */
 .dashboard-container {
@@ -25,18 +25,8 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/*  Sidebar - Semantic <aside> tag */
-aside.sidebar {
-  width: 280px;
-  background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
-  color: white;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Also support .sidebar class for backward compatibility */
+/*  Sidebar */
+aside.sidebar,
 .sidebar {
   width: 280px;
   background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
@@ -47,7 +37,6 @@ aside.sidebar {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Sidebar header */
 .logo-container,
 aside.sidebar header,
 .sidebar header {
@@ -114,15 +103,12 @@ aside.sidebar header,
 /*  Overlay  */
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 998;
 }
 
-/*  Main Content - Semantic <main> tag */
+/*  Main Content  */
 main.main-content,
 .main-content {
   flex: 1;
@@ -131,7 +117,6 @@ main.main-content,
   overflow-y: auto;
 }
 
-/* Page header */
 main.main-content > header,
 .main-content > header {
   margin-bottom: 30px;
@@ -150,7 +135,7 @@ main.main-content > header,
   margin: 0;
 }
 
-/*  Stats Cards - Semantic <section> */
+/*  Stats Cards  */
 .stats-container,
 section.stats-container {
   display: flex;
@@ -201,7 +186,7 @@ section.stats-container {
   flex-wrap: wrap;
 }
 
-/*  Middle Row - Semantic <section> */
+/*  Middle Row  */
 .middle-row,
 section.middle-row {
   display: flex;
@@ -210,7 +195,7 @@ section.middle-row {
   margin-bottom: 30px;
 }
 
-/* Cards - Semantic <article> */
+/* Cards */
 .ml-card,
 .vaccine-card,
 article.ml-card,
@@ -247,13 +232,9 @@ article.vaccine-card {
   gap: 10px;
 }
 
-.ml-item:last-child {
-  border-bottom: none;
-}
+.ml-item:last-child { border-bottom: none; }
 
-.ml-label-group {
-  flex: 1;
-}
+.ml-label-group { flex: 1; }
 
 .ml-label {
   font-size: 12px;
@@ -294,7 +275,7 @@ article.vaccine-card {
 .crowd-high   { background-color: #ffebee; color: #c62828; }
 .crowd-low    { background-color: #e8f5e9; color: #2e7d32; }
 
-/*  Vaccines to Order Card - Semantic <section> */
+/*  Vaccines to Order Card  */
 .order-card,
 section.order-card {
   background-color: #fff;
@@ -356,9 +337,7 @@ section.order-card {
 }
 
 /*  Table  */
-.table-wrapper {
-  overflow-x: auto;
-}
+.table-wrapper { overflow-x: auto; }
 
 .data-table {
   width: 100%;
@@ -379,19 +358,10 @@ section.order-card {
   font-size: 13px;
 }
 
-.data-table tbody tr {
-  transition: background-color 0.2s;
-}
+.data-table tbody tr { transition: background-color 0.2s; }
+.data-table tbody tr:hover { background-color: #f9f9f9; }
 
-.data-table tbody tr:hover {
-  background-color: #f9f9f9;
-}
-
-.total-row {
-  background-color: #f5f5f5;
-  font-weight: 700;
-}
-
+.total-row { background-color: #f5f5f5; font-weight: 700; }
 .total-row td {
   font-weight: 700;
   color: #333;
@@ -429,7 +399,6 @@ section.order-card {
   border: 2px solid #c62828;
 }
 
-/* Confidence level colors */
 .high   { color: #2e7d32; }
 .medium { color: #f57f17; }
 .low    { color: #c62828; }
@@ -438,10 +407,7 @@ section.order-card {
    ML FORECAST CARD
    ═══════════════════════════════════════════════════════════ */
 
-.ml-forecast-card {
-  flex: 1 1 auto;
-  min-width: 0;
-}
+.ml-forecast-card { flex: 1 1 auto; min-width: 0; }
 
 .ml-forecast-header {
   display: flex;
@@ -452,11 +418,7 @@ section.order-card {
   margin-bottom: 4px;
 }
 
-.ml-view-toggle {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
+.ml-view-toggle { display: flex; gap: 6px; flex-shrink: 0; }
 
 .ml-toggle-btn {
   padding: 5px 14px;
@@ -488,14 +450,9 @@ section.order-card {
   border-color: #1a8174;
 }
 
-.ml-divider {
-  border-top: 2px dashed #f0f0f0;
-  margin: 14px 0 10px 0;
-}
+.ml-divider { border-top: 2px dashed #f0f0f0; margin: 14px 0 10px 0; }
 
-.ml-table-wrapper {
-  overflow-x: auto;
-}
+.ml-table-wrapper { overflow-x: auto; }
 
 .ml-forecast-table {
   min-width: 420px;
@@ -521,6 +478,89 @@ section.order-card {
 .ml-rec-text            { color: #26a69a; font-size: 14px; }
 .order-total-cell       { color: #e53935; }
 
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════ */
+
+body.dark-mode main.main-content,
+body.dark-mode .main-content {
+  background-color: #1a1a2e;
+}
+
+body.dark-mode .dashboard-heading { color: #e0e0e0; }
+body.dark-mode .dashboard-subheading { color: #aaa; }
+
+body.dark-mode .stat-box {
+  background-color: #252530;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .stat-title { color: #aaa; }
+body.dark-mode .stat-note  { color: #888; }
+
+body.dark-mode .ml-card,
+body.dark-mode .vaccine-card,
+body.dark-mode article.ml-card,
+body.dark-mode article.vaccine-card {
+  background-color: #252530;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .section-title  { color: #e0e0e0; }
+body.dark-mode .ml-subtitle    { color: #888; }
+body.dark-mode .ml-label       { color: #bbb; }
+
+body.dark-mode .ml-item {
+  border-bottom-color: #2e2e3e;
+}
+
+body.dark-mode .order-card,
+body.dark-mode section.order-card {
+  background-color: #252530;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .data-table tbody tr:hover {
+  background-color: #2c2c3a;
+}
+
+body.dark-mode .data-table th,
+body.dark-mode .data-table td {
+  border-bottom-color: #2e2e3e;
+  color: #ccc;
+}
+
+body.dark-mode .data-table thead tr {
+  background-color: #1a8174;
+}
+
+body.dark-mode .total-row {
+  background-color: #1e1e2a;
+}
+
+body.dark-mode .total-row td {
+  color: #e0e0e0;
+  border-top-color: #3a3a4a;
+}
+
+body.dark-mode .ml-toggle-btn {
+  background: #1e1e2a;
+  border-color: #3a3a4a;
+  color: #ccc;
+}
+
+body.dark-mode .ml-toggle-btn.ml-toggle-active {
+  background: #26a69a;
+  color: white;
+  border-color: #26a69a;
+}
+
+body.dark-mode .ml-divider { border-top-color: #2e2e3e; }
+
+body.dark-mode .ml-forecast-table { background: #252530; }
+
+body.dark-mode .ml-stock-ok { color: #ccc; }
+
 /*  Responsive  */
 @media (max-width: 768px) {
   .mobile-menu-toggle { display: block; }
@@ -536,45 +576,26 @@ section.order-card {
   }
 
   aside.sidebar.active,
-  .sidebar.active {
-    left: 0;
-  }
+  .sidebar.active { left: 0; }
 
   main.main-content,
-  .main-content {
-    padding: 70px 20px 20px 20px;
-  }
+  .main-content { padding: 70px 20px 20px 20px; }
 
   .stats-container,
-  section.stats-container {
-    flex-direction: column;
-  }
+  section.stats-container { flex-direction: column; }
 
-  .stats-container > div {
-    min-width: 100%;
-  }
+  .stats-container > div { min-width: 100%; }
 
-  .prediction-row {
-    flex-direction: column;
-  }
-
-  .prediction-row > div {
-    min-width: 100%;
-  }
+  .prediction-row { flex-direction: column; }
+  .prediction-row > div { min-width: 100%; }
 }
 
 @media (max-width: 480px) {
   main.main-content,
-  .main-content {
-    padding: 60px 15px 15px 15px;
-  }
+  .main-content { padding: 60px 15px 15px 15px; }
 
-  .data-table {
-    font-size: 12px;
-  }
+  .data-table { font-size: 12px; }
 
   .data-table th,
-  .data-table td {
-    padding: 8px;
-  }
+  .data-table td { padding: 8px; }
 }
