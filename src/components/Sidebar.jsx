@@ -1,31 +1,37 @@
-// Sidebar.jsx - OPTIMIZED
+// Sidebar.jsx 
 
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../images/logoit.png';
 
+
 const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+
   const isActive = (path) => location.pathname === path;
+
 
   const handleNavClick = (path) => {
     navigate(path);
     if (onMenuClose) onMenuClose();
   };
 
+
   const handleLogout = () => {
     navigate('/login');
   };
 
+
   return (
     <aside className={isMobileMenuOpen ? 'sidebar active' : 'sidebar'} role="navigation">
-      
+     
       <header className="logo-container">
         <img src={logo} alt="VaxFlow - Vaccine Management System Logo" className="sidebar-logo" />
         <h1 className="sidebar-title">VaxFlow</h1>
       </header>
+
 
       <nav className="nav">
         <button
@@ -36,6 +42,7 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           📊 DASHBOARD
         </button>
 
+
         <button
           type="button"
           className={isActive('/vaccine') ? 'nav-link nav-link-active' : 'nav-link'}
@@ -43,6 +50,7 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           aria-current={isActive('/vaccine') ? 'page' : undefined}>
           💉 VACCINE MANAGEMENT
         </button>
+
 
         <button
           type="button"
@@ -52,6 +60,7 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           📈 REPORTS
         </button>
 
+
         <button
           type="button"
           className={isActive('/notifications') ? 'nav-link nav-link-active' : 'nav-link'}
@@ -59,6 +68,7 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           aria-current={isActive('/notifications') ? 'page' : undefined}>
           🔔 NOTIFICATIONS
         </button>
+
 
         <button
           type="button"
@@ -68,10 +78,12 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           ⚙️ SETTINGS
         </button>
 
+
         <button type="button" className="nav-link logout-btn" onClick={handleLogout}>
           🚪 LOGOUT
         </button>
       </nav>
+
 
     </aside>
   );
