@@ -164,7 +164,7 @@ const DailyAnalytics = () => {
         ].map(tab => (
           <button
             key={tab.key}
-            type="button"  // ← Added type
+            type="button"  
             onClick={() => setActiveChart(tab.key)}
             className={`analytics-tab-btn ${activeChart === tab.key ? 'active' : ''}`}>
             {tab.label}
