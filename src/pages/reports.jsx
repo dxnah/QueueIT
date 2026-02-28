@@ -15,7 +15,6 @@ const Reports = () => {
     endDate:   '2025-02-19',
   });
 
-  // Seeded from dashboardData — replace with API call when backend is added
   const [reportData] = useState(reportsData);
 
   const handleDateChange = (e) => {
@@ -24,7 +23,7 @@ const Reports = () => {
   };
 
   const handleGenerateReport = () => {
-    alert(`Generating ${selectedReport} report for ${selectedPeriod} period from ${dateRange.startDate} to ${dateRange.endDate}`);
+    alert(`Generating ${selectedReport} report for ${selectedPeriod} period`);
   };
 
   const handleExportReport = (format) => {
@@ -35,8 +34,11 @@ const Reports = () => {
     <div className="dashboard-container">
 
       <button
+        type="button"
         className="mobile-menu-toggle"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        aria-label="Toggle navigation menu"
+        aria-expanded={isMobileMenuOpen}>
         ☰
       </button>
 
@@ -46,22 +48,28 @@ const Reports = () => {
       />
 
       {isMobileMenuOpen && (
-        <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />
+        <div
+          className="overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+          role="presentation"
+        />
       )}
 
-      <div className="main-content">
+      <main className="main-content">
 
-        <h2 className="dashboard-heading">📈 Reports & Analytics</h2>
-        <p className="dashboard-subheading">Generate and view system performance reports</p>
+        <header>
+          <h1 className="dashboard-heading">📈 Reports & Analytics</h1>
+          <p className="dashboard-subheading">Generate and view system performance reports</p>
+        </header>
 
-        {/* Report Configuration */}
-        <div className="settings-card">
-          <h3 className="section-title">📋 Report Configuration</h3>
+        <section className="settings-card" aria-label="Report configuration">
+          <h2 className="section-title">📋 Report Configuration</h2>
 
           <div className="form-row">
             <div className="form-group">
-              <label>Report Type</label>
+              <label htmlFor="report-type">Report Type</label>
               <select
+                id="report-type"
                 value={selectedReport}
                 onChange={(e) => setSelectedReport(e.target.value)}
                 className="form-control">
@@ -71,8 +79,9 @@ const Reports = () => {
             </div>
 
             <div className="form-group">
-              <label>Time Period</label>
+              <label htmlFor="report-period">Time Period</label>
               <select
+                id="report-period"
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
                 className="form-control">
@@ -88,9 +97,10 @@ const Reports = () => {
           {selectedPeriod === 'custom' && (
             <div className="form-row">
               <div className="form-group">
-                <label>Start Date</label>
+                <label htmlFor="report-start">Start Date</label>
                 <input
                   type="date"
+                  id="report-start"
                   name="startDate"
                   value={dateRange.startDate}
                   onChange={handleDateChange}
@@ -98,9 +108,10 @@ const Reports = () => {
                 />
               </div>
               <div className="form-group">
-                <label>End Date</label>
+                <label htmlFor="report-end">End Date</label>
                 <input
                   type="date"
+                  id="report-end"
                   name="endDate"
                   value={dateRange.endDate}
                   onChange={handleDateChange}
@@ -111,32 +122,31 @@ const Reports = () => {
           )}
 
           <div className="form-actions">
-            <button onClick={handleGenerateReport} className="btn btn-primary">
+            <button type="button" onClick={handleGenerateReport} className="btn btn-primary">
               🔍 Generate Report
             </button>
-            <button onClick={() => handleExportReport('pdf')} className="btn btn-secondary">
+            <button type="button" onClick={() => handleExportReport('pdf')} className="btn btn-secondary">
               📄 Export PDF
             </button>
-            <button onClick={() => handleExportReport('excel')} className="btn btn-secondary">
+            <button type="button" onClick={() => handleExportReport('excel')} className="btn btn-secondary">
               📊 Export Excel
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Report Preview */}
-        <div className="settings-card">
-          <h3 className="section-title">📊 Report Preview</h3>
+        <section className="settings-card" aria-label="Report preview">
+          <h2 className="section-title">📊 Report Preview</h2>
 
           {selectedReport === 'vaccine-usage' && (
             <div className="table-wrapper">
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Vaccine</th>
-                    <th>Administered</th>
-                    <th>Wasted</th>
-                    <th>Remaining</th>
-                    <th>Efficiency</th>
+                    <th scope="col">Vaccine</th>
+                    <th scope="col">Administered</th>
+                    <th scope="col">Wasted</th>
+                    <th scope="col">Remaining</th>
+                    <th scope="col">Efficiency</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -168,11 +178,11 @@ const Reports = () => {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Period</th>
-                    <th>In Stock</th>
-                    <th>Low Stock</th>
-                    <th>Out of Stock</th>
-                    <th>Stock Health</th>
+                    <th scope="col">Period</th>
+                    <th scope="col">In Stock</th>
+                    <th scope="col">Low Stock</th>
+                    <th scope="col">Out of Stock</th>
+                    <th scope="col">Stock Health</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -197,11 +207,11 @@ const Reports = () => {
               </table>
             </div>
           )}
-        </div>
+        </section>
 
-      </div>
+      </main>
     </div>
   );
 };
 
-export default Reports; 
+export default Reports;
