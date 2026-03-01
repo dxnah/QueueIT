@@ -152,9 +152,6 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ─── Dropdown Component ───────────────────────────────────────────────────────
-const Dropdown = ({ trigger, children, isOpen, onClose }) => {  };
-
 // ─── Calendar Component ───────────────────────────────────────────────────────
 const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
   const totalDays = DAYS_IN_MONTH[month] || 30;
