@@ -154,33 +154,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 // ─── Dropdown Component ───────────────────────────────────────────────────────
-const Dropdown = ({ trigger, children, isOpen, onClose }) => {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) onClose();
-    };
-    if (isOpen) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [isOpen, onClose]);
-
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      {trigger}
-      {isOpen && (
-        <div style={{
-          position: 'absolute', top: '110%', right: 0, zIndex: 999,
-          background: 'white', border: '1px solid #e0e0e0',
-          borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-          minWidth: '160px', padding: '6px 0', overflow: 'hidden',
-        }}>
-          {children}
-        </div>
-      )}
-    </div>
-  );
-};
+const Dropdown = ({ trigger, children, isOpen, onClose }) => {  };
 
 // ─── Calendar Component ───────────────────────────────────────────────────────
 const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {

@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar';
 import VaccineCard from '../components/VaccineCard';
 import {
   vaccineData,
-  MONTHLY_REQUIREMENTS,
   PEAK_MONTHS,
   getMonthlyRequirement,
   getOrderUrgency,

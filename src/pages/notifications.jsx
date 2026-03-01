@@ -39,8 +39,8 @@ const Notifications = () => {
   const { notifications, setNotifications, unreadCount } = useNotifications();
 
   useEffect(() => {
-    setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
-  }, []);
+  setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+}, [setNotifications]);
 
   const handleMarkAsRead = (id) => {
     setNotifications(prev =>

@@ -129,10 +129,9 @@ const LoginScreen = () => {
 
         </form>
 
-        {/* Simulate Log In — changed from <Link> to <button> */}
-        <button type="button" className="simulate-link" onClick={simulateFormFill}>
+        <Link className="simulate-link" onClick={simulateFormFill}>
           Simulate Log In
-        </button>
+        </Link>
 
         <div className="auth-links">
           <Link to="#forgot-password" className="auth-link">
