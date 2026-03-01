@@ -25,7 +25,6 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/*  Sidebar - Semantic <aside> tag */
 aside.sidebar {
   width: 280px;
   background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
@@ -36,7 +35,6 @@ aside.sidebar {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Also support .sidebar class for backward compatibility */
 .sidebar {
   width: 280px;
   background: linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%);
@@ -47,7 +45,6 @@ aside.sidebar {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Sidebar header */
 .logo-container,
 aside.sidebar header,
 .sidebar header {
@@ -74,7 +71,6 @@ aside.sidebar header,
   object-fit: contain;
 }
 
-/*  Navigation  */
 .nav {
   display: flex;
   flex-direction: column;
@@ -111,7 +107,6 @@ aside.sidebar header,
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/*  Overlay  */
 .overlay {
   position: fixed;
   top: 0;
@@ -122,7 +117,6 @@ aside.sidebar header,
   z-index: 998;
 }
 
-/*  Main Content - Semantic <main> tag */
 main.main-content,
 .main-content {
   flex: 1;
@@ -131,7 +125,6 @@ main.main-content,
   overflow-y: auto;
 }
 
-/* Page header */
 main.main-content > header,
 .main-content > header {
   margin-bottom: 30px;
@@ -150,7 +143,7 @@ main.main-content > header,
   margin: 0;
 }
 
-/*  Stats Cards - Semantic <section> */
+/* ── Stats Cards ── */
 .stats-container,
 section.stats-container {
   display: flex;
@@ -162,12 +155,21 @@ section.stats-container {
 .stat-box {
   background-color: #fff;
   padding: 25px 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.10),
+    0 12px 28px rgba(0, 0, 0, 0.07);
   flex: 1 1 0;
   min-width: 0;
   text-align: center;
   border-top: 4px solid #26a69a;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat-box:hover {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
 }
 
 .stat-title {
@@ -193,7 +195,6 @@ section.stats-container {
   font-style: italic;
 }
 
-/*  Prediction Cards Row  */
 .prediction-row {
   display: flex;
   gap: 15px;
@@ -201,7 +202,6 @@ section.stats-container {
   flex-wrap: wrap;
 }
 
-/*  Middle Row - Semantic <section> */
 .middle-row,
 section.middle-row {
   display: flex;
@@ -210,20 +210,29 @@ section.middle-row {
   margin-bottom: 30px;
 }
 
-/* Cards - Semantic <article> */
+/* ── Dashboard content cards ── */
 .ml-card,
 .vaccine-card,
 article.ml-card,
 article.vaccine-card {
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.10),
+    0 12px 28px rgba(0, 0, 0, 0.07);
   width: 100%;
   box-sizing: border-box;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/*  ML Predictions Content  */
+.ml-card:hover,
+.vaccine-card:hover {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
+}
+
 .section-title {
   font-size: 16px;
   color: #333;
@@ -251,9 +260,7 @@ article.vaccine-card {
   border-bottom: none;
 }
 
-.ml-label-group {
-  flex: 1;
-}
+.ml-label-group { flex: 1; }
 
 .ml-label {
   font-size: 12px;
@@ -294,15 +301,25 @@ article.vaccine-card {
 .crowd-high   { background-color: #ffebee; color: #c62828; }
 .crowd-low    { background-color: #e8f5e9; color: #2e7d32; }
 
-/*  Vaccines to Order Card - Semantic <section> */
+/* ── Vaccines to Order Card ── */
 .order-card,
 section.order-card {
   background-color: #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 6px 16px rgba(0, 0, 0, 0.10),
+    0 12px 28px rgba(0, 0, 0, 0.07);
   margin-bottom: 30px;
   border-top: 4px solid #e53935;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.order-card:hover,
+section.order-card:hover {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.08),
 }
 
 .order-card-header {
@@ -324,7 +341,6 @@ section.order-card {
   align-self: center;
 }
 
-/*  Urgency Badges  */
 .urgency-out {
   background-color: #ffebee;
   color: #c62828;
@@ -355,10 +371,7 @@ section.order-card {
   border: 2px solid #00796b;
 }
 
-/*  Table  */
-.table-wrapper {
-  overflow-x: auto;
-}
+.table-wrapper { overflow-x: auto; }
 
 .data-table {
   width: 100%;
@@ -379,26 +392,12 @@ section.order-card {
   font-size: 13px;
 }
 
-.data-table tbody tr {
-  transition: background-color 0.2s;
-}
+.data-table tbody tr { transition: background-color 0.2s; }
+.data-table tbody tr:hover { background-color: #f9f9f9; }
 
-.data-table tbody tr:hover {
-  background-color: #f9f9f9;
-}
+.total-row { background-color: #f5f5f5; font-weight: 700; }
+.total-row td { font-weight: 700; color: #333; border-top: 2px solid #e0e0e0; }
 
-.total-row {
-  background-color: #f5f5f5;
-  font-weight: 700;
-}
-
-.total-row td {
-  font-weight: 700;
-  color: #333;
-  border-top: 2px solid #e0e0e0;
-}
-
-/*  Status Badges  */
 .status-in-stock {
   background-color: #e0f2f1;
   color: #00796b;
@@ -429,7 +428,6 @@ section.order-card {
   border: 2px solid #c62828;
 }
 
-/* Confidence level colors */
 .high   { color: #2e7d32; }
 .medium { color: #f57f17; }
 .low    { color: #c62828; }
@@ -438,10 +436,7 @@ section.order-card {
    ML FORECAST CARD
    ═══════════════════════════════════════════════════════════ */
 
-.ml-forecast-card {
-  flex: 1 1 auto;
-  min-width: 0;
-}
+.ml-forecast-card { flex: 1 1 auto; min-width: 0; }
 
 .ml-forecast-header {
   display: flex;
@@ -452,11 +447,7 @@ section.order-card {
   margin-bottom: 4px;
 }
 
-.ml-view-toggle {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
+.ml-view-toggle { display: flex; gap: 6px; flex-shrink: 0; }
 
 .ml-toggle-btn {
   padding: 5px 14px;
@@ -488,14 +479,8 @@ section.order-card {
   border-color: #1a8174;
 }
 
-.ml-divider {
-  border-top: 2px dashed #f0f0f0;
-  margin: 14px 0 10px 0;
-}
-
-.ml-table-wrapper {
-  overflow-x: auto;
-}
+.ml-divider { border-top: 2px dashed #f0f0f0; margin: 14px 0 10px 0; }
+.ml-table-wrapper { overflow-x: auto; }
 
 .ml-forecast-table {
   min-width: 420px;
@@ -504,22 +489,22 @@ section.order-card {
   background: white;
 }
 
-.ml-stock-cell          { font-weight: 600; }
-.ml-stock-critical      { color: #c62828; }
-.ml-stock-warning       { color: #f57f17; }
-.ml-stock-ok            { color: #333; }
+.ml-stock-cell     { font-weight: 600; }
+.ml-stock-critical { color: #c62828; }
+.ml-stock-warning  { color: #f57f17; }
+.ml-stock-ok       { color: #333; }
 
-.ml-need-cell           { color: #26a69a; font-weight: 600; }
-.ml-peak-cell           { color: #e53935; font-weight: 600; }
+.ml-need-cell  { color: #26a69a; font-weight: 600; }
+.ml-peak-cell  { color: #e53935; font-weight: 600; }
 
-.ml-weeks-cell          { font-weight: 700; }
-.ml-weeks-critical      { color: #c62828; }
-.ml-weeks-warning       { color: #f57f17; }
-.ml-weeks-ok            { color: #2e7d32; }
+.ml-weeks-cell     { font-weight: 700; }
+.ml-weeks-critical { color: #c62828; }
+.ml-weeks-warning  { color: #f57f17; }
+.ml-weeks-ok       { color: #2e7d32; }
 
-.urgency-sm             { font-size: 11px !important; padding: 3px 8px !important; }
-.ml-rec-text            { color: #26a69a; font-size: 14px; }
-.order-total-cell       { color: #e53935; }
+.urgency-sm       { font-size: 11px !important; padding: 3px 8px !important; }
+.ml-rec-text      { color: #26a69a; font-size: 14px; }
+.order-total-cell { color: #e53935; }
 
 /*  Responsive  */
 @media (max-width: 768px) {
@@ -536,45 +521,26 @@ section.order-card {
   }
 
   aside.sidebar.active,
-  .sidebar.active {
-    left: 0;
-  }
+  .sidebar.active { left: 0; }
 
   main.main-content,
-  .main-content {
-    padding: 70px 20px 20px 20px;
-  }
+  .main-content { padding: 70px 20px 20px 20px; }
 
   .stats-container,
-  section.stats-container {
-    flex-direction: column;
-  }
+  section.stats-container { flex-direction: column; }
 
-  .stats-container > div {
-    min-width: 100%;
-  }
+  .stats-container > div { min-width: 100%; }
 
-  .prediction-row {
-    flex-direction: column;
-  }
-
-  .prediction-row > div {
-    min-width: 100%;
-  }
+  .prediction-row { flex-direction: column; }
+  .prediction-row > div { min-width: 100%; }
 }
 
 @media (max-width: 480px) {
   main.main-content,
-  .main-content {
-    padding: 60px 15px 15px 15px;
-  }
+  .main-content { padding: 60px 15px 15px 15px; }
 
-  .data-table {
-    font-size: 12px;
-  }
+  .data-table { font-size: 12px; }
 
   .data-table th,
-  .data-table td {
-    padding: 8px;
-  }
+  .data-table td { padding: 8px; }
 }

@@ -1,4 +1,108 @@
-/* settings.css*/
+/* settings.css */
+
+/* ─────────────────────────────────────────────────────────
+   DARK MODE VARIABLES
+   ───────────────────────────────────────────────────────── */
+
+body.dark-mode {
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+}
+
+body.dark-mode .main-content {
+  background-color: #1a1a2e;
+}
+
+/* Cards — darker greyish (was blue #16213e) */
+body.dark-mode .settings-card {
+  background-color: #252530;
+  border-top-color: #26a69a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .settings-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+body.dark-mode .settings-input-label,
+body.dark-mode .settings-toggle-title,
+body.dark-mode .section-title,
+body.dark-mode .dashboard-heading {
+  color: #e0e0e0;
+}
+
+body.dark-mode .settings-toggle-description,
+body.dark-mode .settings-helper-text,
+body.dark-mode .dashboard-subheading {
+  color: #aaa;
+}
+
+/* Input fields — dark greyish (was blue #0f3460) */
+body.dark-mode .settings-input-field,
+body.dark-mode .settings-select {
+  background-color: #1e1e2a;
+  border-color: #3a3a4a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .settings-input-field:focus,
+body.dark-mode .settings-select:focus {
+  border-color: #26a69a;
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.2);
+}
+
+body.dark-mode .settings-input-container {
+  border-bottom-color: #2e2e3e;
+}
+
+body.dark-mode .settings-toggle-row {
+  border-bottom-color: #2e2e3e;
+}
+
+body.dark-mode .settings-toggle-row:hover {
+  background-color: #2c2c3a;
+}
+
+/* Last login box — dark greyish (was blue #0f3460) */
+body.dark-mode .settings-last-login {
+  background-color: #1e1e2a;
+  border-color: #3a3a4a;
+}
+
+body.dark-mode .last-login-label {
+  color: #aaa;
+}
+
+body.dark-mode .last-login-value {
+  color: #26a69a;
+}
+
+body.dark-mode .settings-refresh-now {
+  border-top-color: #2e2e3e;
+}
+
+body.dark-mode .alert-success {
+  background-color: #1b3a2b;
+  color: #66bb6a;
+  border-color: #2e7d32;
+}
+
+/* Refresh Now button — dark mode */
+body.dark-mode .btn-refresh-now {
+  background-color: #1e2a28;
+  color: #4db6ac;
+  border-color: #2e4a47;
+}
+
+body.dark-mode .btn-refresh-now:hover:not(:disabled) {
+  background-color: #26a69a;
+  color: white;
+  border-color: #26a69a;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HEADER
+   ───────────────────────────────────────────────────────── */
 
 .settings-header {
   display: flex;
@@ -109,6 +213,47 @@
 }
 
 /* ─────────────────────────────────────────────────────────
+   LAST LOGIN INFO
+   ───────────────────────────────────────────────────────── */
+
+.settings-last-login {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: #f0faf9;
+  border: 1px solid #b2dfdb;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.last-login-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.last-login-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.last-login-label {
+  font-size: 11px;
+  color: #888;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.last-login-value {
+  font-size: 13px;
+  color: #26a69a;
+  font-weight: 700;
+}
+
+/* ─────────────────────────────────────────────────────────
    FORM INPUTS
    ───────────────────────────────────────────────────────── */
 
@@ -198,20 +343,33 @@
 
 .password-toggle-btn {
   position: absolute;
-  right: 10px;
+  right: 12px;
   background: none;
+  background-color: transparent;
   border: none;
+  outline: none;
+  box-shadow: none;
   cursor: pointer;
-  font-size: 18px;
-  padding: 5px;
-  color: #666;
-  transition: all 0.3s ease;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
   border-radius: 4px;
+  transition: color 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .password-toggle-btn:hover {
   color: #26a69a;
-  transform: scale(1.1);
+  background-color: transparent;
+}
+
+.password-toggle-btn:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: transparent;
 }
 
 .password-toggle-btn:active {
@@ -323,6 +481,58 @@
 
 .toggle-slider.active::before {
   transform: translateX(26px);
+}
+
+/* ─────────────────────────────────────────────────────────
+   REFRESH NOW BUTTON
+   ───────────────────────────────────────────────────────── */
+
+.settings-refresh-now {
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 5px;
+}
+
+.btn-refresh-now {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background-color: #e0f2f1;
+  color: #00796b;
+  border: 2px solid #80cbc4;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-refresh-now:hover:not(:disabled) {
+  background-color: #26a69a;
+  color: white;
+  border-color: #26a69a;
+  box-shadow: 0 4px 12px rgba(38, 166, 154, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-refresh-now:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-refresh-now:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-refresh-now.refreshing .refresh-icon {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -526,51 +736,6 @@
 }
 
 /* ─────────────────────────────────────────────────────────
-   PASSWORD WRAPPER + EYE TOGGLE
-   ───────────────────────────────────────────────────────── */
-
-.password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-wrapper .settings-input-field {
-  padding-right: 44px;
-}
-
-.password-toggle-btn {
-  position: absolute;
-  right: 12px;
-  background: none;
-  background-color: transparent;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  cursor: pointer;
-  color: #aaa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 4px;
-  transition: color 0.2s ease;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.password-toggle-btn:hover {
-  color: #26a69a;
-  background-color: transparent;
-}
-
-.password-toggle-btn:focus {
-  outline: none;
-  box-shadow: none;
-  background-color: transparent;
-}
-
-/* ─────────────────────────────────────────────────────────
    RESPONSIVE DESIGN
    ───────────────────────────────────────────────────────── */
 
@@ -613,6 +778,12 @@
   .summary-grid {
     grid-template-columns: 1fr;
   }
+
+  .settings-last-login {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -634,5 +805,16 @@
   .badge {
     font-size: 11px;
     padding: 4px 10px;
+  }
+
+  .btn-refresh-now {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .theme-preview-strip {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
   }
 }

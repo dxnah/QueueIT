@@ -1,4 +1,4 @@
-// Login.jsx
+// login.jsx
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -14,10 +14,10 @@ const LoginScreen = () => {
   const navigate = useNavigate();
 
   // ── Get credentials (localStorage overrides default from dashboardData) ──
-  const getStoredUsername = () => 
+  const getStoredUsername = () =>
     localStorage.getItem('adminUsername') || authData.defaultUsername;
-  
-  const getStoredPassword = () => 
+
+  const getStoredPassword = () =>
     localStorage.getItem('adminPassword') || authData.defaultPassword;
 
   // ── HANDLERS ──
@@ -88,7 +88,7 @@ const LoginScreen = () => {
             <input
               type="text"
               id="username"
-              value={username} //controls the input value
+              value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
               placeholder="Username"
@@ -129,10 +129,10 @@ const LoginScreen = () => {
 
         </form>
 
-        {/* Links */}
-        <Link className="simulate-link" onClick={simulateFormFill}>
+        {/* Simulate Log In — changed from <Link> to <button> */}
+        <button type="button" className="simulate-link" onClick={simulateFormFill}>
           Simulate Log In
-        </Link>
+        </button>
 
         <div className="auth-links">
           <Link to="#forgot-password" className="auth-link">
