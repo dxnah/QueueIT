@@ -1,6 +1,6 @@
 // DailyAnalytics.jsx
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import {
   AreaChart, Area,
   BarChart, Bar,
@@ -84,7 +84,6 @@ const generateForecastData = (month, weekIndex = null, day = null) => {
   const monthMult = getMonthMultiplier(month);
   const weekMult = weekIndex !== null ? (1 + weekIndex * 0.05) : 1;
   const dayMult = day !== null ? (1 / 30) : weekIndex !== null ? (1 / 4) : 1;
-  const monthIdx = MONTHS.indexOf(month);
 
   return vaccineData.map((v, i) => {
     const baseAvail = v.available;

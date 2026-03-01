@@ -6,11 +6,9 @@ import DailyAnalytics from '../components/DailyAnalytics';
 import '../styles/dashboard.css';
 import {
   vaccineData,
-  MONTHLY_REQUIREMENTS,
   PEAK_MONTHS,
   getMonthlyRequirement,
   getOrderUrgency,
-  dailyUsageLog,
   logDailyUsage,
   getUsedThisMonth,
 } from '../data/dashboardData';
