@@ -400,17 +400,17 @@ const DailyAnalytics = () => {
   });
 
   return (
-    <div className="analytics-wrapper">
+    <section className="analytics-wrapper">
 
       {/* ── Forecast Table ── */}
-      <div style={{ background: 'white', borderRadius: '14px', padding: '20px', marginBottom: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
+      <section style={{ background: 'white', borderRadius: '14px', padding: '20px', marginBottom: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}>
 
         {/* Controls row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <section style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '4px' }}>
+          <section style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
 
             {/* ── MONTHLY button + dropdown ── */}
-            <div style={{ position: 'relative' }}>
+            <section style={{ position: 'relative' }}>
               <button
                 type="button"
                 style={btnStyle(viewMode === 'monthly')}
@@ -424,7 +424,7 @@ const DailyAnalytics = () => {
                 📅 Monthly {viewMode === 'monthly' ? `(${selectedMonth.slice(0, 3)})` : ''} ▾
               </button>
               {monthDropOpen && (
-                <div style={{
+                <section style={{
                   position: 'absolute', top: '110%', right: 0, zIndex: 999,
                   background: 'white', border: '1px solid #e0e0e0',
                   borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
@@ -433,7 +433,7 @@ const DailyAnalytics = () => {
                   {MONTHS.map(m => {
                     const isPeakM = PEAK_MONTHS.includes(m);
                     return (
-                      <div
+                      <section
                         key={m}
                         onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
                         onMouseLeave={e => e.currentTarget.style.background = m === selectedMonth ? '#e0f7f4' : 'white'}
@@ -448,15 +448,15 @@ const DailyAnalytics = () => {
                           }}>🔥 PEAK</span>
                         )}
                         {m === selectedMonth && !isPeakM && <span style={{ color: '#26a69a', fontSize: '12px' }}>✓</span>}
-                      </div>
+                      </section>
                     );
                   })}
-                </div>
+                </section>
               )}
-            </div>
+            </section>
 
             {/* ── WEEKLY button + dropdown ── */}
-            <div style={{ position: 'relative' }}>
+            <section style={{ position: 'relative' }}>
               <button
                 type="button"
                 style={btnStyle(viewMode === 'weekly')}
@@ -470,14 +470,14 @@ const DailyAnalytics = () => {
                 📆 Weekly {viewMode === 'weekly' ? `(Wk ${selectedWeek + 1})` : ''} ▾
               </button>
               {weekDropOpen && (
-                <div style={{
+                <section style={{
                   position: 'absolute', top: '110%', right: 0, zIndex: 999,
                   background: 'white', border: '1px solid #e0e0e0',
                   borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                   minWidth: '160px', padding: '6px 0', overflow: 'hidden',
                 }}>
                   {[0, 1, 2, 3].map(wi => (
-                    <div
+                    <section
                       key={wi}
                       style={dropItemStyle(selectedWeek === wi)}
                       onMouseEnter={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : '#f5f5f5'}
@@ -486,14 +486,14 @@ const DailyAnalytics = () => {
                     >
                       Week {wi + 1}
                       {selectedWeek === wi && <span style={{ color: '#26a69a', fontSize: '12px' }}>✓</span>}
-                    </div>
+                    </section>
                   ))}
-                </div>
+                </section>
               )}
-            </div>
+            </section>
 
             {/* ── DAILY button + calendar ── */}
-            <div style={{ position: 'relative' }}>
+            <section  style={{ position: 'relative' }}>
               <button
                 type="button"
                 style={btnStyle(viewMode === 'daily')}
@@ -507,17 +507,17 @@ const DailyAnalytics = () => {
                 🗓️ Daily {viewMode === 'daily' ? `(${selectedMonth.slice(0, 3)} ${selectedDay})` : ''} ▾
               </button>
               {calOpen && (
-                <div style={{ position: 'absolute', top: '110%', right: 0, zIndex: 999 }}>
+                <section style={{ position: 'absolute', top: '110%', right: 0, zIndex: 999 }}>
                   <MiniCalendar
                     month={selectedMonth}
                     selectedDay={selectedDay}
                     onSelectDay={(d) => { setSelectedDay(d); setCalOpen(false); }}
                   />
-                </div>
+                </section>
               )}
-            </div>
+            </section>
 
-          </div>
+          </section>
 
           {/* Peak badge on header right */}
           {isPeak && (
@@ -529,7 +529,7 @@ const DailyAnalytics = () => {
               🔥 Peak Season Active
             </span>
           )}
-        </div>
+        </section>
 
         {/* Forecast table */}
         <ForecastTable
@@ -538,11 +538,11 @@ const DailyAnalytics = () => {
           day={viewMode === 'daily' ? selectedDay : null}
           viewMode={viewMode}
         />
-      </div>
+      </section>
 
       {/* ── Analytics Charts Section ── */}
-      <div className="analytics-header">
-        <div>
+      <section className="analytics-header">
+        <section>
           <h3 className="analytics-title">📊 Vaccine Analytics — {periodLabel}</h3>
           <p className="analytics-subtext">
             {viewMode === 'daily'
@@ -552,11 +552,11 @@ const DailyAnalytics = () => {
               : `Monthly dispensing overview for ${selectedMonth}`}
             {isPeak && ' · 🔥 Peak season demand'}
           </p>
-        </div>
-      </div>
+        </section>
+      </section>
 
       {/* Summary chips */}
-      <div className="analytics-stat-chips">
+      <section className="analytics-stat-chips">
         {[
           { label: 'Total Dispensed Today', value: totalToday.toLocaleString(), unit: 'doses', color: '#26a69a', icon: '💉' },
           { label: 'Total Wasted Today', value: wastedToday.toLocaleString(), unit: 'doses', color: '#e53935', icon: '🗑️' },
@@ -564,18 +564,18 @@ const DailyAnalytics = () => {
           { label: 'Peak Hour', value: peakHour.time || '—', unit: `${peakHour.totalDispensed || 0} doses`, color: '#f57f17', icon: '⏰' },
           { label: 'Hours Tracked', value: hourlyData.length, unit: 'hrs', color: '#5c6bc0', icon: '🕐' },
         ].map((chip, i) => (
-          <div key={i} className="analytics-chip" style={{ borderTop: `3px solid ${chip.color}` }}>
+          <section key={i} className="analytics-chip" style={{ borderTop: `3px solid ${chip.color}` }}>
             <span className="analytics-chip-icon">{chip.icon}</span>
             <span className="analytics-chip-value" style={{ color: chip.color }}>{chip.value}</span>
             <span className="analytics-chip-unit">{chip.unit}</span>
             <span className="analytics-chip-label">{chip.label}</span>
-          </div>
+          </section>
         ))}
-      </div>
+      </section>
 
       {/* Chart controls */}
-      <div className="analytics-controls">
-        <div className="analytics-tab-group">
+      <section className="analytics-controls">
+        <section className="analytics-tab-group">
           {[
             { key: 'dispensed', label: '💉 Dispensed by Hour' }, //area chart
             { key: 'stacked', label: '📊 Vaccine Breakdown' }, //bar chart
@@ -589,7 +589,7 @@ const DailyAnalytics = () => {
               {tab.label}
             </button>
           ))}
-        </div>
+        </section>
         {activeChart !== 'stock' && (
           <select
             value={selectedVax}
@@ -599,10 +599,10 @@ const DailyAnalytics = () => {
             {vaccineNames.map(n => <option key={n} value={n}>{n}</option>)}
           </select>
         )}
-      </div>
+      </section>
 
       {/* Chart area */}
-      <div className="analytics-chart-box">
+      <section className="analytics-chart-box">
 
         {activeChart === 'dispensed' && (
           <>
@@ -699,39 +699,39 @@ const DailyAnalytics = () => {
             </ResponsiveContainer>
           </>
         )}
-      </div>
+      </section>
 
       {/* Dispensed vs Wasted comparison */}
-      <div className="analytics-comparison">
+      <section className="analytics-comparison">
         <h4 className="analytics-comparison-label">Dispensed vs. Wasted per Vaccine — {periodLabel}</h4>
-        <div className="analytics-comparison-bars">
+        <section className="analytics-comparison-bars">
           {vaccineNames.map((name, i) => {
             const disp = hourlyData.reduce((s, h) => s + (h[name] || 0), 0);
             const wasted = hourlyData.reduce((s, h) => s + (h[`${name}_w`] || 0), 0);
             const total = disp + wasted;
             const pct = total > 0 ? ((disp / total) * 100).toFixed(0) : 0;
             return (
-              <div key={name} className="analytics-comparison-item">
-                <div className="analytics-comparison-header">
+              <section key={name} className="analytics-comparison-item">
+                <section className="analytics-comparison-header">
                   <span className="analytics-comparison-name">{name}</span>
                   <span className="analytics-comparison-efficiency" style={{ color: CHART_COLORS[i] }}>
                     {pct}% efficient
                   </span>
-                </div>
-                <div className="analytics-track-bar">
-                  <div className="analytics-track-fill" style={{ width: `${pct}%`, background: CHART_COLORS[i] }} />
-                </div>
-                <div className="analytics-comparison-footer">
+                </section>
+                <section className="analytics-track-bar">
+                  <section className="analytics-track-fill" style={{ width: `${pct}%`, background: CHART_COLORS[i] }} />
+                </section>
+                <section className="analytics-comparison-footer">
                   <span style={{ color: CHART_COLORS[i] }}>💉 {disp.toLocaleString()} dispensed</span>
                   <span style={{ color: '#e53935' }}>🗑️ {wasted} wasted</span>
-                </div>
-              </div>
+                </section>
+              </section>
             );
           })}
-        </div>
-      </div>
+        </section>
+      </section>
 
-    </div>
+    </section>
   );
 };
 

@@ -96,7 +96,7 @@ const Reports = () => {
   const handleExportReport    = (fmt) => alert(`Exporting report as ${fmt.toUpperCase()}`);
 
   return (
-    <div className="dashboard-container">
+    <section className="dashboard-container">
 
       <button
         type="button"
@@ -372,7 +372,7 @@ const Reports = () => {
         </section>
 
       </main>
-    </div>
+    </section>
   );
 };
 

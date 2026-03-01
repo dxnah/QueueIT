@@ -107,7 +107,7 @@ const Settings = () => {
   );
 
   return (
-    <div className={`dashboard-container${darkMode ? ' dark-mode' : ''}`}>
+    <section className={`dashboard-container${darkMode ? ' dark-mode' : ''}`}>
 
       <button
         type="button"
@@ -348,7 +348,7 @@ const Settings = () => {
 
         </form>
       </main>
-    </div>
+    </section>
   );
 };
 

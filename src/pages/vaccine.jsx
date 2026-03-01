@@ -149,7 +149,7 @@ const VaccineManagement = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <section className="dashboard-container">
 
       <button type="button" className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>☰</button>
 
@@ -163,7 +163,6 @@ const VaccineManagement = () => {
           <div className="modal-box">
             <div className="modal-header">
               <h3 className="modal-title">📋 Log Daily Usage — {selectedMonth}</h3>
-              <button type="button" className="modal-close-btn" onClick={() => setShowLogModal(false)}>✕</button>
             </div>
             <div className="modal-field">
               <label className="modal-label">Day of {selectedMonth}</label>
@@ -210,7 +209,6 @@ const VaccineManagement = () => {
                   </p>
                 </div>
               </div>
-              <button type="button" onClick={closeForm} className="modal-green-close">✕</button>
             </div>
 
             {/* Modal body */}
@@ -425,7 +423,7 @@ const VaccineManagement = () => {
         </svg>
       </button>
 
-    </div>
+    </section>
   );
 };
 

@@ -966,7 +966,7 @@
 }
 
 .modal-green-close {
-  background: rgba(255,255,255,0.2);
+  background: transparent;
   border: none;
   border-radius: 50%;
   width: 32px;
@@ -981,7 +981,7 @@
 }
 
 .modal-green-close:hover {
-  background: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.15);
 }
 
 .modal-close-btn:hover {

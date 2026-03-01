@@ -103,7 +103,7 @@ const Notifications = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <section className="dashboard-container">
 
       <button
         type="button"
@@ -183,7 +183,7 @@ const Notifications = () => {
         </div>
 
         {/* ── Notifications List (grouped by date) ─────────────────────── */}
-        <div className="notifications-list">
+        <section className="notifications-list">
           {filteredNotifications.length > 0 ? (
             DATE_GROUP_ORDER.filter(g => grouped[g]).map(group => (
               <div key={group}>
@@ -228,8 +228,8 @@ const Notifications = () => {
             ))
           ) : (
             /* ── Empty State ─────────────────────────────────────────── */
-            <div className="empty-state">
-              <div className="empty-state-illustration">🔕</div>
+            <section className="empty-state">
+              <section className="empty-state-illustration">🔕</section>
               <h3 className="empty-state-title">
                 {searchQuery ? 'No results found' : 'You\'re all caught up!'}
               </h3>
@@ -243,12 +243,12 @@ const Notifications = () => {
                   Clear Search
                 </button>
               )}
-            </div>
+            </section>
           )}
-        </div>
+        </section>
 
       </section>
-    </div>
+    </section>
   );
 };
 

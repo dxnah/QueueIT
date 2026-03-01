@@ -46,19 +46,19 @@ const DropdownWrap = ({ trigger, children, isOpen, onClose }) => {
   const ref = useRef(null);
   useOutsideClick(ref, onClose);
   return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
+    <section ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
       {trigger}
       {isOpen && (
-        <div style={{
+        <section style={{
           position: 'absolute', top: '110%', right: 0, zIndex: 999,
           background: 'white', border: '1px solid #e0e0e0',
           borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
           minWidth: '180px', padding: '6px 0', overflow: 'hidden',
         }}>
           {children}
-        </div>
+        </section>
       )}
-    </div>
+    </section>
   );
 };
 
@@ -81,23 +81,23 @@ const LogUsageModal = ({ month, onClose, onSave }) => {
   };
 
   return (
-    <div style={{
+    <section style={{
       position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)',
       zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      <div style={{
+      <section style={{
         background: 'white', borderRadius: '16px', padding: '28px',
         width: '420px', maxWidth: '95vw', boxShadow: '0 12px 40px rgba(0,0,0,0.2)',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#333' }}>
             📋 Log Daily Usage — {month}
           </h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', color: '#999' }}>✕</button>
-        </div>
+        </section>
 
         {/* Day selector */}
-        <div style={{ marginBottom: '16px' }}>
+        <section style={{ marginBottom: '16px' }}>
           <label style={{ fontSize: '13px', fontWeight: '600', color: '#555', display: 'block', marginBottom: '6px' }}>
             Day of {month}
           </label>
@@ -110,11 +110,11 @@ const LogUsageModal = ({ month, onClose, onSave }) => {
               <option key={d} value={d}>Day {d}</option>
             ))}
           </select>
-        </div>
+        </section>
 
         {/* Doses per vaccine */}
         {vaccineData.map(v => (
-          <div key={v.vaccine} style={{ marginBottom: '12px' }}>
+          <section key={v.vaccine} style={{ marginBottom: '12px' }}>
             <label style={{ fontSize: '13px', fontWeight: '600', color: '#555', display: 'block', marginBottom: '4px' }}>
               {v.vaccine}
             </label>
@@ -126,10 +126,10 @@ const LogUsageModal = ({ month, onClose, onSave }) => {
               onChange={e => setAmounts(prev => ({ ...prev, [v.vaccine]: e.target.value }))}
               style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '13px', boxSizing: 'border-box' }}
             />
-          </div>
+          </section>
         ))}
 
-        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+        <section style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
           <button
             onClick={handleSave}
             style={{
@@ -150,9 +150,9 @@ const LogUsageModal = ({ month, onClose, onSave }) => {
           >
             Cancel
           </button>
-        </div>
-      </div>
-    </div>
+        </section>
+      </section>
+    </section>
   );
 };
 
@@ -217,7 +217,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <section className="dashboard-container">
 
       <button type="button" className="mobile-menu-toggle"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Toggle navigation menu">
@@ -470,7 +470,7 @@ const Dashboard = () => {
         </section>
 
       </main>
-    </div>
+    </section>
   );
 };
 

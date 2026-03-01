@@ -59,19 +59,19 @@ const LoginScreen = () => {
   );
 
   return (
-    <div className="login-screen">
-      <div className="login-container">
+    <section className="login-screen">
+      <section className="login-container">
 
         {/* Logo & Title */}
-        <div className="logo-section">
+        <section className="logo-section">
           <img src={logo} alt="VaxFlow Logo" className="logo" />
-          <div className="title-section">
+          <section className="title-section">
             <h1 className="system-title">VaxFlow</h1>
             <p className="system-subtitle">
               A Machine Learning Assisted Vaccine Management System
             </p>
-          </div>
-        </div>
+          </section>
+        </section>
 
         {/* Heading */}
         <h2 className="login-heading">LOG IN</h2>
@@ -81,7 +81,7 @@ const LoginScreen = () => {
         <form onSubmit={handleLogin}>
 
           {/* Username */}
-          <div className="input-container">
+          <section className="input-container">
             <label htmlFor="username" className="input-label">
               Username
             </label>
@@ -94,14 +94,14 @@ const LoginScreen = () => {
               placeholder="Username"
               className="input-field"
             />
-          </div>
+          </section>
 
           {/* Password with eye toggle */}
-          <div className="input-container">
+          <section className="input-container">
             <label htmlFor="password" className="input-label">
               Password
             </label>
-            <div className="login-password-wrapper">
+            <section className="login-password-wrapper">
               <input
                 type={showPassword ? 'text' : 'password'}
                 id="password"
@@ -118,8 +118,8 @@ const LoginScreen = () => {
                 title={showPassword ? 'Hide password' : 'Show password'}>
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
               </button>
-            </div>
-          </div>
+            </section>
+          </section>
 
           {error && <p className="error-message">{error}</p>}
 
@@ -133,14 +133,14 @@ const LoginScreen = () => {
           Simulate Log In
         </Link>
 
-        <div className="auth-links">
+        <section className="auth-links">
           <Link to="#forgot-password" className="auth-link">
             Forgot Password?
           </Link>
-        </div>
+        </section>
 
-      </div>
-    </div>
+      </section>
+    </section>
   );
 };
 
