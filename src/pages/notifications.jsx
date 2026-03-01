@@ -1,6 +1,6 @@
 // notifications.jsx
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext } from 'react';
 import Sidebar from '../components/Sidebar';
 import { notificationsData } from '../data/dashboardData';
 import '../styles/dashboard.css';
@@ -37,10 +37,6 @@ const Notifications = () => {
   const [searchQuery, setSearchQuery]           = useState('');
 
   const { notifications, setNotifications, unreadCount } = useNotifications();
-
-  useEffect(() => {
-  setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
-}, [setNotifications]);
 
   const handleMarkAsRead = (id) => {
     setNotifications(prev =>
@@ -103,7 +99,7 @@ const Notifications = () => {
   };
 
   return (
-    <section className="dashboard-container">
+    <div className="dashboard-container">
 
       <button
         type="button"
@@ -183,7 +179,7 @@ const Notifications = () => {
         </div>
 
         {/* ── Notifications List (grouped by date) ─────────────────────── */}
-        <section className="notifications-list">
+        <div className="notifications-list">
           {filteredNotifications.length > 0 ? (
             DATE_GROUP_ORDER.filter(g => grouped[g]).map(group => (
               <div key={group}>
@@ -199,7 +195,7 @@ const Notifications = () => {
                         {getNotificationIcon(notif.type)}
                       </div>
                       <div className="notification-content">
-                        <h4 className="notification-title">{notif.title}</h4>
+                        <h3 className="notification-title">{notif.title}</h3>
                         <p className="notification-message">{notif.message}</p>
                         <span className="notification-time">{notif.time}</span>
                       </div>
@@ -228,8 +224,8 @@ const Notifications = () => {
             ))
           ) : (
             /* ── Empty State ─────────────────────────────────────────── */
-            <section className="empty-state">
-              <section className="empty-state-illustration">🔕</section>
+            <div className="empty-state">
+              <div className="empty-state-illustration">🔕</div>
               <h3 className="empty-state-title">
                 {searchQuery ? 'No results found' : 'You\'re all caught up!'}
               </h3>
@@ -243,12 +239,12 @@ const Notifications = () => {
                   Clear Search
                 </button>
               )}
-            </section>
+            </div>
           )}
-        </section>
+        </div>
 
       </section>
-    </section>
+    </div>
   );
 };
 
