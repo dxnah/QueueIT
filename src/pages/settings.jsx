@@ -1,6 +1,6 @@
-// settings.jsx
+// Settings.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import '../styles/dashboard.css';
 import '../styles/settings.css';
@@ -11,11 +11,19 @@ const Settings = () => {
   const [saveMessage, setSaveMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const fileInputRef = useRef(null);
 
+  // Profile picture state — persisted in localStorage
+  const [profilePic, setProfilePic] = useState(() => {
+    return localStorage.getItem('profilePic') || null;
+  });
+
+  // Dark mode state — persisted in localStorage
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('darkMode') === 'true';
   });
 
+  // Apply / remove dark-mode class on <body> whenever darkMode changes
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add('dark-mode');
@@ -25,6 +33,7 @@ const Settings = () => {
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
 
+  // Last login — store current time on mount if not already set
   useEffect(() => {
     const stored = localStorage.getItem('lastLogin');
     if (!stored) {
@@ -44,6 +53,7 @@ const Settings = () => {
       })
     : 'N/A';
 
+  // Load saved credentials from localStorage, fall back to defaults
   const [settings, setSettings] = useState({
     notifications: true,
     emailAlerts: false,
@@ -66,11 +76,38 @@ const Settings = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-
-    // Save to localStorage
     localStorage.setItem('adminUsername', settings.adminUsername);
     localStorage.setItem('adminPassword', settings.adminPassword);
     setSaveMessage('✅ Settings saved successfully!');
+    setTimeout(() => setSaveMessage(''), 3000);
+  };
+
+  // Profile picture handlers
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setSaveMessage('❌ Please select a valid image file.');
+      setTimeout(() => setSaveMessage(''), 3000);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result;
+      setProfilePic(dataUrl);
+      localStorage.setItem('profilePic', dataUrl);
+      setSaveMessage('✅ Profile picture updated!');
+      setTimeout(() => setSaveMessage(''), 3000);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveProfilePic = () => {
+    setProfilePic(null);
+    localStorage.removeItem('profilePic');
+    setSaveMessage('🗑️ Profile picture removed.');
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
@@ -107,10 +144,9 @@ const Settings = () => {
   );
 
   return (
-    <section className={`dashboard-container${darkMode ? ' dark-mode' : ''}`}>
+    <div className={`dashboard-container${darkMode ? ' dark-mode' : ''}`}>
 
       <button
-        type="button"
         className="mobile-menu-toggle"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
         ☰
@@ -125,7 +161,7 @@ const Settings = () => {
         <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
-      <main className="main-content">
+      <div className="main-content">
 
         <h2 className="dashboard-heading">⚙️ Admin Settings</h2>
         <p className="dashboard-subheading">Configure system preferences</p>
@@ -138,22 +174,69 @@ const Settings = () => {
 
           {/* ── Admin Profile ── */}
           <div className="settings-card">
-            <h3 className="section-title">👤 Admin Profile</h3>
 
-            {/* Last Login Info */}
-            <div className="settings-last-login">
-              <span className="last-login-icon">🕐</span>
-              <div className="last-login-text">
-                <span className="last-login-label">Last Login</span>
-                <span className="last-login-value">{lastLoginDisplay}</span>
+            {/* Header row: title + last login on left, avatar on right */}
+            <div className="profile-header-row">
+              <div className="profile-header-left">
+                <h3 className="section-title" style={{ marginBottom: '8px' }}>👤 Admin Profile</h3>
+
+                {/* Last Login Info */}
+                <div className="settings-last-login">
+                  <span className="last-login-icon">🕐</span>
+                  <div className="last-login-text">
+                    <span className="last-login-label">Last Login</span>
+                    <span className="last-login-value">{lastLoginDisplay}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Profile Picture (right side) ── */}
+              <div className="profile-pic-right">
+                <div className="profile-pic-wrapper">
+                  {profilePic ? (
+                    <img
+                      src={profilePic}
+                      alt="Profile"
+                      className="profile-pic-preview"
+                    />
+                  ) : (
+                    <div className="profile-pic-placeholder">
+                      <span className="profile-pic-initials">
+                        {(settings.adminUsername || 'A').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    className="profile-pic-edit-btn"
+                    onClick={() => fileInputRef.current.click()}
+                    title="Change profile picture">
+                    ✏️
+                  </button>
+                </div>
+                {profilePic && (
+                  <button
+                    type="button"
+                    className="btn btn-danger btn-sm"
+                    onClick={handleRemoveProfilePic}>
+                    🗑️ Remove
+                  </button>
+                )}
               </div>
             </div>
 
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleProfilePicChange}
+            />
+
             <div className="settings-input-container">
-              <label htmlFor="adminUsername" className="settings-input-label">Username</label>
+              <label className="settings-input-label">Username</label>
               <input
                 type="text"
-                id="adminUsername"
                 name="adminUsername"
                 value={settings.adminUsername}
                 onChange={handleChange}
@@ -163,13 +246,10 @@ const Settings = () => {
             </div>
 
             <div className="settings-input-container">
-              <label htmlFor="adminPassword" className="settings-input-label">Password</label>
-
-              {/* Password field with eye toggle */}
+              <label className="settings-input-label">Password</label>
               <div className="password-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  id="adminPassword"
                   name="adminPassword"
                   value={settings.adminPassword}
                   onChange={handleChange}
@@ -187,9 +267,8 @@ const Settings = () => {
             </div>
 
             <div className="settings-input-container">
-              <label htmlFor="language" className="settings-input-label">Language</label>
+              <label className="settings-input-label">Language</label>
               <select
-                id="language"
                 name="language"
                 value={settings.language}
                 onChange={handleChange}
@@ -207,9 +286,7 @@ const Settings = () => {
             <div className="settings-toggle-row">
               <div className="settings-toggle-info">
                 <h4 className="settings-toggle-title">Enable Notifications</h4>
-                <p className="settings-toggle-description">
-                  Receive alerts for stock updates
-                </p>
+                <p className="settings-toggle-description">Receive alerts for stock updates</p>
               </div>
               <label className="toggle-switch">
                 <input
@@ -224,9 +301,7 @@ const Settings = () => {
             <div className="settings-toggle-row">
               <div className="settings-toggle-info">
                 <h4 className="settings-toggle-title">Email Alerts</h4>
-                <p className="settings-toggle-description">
-                  Send email notifications for critical alerts
-                </p>
+                <p className="settings-toggle-description">Send email notifications for critical alerts</p>
               </div>
               <label className="toggle-switch">
                 <input
@@ -242,9 +317,7 @@ const Settings = () => {
             <div className="settings-toggle-row">
               <div className="settings-toggle-info">
                 <h4 className="settings-toggle-title">SMS Alerts</h4>
-                <p className="settings-toggle-description">
-                  Send SMS notifications for critical stock alerts
-                </p>
+                <p className="settings-toggle-description">Send SMS notifications for critical stock alerts</p>
               </div>
               <label className="toggle-switch">
                 <input
@@ -265,9 +338,7 @@ const Settings = () => {
             <div className="settings-toggle-row">
               <div className="settings-toggle-info">
                 <h4 className="settings-toggle-title">Auto Refresh Dashboard</h4>
-                <p className="settings-toggle-description">
-                  Automatically refresh vaccine data
-                </p>
+                <p className="settings-toggle-description">Automatically refresh vaccine data</p>
               </div>
               <label className="toggle-switch">
                 <input
@@ -281,12 +352,9 @@ const Settings = () => {
 
             {settings.autoRefresh && (
               <div className="settings-input-container">
-                <label htmlFor="refreshInterval" className="settings-input-label">
-                  Refresh Interval (seconds)
-                </label>
+                <label className="settings-input-label">Refresh Interval (seconds)</label>
                 <input
                   type="number"
-                  id="refreshInterval"
                   name="refreshInterval"
                   value={settings.refreshInterval}
                   onChange={handleChange}
@@ -300,7 +368,6 @@ const Settings = () => {
               </div>
             )}
 
-            {/* Manual Refresh Now button */}
             <div className="settings-refresh-now">
               <button
                 type="button"
@@ -310,9 +377,7 @@ const Settings = () => {
                 <span className="refresh-icon">🔃</span>
                 {isRefreshing ? 'Refreshing...' : 'Refresh Now'}
               </button>
-              <p className="settings-helper-text">
-                Manually trigger an immediate data refresh
-              </p>
+              <p className="settings-helper-text">Manually trigger an immediate data refresh</p>
             </div>
           </div>
 
@@ -326,9 +391,7 @@ const Settings = () => {
                   {darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
                 </h4>
                 <p className="settings-toggle-description">
-                  {darkMode
-                    ? 'Currently using dark theme'
-                    : 'Currently using light theme'}
+                  {darkMode ? 'Currently using dark theme' : 'Currently using light theme'}
                 </p>
               </div>
               <label className="toggle-switch">
@@ -347,8 +410,8 @@ const Settings = () => {
           </button>
 
         </form>
-      </main>
-    </section>
+      </div>
+    </div>
   );
 };
 

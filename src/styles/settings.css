@@ -100,6 +100,19 @@ body.dark-mode .btn-refresh-now:hover:not(:disabled) {
   border-color: #26a69a;
 }
 
+/* Profile picture — dark mode */
+body.dark-mode .profile-header-row {
+  border-bottom-color: #2e2e3e;
+}
+
+body.dark-mode .profile-pic-placeholder {
+  border-color: #3a3a4a;
+}
+
+body.dark-mode .profile-pic-hint {
+  color: #666;
+}
+
 /* ─────────────────────────────────────────────────────────
    HEADER
    ───────────────────────────────────────────────────────── */
@@ -212,20 +225,147 @@ body.dark-mode .btn-refresh-now:hover:not(:disabled) {
   transition: all 0.3s ease;
 }
 
+.settings-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* ─────────────────────────────────────────────────────────
+   PROFILE PICTURE — right-side layout
+   ───────────────────────────────────────────────────────── */
+
+/* Row: left (title + last login) | right (avatar) */
+.profile-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.profile-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Avatar column on the right */
+.profile-pic-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 130px;
+  padding: 0 8px;
+}
+
+.profile-pic-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.profile-pic-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #26a69a;
+  display: block;
+}
+
+.profile-pic-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #26a69a, #5c6bc0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #e0e0e0;
+}
+
+.profile-pic-initials {
+  font-size: 36px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.profile-pic-edit-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #26a69a;
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.2s;
+}
+
+.profile-pic-edit-btn:hover {
+  background: #00897b;
+}
+
+.profile-pic-upload-btns {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.profile-pic-hint {
+  font-size: 11px;
+  color: #aaa;
+  margin: 0;
+  text-align: center;
+}
+
+.btn-sm {
+  padding: 5px 12px !important;
+  font-size: 12px !important;
+  min-width: unset !important;
+  flex: unset !important;
+}
+
+.btn-danger {
+  background: #e53935;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.btn-danger:hover {
+  background: #c62828;
+}
+
 /* ─────────────────────────────────────────────────────────
    LAST LOGIN INFO
    ───────────────────────────────────────────────────────── */
 
 .settings-last-login {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
   background-color: #f0faf9;
   border: 1px solid #b2dfdb;
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 0;
   animation: fadeIn 0.4s ease-out;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .last-login-icon {
@@ -784,6 +924,18 @@ body.dark-mode .btn-refresh-now:hover:not(:disabled) {
     align-items: flex-start;
     gap: 6px;
   }
+
+  .profile-header-row {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+
+  .profile-pic-right {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -816,5 +968,14 @@ body.dark-mode .btn-refresh-now:hover:not(:disabled) {
     flex-direction: column;
     gap: 8px;
     align-items: flex-start;
+  }
+
+  .profile-pic-btns {
+    flex-direction: column;
+  }
+
+  .profile-pic-btns .btn {
+    min-width: unset;
+    width: 100%;
   }
 }

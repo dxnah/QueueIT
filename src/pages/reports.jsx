@@ -1,4 +1,4 @@
-// reports.jsx
+// Reports.jsx
 
 import React, { useState, useMemo } from 'react';
 import {
@@ -10,19 +10,10 @@ import { reportsData } from '../data/dashboardData';
 import '../styles/dashboard.css';
 import '../styles/reports.css';
 
+
 /* ─── tiny helpers ─── */
 const calcEff = (adm, wst) => ((adm / (adm + wst)) * 100).toFixed(1);
 
-const KpiCard = ({ icon, label, value, sub, accent }) => (
-  <div className="kpi-card" style={{ borderTopColor: accent }}>
-    <div className="kpi-icon" style={{ background: `${accent}18`, color: accent }}>{icon}</div>
-    <div className="kpi-body">
-      <span className="kpi-label">{label}</span>
-      <span className="kpi-value">{value}</span>
-      {sub && <span className="kpi-sub">{sub}</span>}
-    </div>
-  </div>
-);
 
 const Reports = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -35,18 +26,8 @@ const Reports = () => {
   const [sortConfig, setSortConfig] = useState({ key: null, dir: 'asc' });
   const [reportData]                = useState(reportsData);
 
+  /* ── derived data ── */
   const vaccineRows = reportData['vaccine-usage'];
-
-  const totals = useMemo(() => {
-    const adm = vaccineRows.reduce((s, r) => s + r.administered, 0);
-    const wst = vaccineRows.reduce((s, r) => s + r.wasted,       0);
-    const rem = vaccineRows.reduce((s, r) => s + r.remaining,    0);
-    return { adm, wst, rem, eff: calcEff(adm, wst) };
-  }, [vaccineRows]);
-
-  const mostUsed = useMemo(() =>
-    [...vaccineRows].sort((a, b) => b.administered - a.administered)[0]?.vaccine ?? '—',
-  [vaccineRows]);
 
   /* ── sorting ── */
   const handleSort = (key) => {
@@ -96,7 +77,7 @@ const Reports = () => {
   const handleExportReport    = (fmt) => alert(`Exporting report as ${fmt.toUpperCase()}`);
 
   return (
-    <section className="dashboard-container">
+    <div className="dashboard-container">
 
       <button
         type="button"
@@ -109,13 +90,15 @@ const Reports = () => {
 
       <Sidebar
         isMobileMenuOpen={isMobileMenuOpen}
-        onMenuClose={() => setIsMobileMenuOpen(false)}/>
+        onMenuClose={() => setIsMobileMenuOpen(false)}
+      />
 
       {isMobileMenuOpen && (
         <div
           className="overlay"
           onClick={() => setIsMobileMenuOpen(false)}
-          role="presentation"/>
+          role="presentation"
+        />
       )}
 
       <main className="main-content">
@@ -124,36 +107,6 @@ const Reports = () => {
           <h1 className="dashboard-heading">📈 Reports & Analytics</h1>
           <p className="dashboard-subheading">Generate and view system performance reports</p>
         </header>
-
-        {/* ── KPI SUMMARY CARDS ── */}
-        {selectedReport === 'vaccine-usage' && (
-          <div className="kpi-grid">
-            <KpiCard
-              icon="💉"
-              label="Total Administered"
-              value={`${totals.adm.toLocaleString()} doses`}
-              sub="This period"
-              accent="#26a69a"/>
-            <KpiCard
-              icon="⚠️"
-              label="Total Wasted"
-              value={`${totals.wst} doses`}
-              sub={totals.wst > 20 ? 'Above threshold' : 'Within threshold'}
-              accent={totals.wst > 20 ? '#e53935' : '#f57f17'}/>
-            <KpiCard
-              icon="📦"
-              label="Total Remaining"
-              value={`${totals.rem.toLocaleString()} doses`}
-              sub="In inventory"
-              accent="#5c6bc0"/>
-            <KpiCard
-              icon="✅"
-              label="Avg Efficiency"
-              value={`${totals.eff}%`}
-              sub={`Best: ${mostUsed}`}
-              accent={parseFloat(totals.eff) >= 97 ? '#2e7d32' : '#f57f17'}/>
-          </div>
-        )}
 
         {/* ── REPORT CONFIGURATION ── */}
         <section className="settings-card" aria-label="Report configuration">
@@ -198,7 +151,8 @@ const Reports = () => {
                   name="startDate"
                   value={dateRange.startDate}
                   onChange={handleDateChange}
-                  className="form-control"/>
+                  className="form-control"
+                />
               </div>
               <div className="form-group">
                 <label htmlFor="report-end">End Date</label>
@@ -208,7 +162,8 @@ const Reports = () => {
                   name="endDate"
                   value={dateRange.endDate}
                   onChange={handleDateChange}
-                  className="form-control"/>
+                  className="form-control"
+                />
               </div>
             </div>
           )}
@@ -238,20 +193,24 @@ const Reports = () => {
                     dataKey="name"
                     tick={{ fontSize: 12, fill: '#666' }}
                     axisLine={{ stroke: '#e0e0e0' }}
-                    tickLine={false}/>
+                    tickLine={false}
+                  />
                   <YAxis
                     tick={{ fontSize: 12, fill: '#666' }}
                     axisLine={false}
-                    tickLine={false}/>
+                    tickLine={false}
+                  />
                   <Tooltip
                     contentStyle={{
                       borderRadius: '8px',
                       border: '1px solid #e0e0e0',
                       fontSize: '13px',
                     }}
-                    formatter={(value, name) => [`${value} doses`, name]}/>
+                    formatter={(value, name) => [`${value} doses`, name]}
+                  />
                   <Legend
-                    wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }}/>
+                    wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }}
+                  />
                   <Bar dataKey="Administered" fill="#26a69a" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Wasted"       fill="#ef5350" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Remaining"    fill="#5c6bc0" radius={[4, 4, 0, 0]} />
@@ -372,9 +331,8 @@ const Reports = () => {
         </section>
 
       </main>
-    </section>
+    </div>
   );
 };
-
 
 export default Reports;
