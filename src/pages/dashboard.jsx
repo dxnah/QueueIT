@@ -8,8 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   vaccineData,
   PEAK_MONTHS,
-  logDailyUsage,
-  getUsedThisMonth,
 } from '../data/dashboardData';
 
 const MONTHS = [
@@ -19,7 +17,6 @@ const MONTHS = [
 
 // ── Same forecast helper that lives in DemandForecast.jsx ──────────────────
 // Duplicated here so Dashboard has no cross-page import dependency
-const seededRand = (seed) => { const x = Math.sin(seed + 1) * 10000; return x - Math.floor(x); };
 const getMonthMultiplier = (month) => PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
 
 const generateForecastData = (month) => {

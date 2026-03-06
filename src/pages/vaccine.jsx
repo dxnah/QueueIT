@@ -8,7 +8,6 @@ import {
   PEAK_MONTHS,
   getMonthlyRequirement,
   getOrderUrgency,
-  getUsedThisMonth,
 } from '../data/dashboardData';
 import '../styles/dashboard.css';
 import '../styles/vaccine.css';
@@ -28,7 +27,7 @@ const MONTH_START_DAYS = {
   July:6,August:2,September:5,October:0,November:3,December:5,
 };
 
-// ─── Mini Calendar (same as DemandForecast) ───────────────────────────────────
+// ─── Mini Calendar ────────────────────────────────────────────────────────────
 const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
   const totalDays = DAYS_IN_MONTH[month] || 30;
   const startDay  = MONTH_START_DAYS[month] || 0;
@@ -142,8 +141,7 @@ const VaccineManagement = () => {
 
   const getVaccineMonthlyUrgency = (vaccineName) => {
     const required  = getMonthlyRequirement(vaccineName, selectedMonth);
-    const usedSoFar = getUsedThisMonth(vaccineName, selectedMonth);
-    const remaining = Math.max(0, required - usedSoFar);
+    const remaining = Math.max(0, required);
     return getOrderUrgency(remaining, required);
   };
 
@@ -326,9 +324,6 @@ const VaccineManagement = () => {
         </div>
 
         {saveMessage && <div className="alert alert-success">{saveMessage}</div>}
-
-        {/* ── STATS CARDS REMOVED ── */}
-        {/* ── LOG DAILY USAGE REMOVED ── */}
 
         {isPeak && (
           <div className="peak-notice">
