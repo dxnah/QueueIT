@@ -46,6 +46,15 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           💉 VACCINE MANAGEMENT
         </button>
 
+        {/* ✅ NEW — Demand Forecast page */}
+        <button
+          type="button"
+          className={isActive('/demand-forecast') ? 'nav-link nav-link-active' : 'nav-link'}
+          onClick={() => handleNavClick('/demand-forecast')}
+          aria-current={isActive('/demand-forecast') ? 'page' : undefined}>
+          🤖 DEMAND FORECAST
+        </button>
+
         <button
           type="button"
           className={isActive('/reports') ? 'nav-link nav-link-active' : 'nav-link'}
