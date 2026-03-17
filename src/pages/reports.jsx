@@ -14,17 +14,6 @@ import '../styles/reports.css';
 /* ─── tiny helpers ─── */
 const calcEff = (adm, wst) => ((adm / (adm + wst)) * 100).toFixed(1);
 
-const KpiCard = ({ icon, label, value, sub, accent }) => (
-  <div className="kpi-card" style={{ borderTopColor: accent }}>
-    <div className="kpi-icon" style={{ background: `${accent}18`, color: accent }}>{icon}</div>
-    <div className="kpi-body">
-      <span className="kpi-label">{label}</span>
-      <span className="kpi-value">{value}</span>
-      {sub && <span className="kpi-sub">{sub}</span>}
-    </div>
-  </div>
-);
-
 const Reports = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod]     = useState('monthly');
