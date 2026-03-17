@@ -5,13 +5,10 @@ import Sidebar from '../components/Sidebar';
 import DailyAnalytics from '../components/DailyAnalytics';
 import useClickOutside from '../hooks/useClickOutside';
 import '../styles/dashboard.css';
+import { useNavigate } from 'react-router-dom';
 import {
   vaccineData,
   PEAK_MONTHS,
-  getMonthlyRequirement,
-  getOrderUrgency,
-  logDailyUsage,
-  getUsedThisMonth,
 } from '../data/dashboardData';
 
 // ─── Month list ───────────────────────────────────────────────────────────────
@@ -130,7 +127,7 @@ const Dashboard = () => {
   const [showLogModal, setShowLogModal]         = useState(false);
   const [refreshKey, setRefreshKey]             = useState(0);
 
-  // ── DYNAMIC CALCULATIONS ───────────────────────────────
+  // ── DYNAMIC CALCULATIONS ──────────────────────────────
   const totalAvailable  = vaccineData.reduce((sum, v) => sum + v.available, 0);
   const lowStockCount   = vaccineData.filter(v => v.status === 'Low Stock').length;
   const outOfStockCount = vaccineData.filter(v => v.status === 'Out Stock').length;
@@ -141,11 +138,9 @@ const Dashboard = () => {
   const getAvailableColor  = (t) => t > 500 ? '#26a69a' : t > 100 ? '#f57f17' : '#c62828';
   const getLowStockColor   = (c) => c === 0 ? '#26a69a' : c <= 2 ? '#f57f17' : '#c62828';
   const getOutOfStockColor = (c) => c === 0 ? '#26a69a' : '#c62828';
-
   const getAvailableLabel  = (t) => t > 500 ? '✅ Stock is sufficient' : t > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
   const getLowStockLabel   = (c) => c === 0 ? '✅ All vaccines well stocked' : c <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
   const getOutOfStockLabel = (c) => c === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
-
   const getVaccineStatusClass = (s) => s === 'In Stock' ? 'status-in-stock' : s === 'Low Stock' ? 'status-low-stock' : 'status-out-stock';
 
   // ── MONTHLY ORDER DATA ──────────────────────────────────
@@ -184,14 +179,6 @@ const Dashboard = () => {
         <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
-      {showLogModal && (
-        <LogUsageModal
-          month={orderMonth}
-          onClose={() => setShowLogModal(false)}
-          onSave={() => setRefreshKey(k => k + 1)}
-        />
-      )}
-
       <main className="main-content">
 
         <header>
@@ -200,7 +187,7 @@ const Dashboard = () => {
         </header>
 
         {/* ── STATS CARDS ── */}
-        <section className="stats-container" aria-label="Dashboard Statistics">
+        <section className="stats-container">
           <div className="stat-box" style={{ borderTop: `4px solid ${getAvailableColor(totalAvailable)}` }}>
             <h3 className="stat-title">Vaccines Available</h3>
             <p className="stat-number" style={{ color: getAvailableColor(totalAvailable) }}>{totalAvailable.toLocaleString()}</p>
@@ -223,7 +210,7 @@ const Dashboard = () => {
           </div>
         </section>
 
-        {/* ── DAILY ANALYTICS ── */}
+        {/* ── DAILY ANALYTICS (charts only — forecast table removed) ── */}
         <DailyAnalytics />
 
         {/* ── VACCINE AVAILABILITY ── */}
