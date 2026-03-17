@@ -25,14 +25,20 @@ const Settings = () => {
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
 
+  // ── Session Login Tracking ──
   useEffect(() => {
-    const stored = localStorage.getItem('lastLogin');
-    if (!stored) {
-      localStorage.setItem('lastLogin', new Date().toISOString());
-    }
-  }, []);
+    const currentSession = localStorage.getItem('currentLoginTime');
 
-  const lastLoginRaw = localStorage.getItem('lastLogin');
+    if (currentSession) {
+      localStorage.setItem('lastLoginTime', currentSession);
+    }
+
+    // Stamp the current session start time
+    localStorage.setItem('currentLoginTime', new Date().toISOString());
+  }, []); 
+
+  // Display the PREVIOUS session's login time
+  const lastLoginRaw = localStorage.getItem('lastLoginTime');
   const lastLoginDisplay = lastLoginRaw
     ? new Date(lastLoginRaw).toLocaleString('en-PH', {
         year: 'numeric',
@@ -42,7 +48,7 @@ const Settings = () => {
         minute: '2-digit',
         second: '2-digit',
       })
-    : 'N/A';
+    : 'No previous session recorded';
 
   const [settings, setSettings] = useState({
     notifications: true,
@@ -66,15 +72,12 @@ const Settings = () => {
 
   const handleSave = (e) => {
     e.preventDefault();
-
-    // Save to localStorage
     localStorage.setItem('adminUsername', settings.adminUsername);
     localStorage.setItem('adminPassword', settings.adminPassword);
     setSaveMessage('✅ Settings saved successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
-  // Manual Refresh Now handler
   const handleRefreshNow = () => {
     setIsRefreshing(true);
     setTimeout(() => {
@@ -84,7 +87,6 @@ const Settings = () => {
     }, 1500);
   };
 
-  // ── Eye SVG icons ──
   const EyeIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
       fill="none" stroke="currentColor" strokeWidth="2"
@@ -140,7 +142,7 @@ const Settings = () => {
           <div className="settings-card">
             <h3 className="section-title">👤 Admin Profile</h3>
 
-            {/* Last Login Info */}
+            {/* Last Login Info — shows PREVIOUS session's login time */}
             <div className="settings-last-login">
               <span className="last-login-icon">🕐</span>
               <div className="last-login-text">
@@ -164,8 +166,6 @@ const Settings = () => {
 
             <div className="settings-input-container">
               <label htmlFor="adminPassword" className="settings-input-label">Password</label>
-
-              {/* Password field with eye toggle */}
               <div className="password-wrapper">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -300,7 +300,6 @@ const Settings = () => {
               </div>
             )}
 
-            {/* Manual Refresh Now button */}
             <div className="settings-refresh-now">
               <button
                 type="button"
