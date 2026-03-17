@@ -1,0 +1,187 @@
+/* patientmanagement.css */
+
+/* ═══════════════════════════════════════════════════════════
+   FILTERS
+   ═══════════════════════════════════════════════════════════ */
+
+.um-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE CARD
+   ═══════════════════════════════════════════════════════════ */
+
+.um-table-card {
+  margin-bottom: 30px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   USER CELL
+   ═══════════════════════════════════════════════════════════ */
+
+.um-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.um-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.um-user-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.um-user-email {
+  font-size: 12px;
+  color: #999;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   USERNAME BADGE
+   ═══════════════════════════════════════════════════════════ */
+
+.um-username-badge {
+  display: inline-block;
+  background: #f0f4ff;
+  color: #5c6bc0;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid #c5cae9;
+  letter-spacing: 0.2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACTION BUTTONS
+   ═══════════════════════════════════════════════════════════ */
+
+.um-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.um-btn-deactivate {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid #e53935;
+  background: #fff5f5;
+  color: #e53935;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.um-btn-deactivate:hover {
+  background: #e53935;
+  color: white;
+}
+
+.um-btn-activate {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid #26a69a;
+  background: #e0f7f4;
+  color: #26a69a;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.um-btn-activate:hover {
+  background: #26a69a;
+  color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ALERT
+   ═══════════════════════════════════════════════════════════ */
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.alert-success {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .um-filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .um-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
+  }
+
+  .um-user-name {
+    font-size: 12px;
+  }
+
+  .um-user-email {
+    font-size: 11px;
+  }
+
+  .um-btn-deactivate,
+  .um-btn-activate {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-buttons {
+    gap: 6px;
+  }
+
+  .um-username-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+}

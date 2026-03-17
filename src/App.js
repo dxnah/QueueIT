@@ -11,6 +11,9 @@ import DemandForecast from './pages/DemandForecast'; // ✅ NEW
 import Reports from './pages/reports';
 import Notifications, { NotificationsProvider } from './pages/notifications';
 import Settings from './pages/settings';
+import Profile from './pages/profile';
+import UserManagement from './pages/patientmanagement';
+
 
 function App() {
   return (
@@ -25,6 +28,8 @@ function App() {
           <Route path="/reports"           element={<Reports />} />
           <Route path="/notifications"     element={<Notifications />} />
           <Route path="/settings"          element={<Settings />} />
+          <Route path="/profile"           element={<Profile />} />
+          <Route path="/patientmanagement"   element={<UserManagement />} />
         </Routes>
       </Router>
     </NotificationsProvider>

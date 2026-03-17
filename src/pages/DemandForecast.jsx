@@ -7,6 +7,7 @@ import {
   XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
+import TopBar from '../components/TopBar';
 import Sidebar from '../components/Sidebar';
 import { vaccineData } from '../data/dashboardData';
 import '../styles/dashboard.css';
@@ -278,235 +279,239 @@ const DemandForecast = () => {
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
 
-      <main className="main-content">
+      {/* ── main-wrapper holds TopBar + scrollable content, same as Dashboard/Settings ── */}
+      <section className="main-wrapper">
+        <TopBar />
 
-        {/* ── Page header ── */}
-        <header>
-          <h1 className="dashboard-heading">🤖 Demand Forecast</h1>
-          <p className="dashboard-subheading">ML-powered vaccine demand predictions and restock planning</p>
-        </header>
+        <main className="main-content">
 
-        {/* ── Peak banner ── */}
-        {isPeak && (
-          <div style={{ marginBottom:'20px', padding:'12px 18px', background:'#fff3e0', borderRadius:'10px', border:'1px solid #ffcc80', fontSize:'13px', color:'#e65100', fontWeight:'600' }}>
-            🔥 <strong>Peak Season ({selectedMonth}):</strong> Dose requirements are automatically increased by 1.5×. Plan restocking accordingly.
-          </div>
-        )}
+          {/* ── Page header ── */}
+          <header>
+            <h1 className="dashboard-heading">🤖 Demand Forecast</h1>
+            <p className="dashboard-subheading">ML-powered vaccine demand predictions and restock planning</p>
+          </header>
 
-        {/* ── KPI CARDS REMOVED ── */}
-
-        {/* ── Period selector + View toggle row ── */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'18px', flexWrap:'wrap', gap:'12px' }}>
-
-          {/* Period controls */}
-          <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
-
-            {/* MONTHLY */}
-            <div style={{ position:'relative' }}>
-              <button type="button" style={btnStyle(viewMode === 'monthly')}
-                onClick={() => { setViewMode('monthly'); setMonthDropOpen(v => !v); setWeekDropOpen(false); setCalOpen(false); }}>
-                📅 Monthly {viewMode === 'monthly' ? `(${selectedMonth.slice(0,3)})` : ''} ▾
-              </button>
-              {monthDropOpen && (
-                <div style={{ position:'absolute', top:'110%', left:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'180px', padding:'6px 0', overflow:'hidden' }}>
-                  {MONTHS.map(m => {
-                    const isPeakM = PEAK_MONTHS.includes(m);
-                    return (
-                      <div key={m} style={dropItemStyle(m === selectedMonth, isPeakM)}
-                        onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
-                        onMouseLeave={e => e.currentTarget.style.background = m === selectedMonth ? '#e0f7f4' : 'white'}
-                        onClick={() => { setSelectedMonth(m); setMonthDropOpen(false); setSelectedWeek(0); setSelectedDay(1); }}>
-                        <span>{m}</span>
-                        {isPeakM && <span style={{ fontSize:'10px', background:'#ffebee', color:'#e53935', padding:'2px 6px', borderRadius:'10px', fontWeight:'700' }}>🔥 PEAK</span>}
-                        {m === selectedMonth && !isPeakM && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+          {/* ── Peak banner ── */}
+          {isPeak && (
+            <div style={{ marginBottom:'20px', padding:'12px 18px', background:'#fff3e0', borderRadius:'10px', border:'1px solid #ffcc80', fontSize:'13px', color:'#e65100', fontWeight:'600' }}>
+              🔥 <strong>Peak Season ({selectedMonth}):</strong> Dose requirements are automatically increased by 1.5×. Plan restocking accordingly.
             </div>
+          )}
 
-            {/* WEEKLY */}
-            <div style={{ position:'relative' }}>
-              <button type="button" style={btnStyle(viewMode === 'weekly')}
-                onClick={() => { setViewMode('weekly'); setWeekDropOpen(v => !v); setMonthDropOpen(false); setCalOpen(false); }}>
-                📆 Weekly {viewMode === 'weekly' ? `(Wk ${selectedWeek + 1})` : ''} ▾
-              </button>
-              {weekDropOpen && (
-                <div style={{ position:'absolute', top:'110%', left:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'160px', padding:'6px 0', overflow:'hidden' }}>
-                  {[0, 1, 2, 3].map(wi => (
-                    <div key={wi} style={dropItemStyle(selectedWeek === wi)}
-                      onMouseEnter={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : '#f5f5f5'}
-                      onMouseLeave={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : 'white'}
-                      onClick={() => { setSelectedWeek(wi); setWeekDropOpen(false); }}>
-                      Week {wi + 1}
-                      {selectedWeek === wi && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* ── Period selector + View toggle row ── */}
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'18px', flexWrap:'wrap', gap:'12px' }}>
 
-            {/* DAILY */}
-            <div style={{ position:'relative' }}>
-              <button type="button" style={btnStyle(viewMode === 'daily')}
-                onClick={() => { setViewMode('daily'); setCalOpen(v => !v); setMonthDropOpen(false); setWeekDropOpen(false); }}>
-                🗓️ Daily {viewMode === 'daily' ? `(${selectedMonth.slice(0,3)} ${selectedDay})` : ''} ▾
-              </button>
-              {calOpen && (
-                <div style={{ position:'absolute', top:'110%', left:0, zIndex:999 }}>
-                  <MiniCalendar month={selectedMonth} selectedDay={selectedDay}
-                    onSelectDay={(d) => { setSelectedDay(d); setCalOpen(false); }} />
-                </div>
-              )}
-            </div>
+            {/* Period controls */}
+            <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
 
-          </div>
-
-          {/* View toggle */}
-          <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
-            {[
-              { id:'table', label:'📋 Table'      },
-              { id:'chart', label:'📊 Bar Chart'  },
-              { id:'trend', label:'📈 Year Trend' },
-            ].map(v => (
-              <button key={v.id} onClick={() => setActiveView(v.id)} style={btnStyle(activeView === v.id)}>
-                {v.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Sort + filter (table only) ── */}
-        {activeView === 'table' && (
-          <div style={{ display:'flex', gap:'8px', marginBottom:'16px', flexWrap:'wrap' }}>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)}
-              style={{ padding:'7px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', color:'#555', background:'white', cursor:'pointer' }}>
-              <option value="urgency">Sort: Urgency</option>
-              <option value="stock">Sort: Stock ↑</option>
-              <option value="needed">Sort: Needed ↓</option>
-              <option value="name">Sort: Name A–Z</option>
-            </select>
-            <select value={filterAction} onChange={e => setFilterAction(e.target.value)}
-              style={{ padding:'7px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', color:'#555', background:'white', cursor:'pointer' }}>
-              <option value="all">All Vaccines</option>
-              <option value="order_now">🚨 Order Now Only</option>
-              <option value="order_soon">⚠️ Order Soon Only</option>
-              <option value="ok">✅ OK Only</option>
-            </select>
-          </div>
-        )}
-
-        {/* ══ TABLE VIEW ══════════════════════════════════════════════ */}
-        {activeView === 'table' && (
-          <div style={{ background:'white', borderRadius:'12px', padding:'20px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
-            <ForecastTable
-              month={selectedMonth}
-              weekIndex={viewMode === 'weekly' || viewMode === 'daily' ? selectedWeek : null}
-              day={viewMode === 'daily' ? selectedDay : null}
-              viewMode={viewMode}
-              sortBy={sortBy}
-              filterAction={filterAction}
-            />
-          </div>
-        )}
-
-        {/* ══ BAR CHART VIEW ══════════════════════════════════════════ */}
-        {activeView === 'chart' && (
-          <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
-            <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>Stock vs Demand — {periodLabel}</h3>
-            <p style={{ margin:'0 0 20px 0', fontSize:'12px', color:'#999' }}>Current stock, required doses, and peak season projections per vaccine</p>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={barData} margin={{ top:5, right:20, left:0, bottom:5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" tick={{ fontSize:12, fontWeight:600 }} />
-                <YAxis tick={{ fontSize:11 }} />
-                <Tooltip contentStyle={{ borderRadius:'8px', fontSize:'13px' }} />
-                <Legend wrapperStyle={{ fontSize:'12px', paddingTop:'12px' }} />
-                <Bar dataKey="Stock"     fill="#26a69a" radius={[4,4,0,0]} />
-                <Bar dataKey="Needed"    fill="#5c6bc0" radius={[4,4,0,0]} />
-                <Bar dataKey="Peak Need" fill="#e53935" radius={[4,4,0,0]} />
-              </BarChart>
-            </ResponsiveContainer>
-            <div style={{ display:'flex', gap:'12px', marginTop:'20px', flexWrap:'wrap' }}>
-              {forecastData.map((r) => {
-                const bg    = r.action === 'order_now' ? '#ffebee' : r.action === 'order_soon' ? '#fff8e1' : '#e8f5e9';
-                const color = r.action === 'order_now' ? '#c62828' : r.action === 'order_soon' ? '#f57f17' : '#2e7d32';
-                const bdr   = r.action === 'order_now' ? '#ef9a9a' : r.action === 'order_soon' ? '#ffe082' : '#a5d6a7';
-                const lbl   = r.action === 'order_now' ? '🚨 Order Now' : r.action === 'order_soon' ? '⚠️ Order Soon' : '✅ OK';
-                return (
-                  <div key={r.vaccine} style={{ flex:'1 1 140px', padding:'12px 14px', borderRadius:'10px', background:bg, border:`1.5px solid ${bdr}` }}>
-                    <div style={{ fontSize:'13px', fontWeight:'700', color:'#333', marginBottom:'4px' }}>{r.vaccine}</div>
-                    <div style={{ fontSize:'12px', color, fontWeight:'700' }}>{lbl}</div>
-                    <div style={{ fontSize:'11px', color:'#888', marginTop:'4px' }}>{r.available} / {r.neededBase} doses</div>
+              {/* MONTHLY */}
+              <div style={{ position:'relative' }}>
+                <button type="button" style={btnStyle(viewMode === 'monthly')}
+                  onClick={() => { setViewMode('monthly'); setMonthDropOpen(v => !v); setWeekDropOpen(false); setCalOpen(false); }}>
+                  📅 Monthly {viewMode === 'monthly' ? `(${selectedMonth.slice(0,3)})` : ''} ▾
+                </button>
+                {monthDropOpen && (
+                  <div style={{ position:'absolute', top:'110%', left:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'180px', padding:'6px 0', overflow:'hidden' }}>
+                    {MONTHS.map(m => {
+                      const isPeakM = PEAK_MONTHS.includes(m);
+                      return (
+                        <div key={m} style={dropItemStyle(m === selectedMonth, isPeakM)}
+                          onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
+                          onMouseLeave={e => e.currentTarget.style.background = m === selectedMonth ? '#e0f7f4' : 'white'}
+                          onClick={() => { setSelectedMonth(m); setMonthDropOpen(false); setSelectedWeek(0); setSelectedDay(1); }}>
+                          <span>{m}</span>
+                          {isPeakM && <span style={{ fontSize:'10px', background:'#ffebee', color:'#e53935', padding:'2px 6px', borderRadius:'10px', fontWeight:'700' }}>🔥 PEAK</span>}
+                          {m === selectedMonth && !isPeakM && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
+                        </div>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                )}
+              </div>
 
-        {/* ══ YEAR TREND VIEW ══════════════════════════════════════════ */}
-        {activeView === 'trend' && (
-          <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
-            <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>12-Month Demand Forecast</h3>
-            <p style={{ margin:'0 0 6px 0', fontSize:'12px', color:'#999' }}>Projected monthly dose requirements. Peak months (Jun–Aug) are 1.5× base demand.</p>
-            <div style={{ display:'flex', gap:'12px', marginBottom:'20px', flexWrap:'wrap' }}>
-              <span style={{ fontSize:'12px', color:'#e53935', fontWeight:'600', background:'#ffebee', padding:'4px 10px', borderRadius:'20px' }}>🔥 Peak Season: Jun · Jul · Aug</span>
-              <span style={{ fontSize:'12px', color:'#26a69a', fontWeight:'600', background:'#e0f7f4', padding:'4px 10px', borderRadius:'20px' }}>Dashed teal line = total demand</span>
-            </div>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={trendData} margin={{ top:5, right:20, left:0, bottom:5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="month" tick={{ fontSize:12 }} />
-                <YAxis tick={{ fontSize:11 }} />
-                <Tooltip contentStyle={{ borderRadius:'8px', fontSize:'13px' }} />
-                <Legend wrapperStyle={{ fontSize:'12px', paddingTop:'12px' }} />
-                <ReferenceLine x="Jun" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
-                <ReferenceLine x="Jul" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
-                <ReferenceLine x="Aug" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
-                {vaccineData.map((v, i) => (
-                  <Line key={v.vaccine} type="monotone" dataKey={v.vaccine}
-                    stroke={CHART_COLORS[i]} strokeWidth={2} dot={{ r:3 }} />
-                ))}
-                <Line type="monotone" dataKey="total" name="Total Demand"
-                  stroke="#26a69a" strokeWidth={3} dot={{ r:4 }} strokeDasharray="6 3" />
-              </LineChart>
-            </ResponsiveContainer>
-            <div style={{ marginTop:'24px', overflowX:'auto' }}>
-              <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'12px' }}>
-                <thead>
-                  <tr style={{ background:'#f5f5f5' }}>
-                    <th style={{ padding:'8px 12px', textAlign:'left', color:'#888', fontWeight:'700', fontSize:'11px', textTransform:'uppercase' }}>Month</th>
-                    {vaccineData.map(v => (
-                      <th key={v.vaccine} style={{ padding:'8px 12px', textAlign:'right', color:'#888', fontWeight:'700', fontSize:'11px', textTransform:'uppercase', whiteSpace:'nowrap' }}>
-                        {v.vaccine.replace('Anti-', 'A-')}
-                      </th>
+              {/* WEEKLY */}
+              <div style={{ position:'relative' }}>
+                <button type="button" style={btnStyle(viewMode === 'weekly')}
+                  onClick={() => { setViewMode('weekly'); setWeekDropOpen(v => !v); setMonthDropOpen(false); setCalOpen(false); }}>
+                  📆 Weekly {viewMode === 'weekly' ? `(Wk ${selectedWeek + 1})` : ''} ▾
+                </button>
+                {weekDropOpen && (
+                  <div style={{ position:'absolute', top:'110%', left:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'160px', padding:'6px 0', overflow:'hidden' }}>
+                    {[0, 1, 2, 3].map(wi => (
+                      <div key={wi} style={dropItemStyle(selectedWeek === wi)}
+                        onMouseEnter={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : '#f5f5f5'}
+                        onMouseLeave={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : 'white'}
+                        onClick={() => { setSelectedWeek(wi); setWeekDropOpen(false); }}>
+                        Week {wi + 1}
+                        {selectedWeek === wi && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
+                      </div>
                     ))}
-                    <th style={{ padding:'8px 12px', textAlign:'right', color:'#26a69a', fontWeight:'700', fontSize:'11px', textTransform:'uppercase' }}>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {trendData.map((row, i) => (
-                    <tr key={row.month} style={{ borderBottom:'1px solid #f0f0f0', background: row.isPeak ? '#fff8f0' : i % 2 === 0 ? '#fafafa' : 'white' }}>
-                      <td style={{ padding:'8px 12px', fontWeight: row.isPeak ? '700' : '500', color: row.isPeak ? '#e65100' : '#333' }}>
-                        {MONTHS[i].slice(0,3)} {row.isPeak ? '🔥' : ''}
-                      </td>
-                      {vaccineData.map(v => (
-                        <td key={v.vaccine} style={{ padding:'8px 12px', textAlign:'right', color:'#555' }}>
-                          {row[v.vaccine].toLocaleString()}
-                        </td>
-                      ))}
-                      <td style={{ padding:'8px 12px', textAlign:'right', fontWeight:'700', color:'#26a69a' }}>{row.total.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </div>
+                )}
+              </div>
+
+              {/* DAILY */}
+              <div style={{ position:'relative' }}>
+                <button type="button" style={btnStyle(viewMode === 'daily')}
+                  onClick={() => { setViewMode('daily'); setCalOpen(v => !v); setMonthDropOpen(false); setWeekDropOpen(false); }}>
+                  🗓️ Daily {viewMode === 'daily' ? `(${selectedMonth.slice(0,3)} ${selectedDay})` : ''} ▾
+                </button>
+                {calOpen && (
+                  <div style={{ position:'absolute', top:'110%', left:0, zIndex:999 }}>
+                    <MiniCalendar month={selectedMonth} selectedDay={selectedDay}
+                      onSelectDay={(d) => { setSelectedDay(d); setCalOpen(false); }} />
+                  </div>
+                )}
+              </div>
+
+            </div>
+
+            {/* View toggle */}
+            <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+              {[
+                { id:'table', label:'📋 Table'      },
+                { id:'chart', label:'📊 Bar Chart'  },
+                { id:'trend', label:'📈 Year Trend' },
+              ].map(v => (
+                <button key={v.id} onClick={() => setActiveView(v.id)} style={btnStyle(activeView === v.id)}>
+                  {v.label}
+                </button>
+              ))}
             </div>
           </div>
-        )}
 
-      </main>
+          {/* ── Sort + filter (table only) ── */}
+          {activeView === 'table' && (
+            <div style={{ display:'flex', gap:'8px', marginBottom:'16px', flexWrap:'wrap' }}>
+              <select value={sortBy} onChange={e => setSortBy(e.target.value)}
+                style={{ padding:'7px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', color:'#555', background:'white', cursor:'pointer' }}>
+                <option value="urgency">Sort: Urgency</option>
+                <option value="stock">Sort: Stock ↑</option>
+                <option value="needed">Sort: Needed ↓</option>
+                <option value="name">Sort: Name A–Z</option>
+              </select>
+              <select value={filterAction} onChange={e => setFilterAction(e.target.value)}
+                style={{ padding:'7px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', color:'#555', background:'white', cursor:'pointer' }}>
+                <option value="all">All Vaccines</option>
+                <option value="order_now">🚨 Order Now Only</option>
+                <option value="order_soon">⚠️ Order Soon Only</option>
+                <option value="ok">✅ OK Only</option>
+              </select>
+            </div>
+          )}
+
+          {/* ══ TABLE VIEW ══════════════════════════════════════════════ */}
+          {activeView === 'table' && (
+            <div style={{ background:'white', borderRadius:'12px', padding:'20px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
+              <ForecastTable
+                month={selectedMonth}
+                weekIndex={viewMode === 'weekly' || viewMode === 'daily' ? selectedWeek : null}
+                day={viewMode === 'daily' ? selectedDay : null}
+                viewMode={viewMode}
+                sortBy={sortBy}
+                filterAction={filterAction}
+              />
+            </div>
+          )}
+
+          {/* ══ BAR CHART VIEW ══════════════════════════════════════════ */}
+          {activeView === 'chart' && (
+            <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
+              <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>Stock vs Demand — {periodLabel}</h3>
+              <p style={{ margin:'0 0 20px 0', fontSize:'12px', color:'#999' }}>Current stock, required doses, and peak season projections per vaccine</p>
+              <ResponsiveContainer width="100%" height={320}>
+                <BarChart data={barData} margin={{ top:5, right:20, left:0, bottom:5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="name" tick={{ fontSize:12, fontWeight:600 }} />
+                  <YAxis tick={{ fontSize:11 }} />
+                  <Tooltip contentStyle={{ borderRadius:'8px', fontSize:'13px' }} />
+                  <Legend wrapperStyle={{ fontSize:'12px', paddingTop:'12px' }} />
+                  <Bar dataKey="Stock"     fill="#26a69a" radius={[4,4,0,0]} />
+                  <Bar dataKey="Needed"    fill="#5c6bc0" radius={[4,4,0,0]} />
+                  <Bar dataKey="Peak Need" fill="#e53935" radius={[4,4,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+              <div style={{ display:'flex', gap:'12px', marginTop:'20px', flexWrap:'wrap' }}>
+                {forecastData.map((r) => {
+                  const bg    = r.action === 'order_now' ? '#ffebee' : r.action === 'order_soon' ? '#fff8e1' : '#e8f5e9';
+                  const color = r.action === 'order_now' ? '#c62828' : r.action === 'order_soon' ? '#f57f17' : '#2e7d32';
+                  const bdr   = r.action === 'order_now' ? '#ef9a9a' : r.action === 'order_soon' ? '#ffe082' : '#a5d6a7';
+                  const lbl   = r.action === 'order_now' ? '🚨 Order Now' : r.action === 'order_soon' ? '⚠️ Order Soon' : '✅ OK';
+                  return (
+                    <div key={r.vaccine} style={{ flex:'1 1 140px', padding:'12px 14px', borderRadius:'10px', background:bg, border:`1.5px solid ${bdr}` }}>
+                      <div style={{ fontSize:'13px', fontWeight:'700', color:'#333', marginBottom:'4px' }}>{r.vaccine}</div>
+                      <div style={{ fontSize:'12px', color, fontWeight:'700' }}>{lbl}</div>
+                      <div style={{ fontSize:'11px', color:'#888', marginTop:'4px' }}>{r.available} / {r.neededBase} doses</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ══ YEAR TREND VIEW ══════════════════════════════════════════ */}
+          {activeView === 'trend' && (
+            <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
+              <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>12-Month Demand Forecast</h3>
+              <p style={{ margin:'0 0 6px 0', fontSize:'12px', color:'#999' }}>Projected monthly dose requirements. Peak months (Jun–Aug) are 1.5× base demand.</p>
+              <div style={{ display:'flex', gap:'12px', marginBottom:'20px', flexWrap:'wrap' }}>
+                <span style={{ fontSize:'12px', color:'#e53935', fontWeight:'600', background:'#ffebee', padding:'4px 10px', borderRadius:'20px' }}>🔥 Peak Season: Jun · Jul · Aug</span>
+                <span style={{ fontSize:'12px', color:'#26a69a', fontWeight:'600', background:'#e0f7f4', padding:'4px 10px', borderRadius:'20px' }}>Dashed teal line = total demand</span>
+              </div>
+              <ResponsiveContainer width="100%" height={320}>
+                <LineChart data={trendData} margin={{ top:5, right:20, left:0, bottom:5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="month" tick={{ fontSize:12 }} />
+                  <YAxis tick={{ fontSize:11 }} />
+                  <Tooltip contentStyle={{ borderRadius:'8px', fontSize:'13px' }} />
+                  <Legend wrapperStyle={{ fontSize:'12px', paddingTop:'12px' }} />
+                  <ReferenceLine x="Jun" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
+                  <ReferenceLine x="Jul" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
+                  <ReferenceLine x="Aug" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
+                  {vaccineData.map((v, i) => (
+                    <Line key={v.vaccine} type="monotone" dataKey={v.vaccine}
+                      stroke={CHART_COLORS[i]} strokeWidth={2} dot={{ r:3 }} />
+                  ))}
+                  <Line type="monotone" dataKey="total" name="Total Demand"
+                    stroke="#26a69a" strokeWidth={3} dot={{ r:4 }} strokeDasharray="6 3" />
+                </LineChart>
+              </ResponsiveContainer>
+              <div style={{ marginTop:'24px', overflowX:'auto' }}>
+                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'12px' }}>
+                  <thead>
+                    <tr style={{ background:'#f5f5f5' }}>
+                      <th style={{ padding:'8px 12px', textAlign:'left', color:'#888', fontWeight:'700', fontSize:'11px', textTransform:'uppercase' }}>Month</th>
+                      {vaccineData.map(v => (
+                        <th key={v.vaccine} style={{ padding:'8px 12px', textAlign:'right', color:'#888', fontWeight:'700', fontSize:'11px', textTransform:'uppercase', whiteSpace:'nowrap' }}>
+                          {v.vaccine.replace('Anti-', 'A-')}
+                        </th>
+                      ))}
+                      <th style={{ padding:'8px 12px', textAlign:'right', color:'#26a69a', fontWeight:'700', fontSize:'11px', textTransform:'uppercase' }}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trendData.map((row, i) => (
+                      <tr key={row.month} style={{ borderBottom:'1px solid #f0f0f0', background: row.isPeak ? '#fff8f0' : i % 2 === 0 ? '#fafafa' : 'white' }}>
+                        <td style={{ padding:'8px 12px', fontWeight: row.isPeak ? '700' : '500', color: row.isPeak ? '#e65100' : '#333' }}>
+                          {MONTHS[i].slice(0,3)} {row.isPeak ? '🔥' : ''}
+                        </td>
+                        {vaccineData.map(v => (
+                          <td key={v.vaccine} style={{ padding:'8px 12px', textAlign:'right', color:'#555' }}>
+                            {row[v.vaccine].toLocaleString()}
+                          </td>
+                        ))}
+                        <td style={{ padding:'8px 12px', textAlign:'right', fontWeight:'700', color:'#26a69a' }}>{row.total.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+        </main>
+      </section>
+
     </div>
   );
 };

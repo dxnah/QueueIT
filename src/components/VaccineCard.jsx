@@ -126,15 +126,6 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
     return 'status-out-stock';
   };
 
-  const getFooterUrgency = (status, available) => {
-    const doses = available.toLocaleString();
-    if (status === 'Out Stock')  return { cls: 'urgency-critical', label: `🚨 ${doses} doses · Critical`     };
-    if (status === 'Low Stock')  return { cls: 'urgency-warning',  label: `⚠️ ${doses} doses · Restock Soon` };
-    return                              { cls: 'urgency-normal',   label: `✅ ${doses} doses · Sufficient`   };
-  };
-
-  const footerUrgency = getFooterUrgency(vaccine.status, vaccine.available);
-
   const monthlyUrgency = vaccine.monthlyUrgency;
   const getMonthlyBadge = (level) => {
     if (level === 'urgent') return { bg: '#ffebee', color: '#c62828', border: '#ef9a9a', label: '🚨 Urgent — Restock Now'   };
@@ -203,11 +194,6 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
           <span className="info-value">{vaccine.available.toLocaleString()} doses</span>
         </div>
 
-        <div className="vaccine-info-row">
-          <span className="info-label">Min. Required:</span>
-          <span className="info-value">{vaccine.minStock.toLocaleString()} doses</span>
-        </div>
-
         {vaccine.mlRecommended > 0 && (
           <div className="vaccine-info-row highlight">
             <span className="info-label">🤖 ML Recommended Order:</span>
@@ -229,9 +215,6 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
 
       {/* ── Footer ── */}
       <div className="vaccine-card-footer" style={{ padding: '10px 16px' }}>
-        <span className={footerUrgency.cls}>
-          {footerUrgency.label}
-        </span>
         <div className="card-actions">
           <button onClick={() => onEdit(vaccine)} className="btn-icon btn-edit" title="Edit">✏️</button>
           <button onClick={() => onDelete(vaccine.id)} className="btn-icon btn-delete" title="Delete">🗑️</button>

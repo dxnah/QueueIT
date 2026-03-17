@@ -1,15 +1,11 @@
 // Sidebar.jsx
 
-import React, { useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { NotificationsContext } from '../pages/notifications';
 import logo from '../images/logoit.png';
 
 const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const context = useContext(NotificationsContext);
-  const unreadCount = context?.unreadCount ?? 0;
   const isActive = (path) => location.pathname === path;
 
   const handleNavClick = (path) => {
@@ -18,6 +14,7 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
   };
 
   const handleLogout = () => {
+    sessionStorage.removeItem('sessionStarted');
     navigate('/login');
   };
 
@@ -46,7 +43,6 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           💉 VACCINE MANAGEMENT
         </button>
 
-        {/* ✅ NEW — Demand Forecast page */}
         <button
           type="button"
           className={isActive('/demand-forecast') ? 'nav-link nav-link-active' : 'nav-link'}
@@ -65,12 +61,10 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
 
         <button
           type="button"
-          className={isActive('/notifications') ? 'nav-link nav-link-active' : 'nav-link'}
-          onClick={() => handleNavClick('/notifications')}
-          aria-current={isActive('/notifications') ? 'page' : undefined}>
-          🔔 NOTIFICATIONS{unreadCount > 0 && (
-            <span className="notif-badge">{unreadCount}</span>
-          )}
+          className={isActive('/patientmanagement') ? 'nav-link nav-link-active' : 'nav-link'}
+          onClick={() => handleNavClick('/patientmanagement')}
+          aria-current={isActive('/patientmanagement') ? 'page' : undefined}>
+          🧑‍⚕️ PATIENT MANAGEMENT
         </button>
 
         <button
@@ -80,11 +74,11 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           aria-current={isActive('/settings') ? 'page' : undefined}>
           ⚙️ SETTINGS
         </button>
-
-        <button type="button" className="nav-link logout-btn" onClick={handleLogout}>
-          🚪 LOGOUT
-        </button>
       </nav>
+
+      <button type="button" className="nav-link logout-btn" onClick={handleLogout}>
+        🚪 LOGOUT
+      </button>
 
     </aside>
   );

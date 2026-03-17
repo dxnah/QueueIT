@@ -1,131 +1,45 @@
 // dashboard.jsx
 
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import Sidebar from '../components/Sidebar';
+import TopBar from '../components/TopBar';
 import DailyAnalytics from '../components/DailyAnalytics';
-import useClickOutside from '../hooks/useClickOutside';
 import '../styles/dashboard.css';
+import '../styles/topbar.css';
 import { useNavigate } from 'react-router-dom';
 import {
   vaccineData,
   PEAK_MONTHS,
 } from '../data/dashboardData';
 
-// ─── Month list ───────────────────────────────────────────────────────────────
 const MONTHS = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December',
 ];
 
-const DAYS_IN_MONTH = {
-  January:31,February:28,March:31,April:30,May:31,June:30,
-  July:31,August:31,September:30,October:31,November:30,December:31,
-};
+const getMonthMultiplier = (month) => PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
 
-// ─── Urgency styling helpers ──────────────────────────────────────────────────
-const urgencyStyle = (level) => {
-  if (level === 'urgent') return { bg: '#ffebee', color: '#c62828', border: '#ef9a9a', label: '🚨 Urgent' };
-  if (level === 'soon')   return { bg: '#fff8e1', color: '#f57f17', border: '#ffe082', label: '⚠️ Soon'   };
-  return                         { bg: '#e8f5e9', color: '#2e7d32', border: '#a5d6a7', label: '✅ Normal'  };
-};
-
-// ─── Dropdown wrapper ─────────────────────────────────────────────────────────
-const DropdownWrap = ({ trigger, children, isOpen, onClose }) => {
-  const ref = useRef(null);
-  useClickOutside(ref, onClose);
-  return (
-    <div ref={ref} style={{ position: 'relative', display: 'inline-block' }}>
-      {trigger}
-      {isOpen && (
-        <div className="dropdown-panel">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ─── Log Usage Modal ──────────────────────────────────────────────────────────
-const LogUsageModal = ({ month, onClose, onSave }) => {
-  const [day, setDay] = useState(1);
-  const [amounts, setAmounts] = useState(
-    Object.fromEntries(vaccineData.map(v => [v.vaccine, '']))
-  );
-
-  const totalDays = DAYS_IN_MONTH[month] || 30;
-
-  const handleSave = () => {
-    vaccineData.forEach(v => {
-      const amt = parseInt(amounts[v.vaccine]) || 0;
-      if (amt > 0) logDailyUsage(v.vaccine, month, day, amt);
-    });
-    onSave();
-    onClose();
-  };
-
-  return (
-    <div className="modal-overlay-dashboard">
-      <div className="modal-box-dashboard">
-        <div className="modal-header-row">
-          <h3 className="modal-title-dashboard">📋 Log Daily Usage — {month}</h3>
-          <button type="button" className="modal-close-dashboard" onClick={onClose}>✕</button>
-        </div>
-
-        {/* Day selector */}
-        <div className="modal-field-dashboard">
-          <label htmlFor="day-select" className="modal-label-dashboard">
-            Day of {month}
-          </label>
-          <select
-            id="day-select"
-            value={day}
-            onChange={e => setDay(parseInt(e.target.value))}
-            className="modal-select-dashboard"
-          >
-            {Array.from({ length: totalDays }, (_, i) => i + 1).map(d => (
-              <option key={d} value={d}>Day {d}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Doses per vaccine */}
-        {vaccineData.map(v => (
-          <div key={v.vaccine} className="modal-field-dashboard">
-            <label htmlFor={`dose-${v.vaccine}`} className="modal-label-dashboard">
-              {v.vaccine}
-            </label>
-            <input
-              id={`dose-${v.vaccine}`}
-              type="number"
-              min="0"
-              placeholder="Doses used today"
-              value={amounts[v.vaccine]}
-              onChange={e => setAmounts(prev => ({ ...prev, [v.vaccine]: e.target.value }))}
-              className="modal-input-dashboard"
-            />
-          </div>
-        ))}
-
-        <div className="modal-actions-dashboard">
-          <button type="button" onClick={handleSave} className="modal-btn-save-dashboard">
-            💾 Save Usage
-          </button>
-          <button type="button" onClick={onClose} className="modal-btn-cancel-dashboard">
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+const generateForecastData = (month) => {
+  const monthMult = getMonthMultiplier(month);
+  return vaccineData.map((v) => {
+    const neededBase = Math.round(v.mlRecommended * monthMult);
+    const weeksLeft  = v.available > 0 ? parseFloat((v.available / (neededBase / 30)).toFixed(1)) : 0;
+    let action;
+    if (v.available === 0)    action = 'order_now';
+    else if (weeksLeft < 1.5) action = 'order_soon';
+    else if (weeksLeft < 3)   action = 'order_soon';
+    else                      action = 'ok';
+    return { ...v, neededBase, weeksLeft, action };
+  });
 };
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 const Dashboard = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [orderMonth, setOrderMonth]             = useState('January');
-  const [monthDropOpen, setMonthDropOpen]       = useState(false);
-  const [showLogModal, setShowLogModal]         = useState(false);
-  const [refreshKey, setRefreshKey]             = useState(0);
+  const navigate = useNavigate();
+
+  const currentMonthIdx = new Date().getMonth();
+  const currentMonth    = MONTHS[currentMonthIdx];
+  const isPeak          = PEAK_MONTHS.includes(currentMonth);
 
   // ── DYNAMIC CALCULATIONS ──────────────────────────────
   const totalAvailable  = vaccineData.reduce((sum, v) => sum + v.available, 0);
@@ -135,256 +49,177 @@ const Dashboard = () => {
   const vaccinesToOrder = vaccineData.filter(v => v.status === 'Low Stock' || v.status === 'Out Stock');
 
   // ── COLOR HELPERS ──────────────────────────────────────
-  const getAvailableColor  = (t) => t > 500 ? '#26a69a' : t > 100 ? '#f57f17' : '#c62828';
-  const getLowStockColor   = (c) => c === 0 ? '#26a69a' : c <= 2 ? '#f57f17' : '#c62828';
-  const getOutOfStockColor = (c) => c === 0 ? '#26a69a' : '#c62828';
-  const getAvailableLabel  = (t) => t > 500 ? '✅ Stock is sufficient' : t > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
-  const getLowStockLabel   = (c) => c === 0 ? '✅ All vaccines well stocked' : c <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
-  const getOutOfStockLabel = (c) => c === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
+  const getAvailableColor     = (t) => t > 500 ? '#26a69a' : t > 100 ? '#f57f17' : '#c62828';
+  const getLowStockColor      = (c) => c === 0 ? '#26a69a' : c <= 2 ? '#f57f17' : '#c62828';
+  const getOutOfStockColor    = (c) => c === 0 ? '#26a69a' : '#c62828';
+  const getAvailableLabel     = (t) => t > 500 ? '✅ Stock is sufficient' : t > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
+  const getLowStockLabel      = (c) => c === 0 ? '✅ All vaccines well stocked' : c <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
+  const getOutOfStockLabel    = (c) => c === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
   const getVaccineStatusClass = (s) => s === 'In Stock' ? 'status-in-stock' : s === 'Low Stock' ? 'status-low-stock' : 'status-out-stock';
 
-  // ── MONTHLY ORDER DATA ──────────────────────────────────
-  const isPeak = PEAK_MONTHS.includes(orderMonth);
-
-  const monthlyOrderData = vaccineData.map(v => {
-    const required  = getMonthlyRequirement(v.vaccine, orderMonth);
-    const usedSoFar = getUsedThisMonth(v.vaccine, orderMonth);
-    const remaining = Math.max(0, required - usedSoFar);
-    const urgency   = getOrderUrgency(remaining, required);
-    const pct       = required > 0 ? Math.min(100, Math.round((remaining / required) * 100)) : 100;
-    return { ...v, required, usedSoFar, remaining, urgency, pct };
-  });
-
-  const monthTotalRequired  = monthlyOrderData.reduce((s, v) => s + v.required, 0);
-  const monthTotalRemaining = monthlyOrderData.reduce((s, v) => s + v.remaining, 0);
+  // ── TOP 3 URGENT VACCINES for snapshot card ───────────
+  const actionOrder = { order_now: 0, order_soon: 1, ok: 2 };
+  const snapshotData = generateForecastData(currentMonth)
+    .sort((a, b) => actionOrder[a.action] - actionOrder[b.action])
+    .slice(0, 3);
 
   return (
-    <div className="dashboard-container">
+    <section className="dashboard-container">
 
-      <button
-        type="button"
-        className="mobile-menu-toggle"
-        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        aria-label="Toggle navigation menu">
-        ☰
-      </button>
+      <Sidebar />
 
-      <Sidebar
-        activeTab="dashboard"
-        isMobileMenuOpen={isMobileMenuOpen}
-        onMenuClose={() => setIsMobileMenuOpen(false)}
-      />
+      <section className="main-wrapper">
+        <TopBar />
 
-      {isMobileMenuOpen && (
-        <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />
-      )}
+        <main className="main-content">
 
-      <main className="main-content">
+          <header>
+            <h1 className="dashboard-heading">📊 Admin Dashboard</h1>
+            <p className="dashboard-subheading">Welcome back, Admin</p>
+          </header>
 
-        <header>
-          <h1 className="dashboard-heading">📊 Admin Dashboard</h1>
-          <p className="dashboard-subheading">Welcome back, Admin</p>
-        </header>
-
-        {/* ── STATS CARDS ── */}
-        <section className="stats-container">
-          <div className="stat-box" style={{ borderTop: `4px solid ${getAvailableColor(totalAvailable)}` }}>
-            <h3 className="stat-title">Vaccines Available</h3>
-            <p className="stat-number" style={{ color: getAvailableColor(totalAvailable) }}>{totalAvailable.toLocaleString()}</p>
-            <p className="stat-note">{getAvailableLabel(totalAvailable)}</p>
-          </div>
-          <div className="stat-box" style={{ borderTop: '4px solid #e53935' }}>
-            <h3 className="stat-title">Vaccines to Order</h3>
-            <p className="stat-number" style={{ color: '#e53935' }}>{totalToOrder.toLocaleString()}</p>
-            <p className="stat-note">💊 {vaccinesToOrder.length} vaccine types need restocking</p>
-          </div>
-          <div className="stat-box" style={{ borderTop: `4px solid ${getLowStockColor(lowStockCount)}` }}>
-            <h3 className="stat-title">Low Stock</h3>
-            <p className="stat-number" style={{ color: getLowStockColor(lowStockCount) }}>{lowStockCount}</p>
-            <p className="stat-note">{getLowStockLabel(lowStockCount)}</p>
-          </div>
-          <div className="stat-box" style={{ borderTop: `4px solid ${getOutOfStockColor(outOfStockCount)}` }}>
-            <h3 className="stat-title">Out of Stock</h3>
-            <p className="stat-number" style={{ color: getOutOfStockColor(outOfStockCount) }}>{outOfStockCount}</p>
-            <p className="stat-note">{getOutOfStockLabel(outOfStockCount)}</p>
-          </div>
-        </section>
-
-        {/* ── DAILY ANALYTICS (charts only — forecast table removed) ── */}
-        <DailyAnalytics />
-
-        {/* ── VACCINE AVAILABILITY ── */}
-        <section className="middle-row" aria-label="Vaccine Availability">
-          <article className="vaccine-card">
-            <h2 className="section-title">💉 Vaccine Availability</h2>
-            <div className="table-wrapper">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Vaccine</th>
-                    <th scope="col">Available</th>
-                    <th scope="col">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vaccineData.map(vaccine => (
-                    <tr key={vaccine.id}>
-                      <td>{vaccine.vaccine}</td>
-                      <td>{vaccine.available.toLocaleString()}</td>
-                      <td><span className={getVaccineStatusClass(vaccine.status)}>{vaccine.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="total-row">
-                    <td>Total</td>
-                    <td>{vaccineData.reduce((sum, v) => sum + v.available, 0).toLocaleString()}</td>
-                    <td></td>
-                  </tr>
-                </tfoot>
-              </table>
+          {/* ── STATS CARDS ── */}
+          <section className="stats-container">
+            <div className="stat-box" style={{ borderTop: `4px solid ${getAvailableColor(totalAvailable)}` }}>
+              <h3 className="stat-title">Vaccines Available</h3>
+              <p className="stat-number" style={{ color: getAvailableColor(totalAvailable) }}>{totalAvailable.toLocaleString()}</p>
+              <p className="stat-note">{getAvailableLabel(totalAvailable)}</p>
             </div>
-          </article>
-        </section>
-
-        {/* ── VACCINES TO ORDER ── */}
-        <section className="order-card" aria-label="Vaccines to Order" key={refreshKey}>
-
-          {/* Header */}
-          <div className="order-card-header">
-            <div>
-              <h2 className="section-title">📦 Vaccines to Order</h2>
-              <p className="ml-subtitle">
-                Monthly restock tracker — {orderMonth}{isPeak ? ' 🔥 Peak Season' : ''}
-              </p>
+            <div className="stat-box" style={{ borderTop: '4px solid #e53935' }}>
+              <h3 className="stat-title">Vaccines to Order</h3>
+              <p className="stat-number" style={{ color: '#e53935' }}>{totalToOrder.toLocaleString()}</p>
+              <p className="stat-note">💊 {vaccinesToOrder.length} vaccine types need restocking</p>
             </div>
+            <div className="stat-box" style={{ borderTop: `4px solid ${getLowStockColor(lowStockCount)}` }}>
+              <h3 className="stat-title">Low Stock</h3>
+              <p className="stat-number" style={{ color: getLowStockColor(lowStockCount) }}>{lowStockCount}</p>
+              <p className="stat-note">{getLowStockLabel(lowStockCount)}</p>
+            </div>
+            <div className="stat-box" style={{ borderTop: `4px solid ${getOutOfStockColor(outOfStockCount)}` }}>
+              <h3 className="stat-title">Out of Stock</h3>
+              <p className="stat-number" style={{ color: getOutOfStockColor(outOfStockCount) }}>{outOfStockCount}</p>
+              <p className="stat-note">{getOutOfStockLabel(outOfStockCount)}</p>
+            </div>
+          </section>
 
-            <div className="order-card-controls">
-              {/* Log daily usage button */}
-              <button
-                type="button"
-                className="btn-log-usage-dashboard"
-                onClick={() => setShowLogModal(true)}>
-                📋 Log Daily Usage
-              </button>
+          {/* ── DAILY ANALYTICS ── */}
+          <DailyAnalytics />
 
-              {/* Month dropdown */}
-              <DropdownWrap
-                isOpen={monthDropOpen}
-                onClose={() => setMonthDropOpen(false)}
-                trigger={
-                  <button
-                    type="button"
-                    className="btn-month-dropdown"
-                    onClick={() => setMonthDropOpen(v => !v)}>
-                    📅 {orderMonth} ▾
-                  </button>
-                }>
-                {MONTHS.map(m => {
-                  const isPeakM = PEAK_MONTHS.includes(m);
-                  return (
-                    <div
-                      key={m}
-                      className={`dropdown-item-dashboard ${m === orderMonth ? 'dropdown-item-active' : ''} ${isPeakM ? 'dropdown-item-peak' : ''}`}
-                      onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
-                      onMouseLeave={e => e.currentTarget.style.background = m === orderMonth ? '#e0f7f4' : 'white'}
-                      onClick={() => { setOrderMonth(m); setMonthDropOpen(false); }}
-                    >
-                      <span>{m}</span>
-                      {isPeakM
-                        ? <span className="peak-badge-dashboard">🔥 PEAK</span>
-                        : m === orderMonth ? <span className="check-mark-dashboard">✓</span> : null
-                      }
-                    </div>
-                  );
-                })}
-              </DropdownWrap>
-
-              {/* Total badge */}
-              <div className="order-total-badge">
-                Monthly Required: <strong>{monthTotalRequired.toLocaleString()}</strong> doses
+          {/* ── ML DEMAND SNAPSHOT CARD ── */}
+          <section style={{
+            background: 'white', borderRadius: '12px', padding: '22px 24px', marginBottom: '28px',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)',
+            borderTop: '4px solid #26a69a',
+          }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'16px', flexWrap:'wrap', gap:'10px' }}>
+              <div>
+                <h2 className="section-title">🤖 ML Demand Snapshot — {currentMonth}</h2>
+                <p className="ml-subtitle">
+                  Top {snapshotData.length} most urgent vaccines right now
+                  {isPeak ? ' · 🔥 Peak Season active' : ''}
+                </p>
               </div>
+              <button
+                onClick={() => navigate('/demand-forecast')}
+                style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'8px 16px', borderRadius:'8px', fontSize:'13px', fontWeight:'600', cursor:'pointer', border:'1.5px solid #26a69a', background:'white', color:'#26a69a', transition:'all 0.2s' }}
+                onMouseEnter={e => { e.currentTarget.style.background='#26a69a'; e.currentTarget.style.color='white'; }}
+                onMouseLeave={e => { e.currentTarget.style.background='white'; e.currentTarget.style.color='#26a69a'; }}>
+                📊 View Full Forecast →
+              </button>
             </div>
-          </div>
 
-          {/* Peak season notice */}
-          {isPeak && (
-            <div className="peak-notice-dashboard">
-              🔥 <strong>Peak Season ({orderMonth}):</strong> Monthly requirements are 1.5× higher than normal. Plan restocking accordingly.
+            <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
+              {snapshotData.map(v => {
+                const bg    = v.action === 'order_now' ? '#ffebee' : v.action === 'order_soon' ? '#fff8e1' : '#e8f5e9';
+                const color = v.action === 'order_now' ? '#c62828' : v.action === 'order_soon' ? '#f57f17' : '#2e7d32';
+                const bdr   = v.action === 'order_now' ? '#ef9a9a' : v.action === 'order_soon' ? '#ffe082' : '#a5d6a7';
+                const lbl   = v.action === 'order_now' ? '🚨 Order Now' : v.action === 'order_soon' ? '⚠️ Order Soon' : '✅ Sufficient';
+                const pct   = v.neededBase > 0 ? Math.min(100, Math.round((v.available / v.neededBase) * 100)) : 100;
+                return (
+                  <div key={v.id} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'14px 16px', borderRadius:'10px', background:bg, border:`1.5px solid ${bdr}`, flexWrap:'wrap' }}>
+
+                    <div style={{ flex:'1 1 160px', minWidth:0 }}>
+                      <div style={{ fontSize:'14px', fontWeight:'700', color:'#333', marginBottom:'3px' }}>{v.vaccine}</div>
+                      <span style={{ fontSize:'11px', fontWeight:'700', color, background:'white', padding:'2px 8px', borderRadius:'10px', border:`1px solid ${bdr}` }}>
+                        {lbl}
+                      </span>
+                    </div>
+
+                    <div style={{ textAlign:'center', flex:'0 0 auto' }}>
+                      <div style={{ fontSize:'18px', fontWeight:'800', color: v.available === 0 ? '#c62828' : v.available < v.minStock ? '#f57f17' : '#26a69a' }}>
+                        {v.available.toLocaleString()}
+                      </div>
+                      <div style={{ fontSize:'10px', color:'#999', textTransform:'uppercase', letterSpacing:'0.4px' }}>doses left</div>
+                    </div>
+
+                    <div style={{ flex:'1 1 120px', minWidth:'100px' }}>
+                      <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'4px' }}>
+                        <span style={{ fontSize:'10px', color:'#888' }}>vs monthly need</span>
+                        <span style={{ fontSize:'10px', fontWeight:'700', color }}>{pct}%</span>
+                      </div>
+                      <div style={{ background:'rgba(0,0,0,0.08)', borderRadius:'99px', height:'8px', overflow:'hidden' }}>
+                        <div style={{ width:`${pct}%`, height:'100%', borderRadius:'99px', background: v.action === 'order_now' ? '#e53935' : v.action === 'order_soon' ? '#f57f17' : '#26a69a', transition:'width 0.4s ease' }} />
+                      </div>
+                      <div style={{ fontSize:'10px', color:'#888', marginTop:'3px' }}>
+                        {v.available.toLocaleString()} / {v.neededBase.toLocaleString()} doses needed
+                      </div>
+                    </div>
+
+                    {v.mlRecommended > 0 && (
+                      <div style={{ flex:'0 0 auto', padding:'8px 12px', borderRadius:'8px', background:'white', border:`1px solid ${bdr}`, textAlign:'center' }}>
+                        <div style={{ fontSize:'13px', fontWeight:'800', color:'#5c6bc0' }}>{v.mlRecommended.toLocaleString()}</div>
+                        <div style={{ fontSize:'10px', color:'#999' }}>ML order rec.</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          )}
 
-          {/* Table */}
-          <div className="table-wrapper">
-            <table className="data-table order-table">
-              <thead>
-                <tr>
-                  {['Vaccine', 'Current Stock', 'Monthly Required', 'Used This Month', 'Remaining Budget', 'Progress', 'Urgency'].map(col => (
-                    <th key={col} scope="col">{col}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyOrderData.map((v, i) => {
-                  const u = urgencyStyle(v.urgency);
-                  return (
-                    <tr key={v.id} className={i % 2 === 0 ? 'row-even' : 'row-odd'}>
-                      <td className="td-vaccine-name">{v.vaccine}</td>
-                      <td>
-                        <span className={v.available === 0 ? 'stock-critical' : v.available < v.minStock ? 'stock-warning' : 'stock-ok'}>
-                          {v.available.toLocaleString()}
-                        </span>
-                        <span className="stock-unit"> doses</span>
-                      </td>
-                      <td className="td-required">
-                        {v.required.toLocaleString()}
-                        {isPeak && <span className="peak-fire-icon">🔥</span>}
-                      </td>
-                      <td className="td-used">{v.usedSoFar.toLocaleString()}</td>
-                      <td className={v.urgency === 'urgent' ? 'td-remaining-urgent' : v.urgency === 'soon' ? 'td-remaining-soon' : 'td-remaining-ok'}>
-                        {v.remaining.toLocaleString()}
-                      </td>
-                      <td className="td-progress">
-                        <div className="progress-track">
-                          <div
-                            className="progress-fill"
-                            style={{
-                              width: `${v.pct}%`,
-                              background: v.urgency === 'urgent' ? '#e53935' : v.urgency === 'soon' ? '#f57f17' : '#26a69a',
-                            }}
-                          />
-                        </div>
-                        <span className="progress-label">{v.pct}% remaining</span>
-                      </td>
-                      <td>
-                        <span
-                          className="urgency-badge"
-                          style={{ background: u.bg, color: u.color, border: `1.5px solid ${u.border}` }}>
-                          {u.label}
-                        </span>
-                      </td>
+            <div style={{ marginTop:'16px', paddingTop:'14px', borderTop:'1px solid #f0f0f0', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'8px' }}>
+              <span style={{ fontSize:'12px', color:'#aaa' }}>
+                Showing top 3 of {vaccineData.length} vaccines by urgency · Full management in Demand Forecast
+              </span>
+              <button onClick={() => navigate('/demand-forecast')}
+                style={{ fontSize:'12px', color:'#26a69a', background:'none', border:'none', cursor:'pointer', fontWeight:'600', textDecoration:'underline' }}>
+                See all vaccines →
+              </button>
+            </div>
+          </section>
+
+          {/* ── VACCINE AVAILABILITY TABLE ── */}
+          <section className="middle-row">
+            <article className="vaccine-card">
+              <h2 className="section-title">💉 Vaccine Availability</h2>
+              <div className="table-wrapper">
+                <table className="data-table">
+                  <thead>
+                    <tr><th>Vaccine</th><th>Available</th><th>Status</th></tr>
+                  </thead>
+                  <tbody>
+                    {vaccineData.map(vaccine => (
+                      <tr key={vaccine.id}>
+                        <td>{vaccine.vaccine}</td>
+                        <td>{vaccine.available.toLocaleString()}</td>
+                        <td><span className={getVaccineStatusClass(vaccine.status)}>{vaccine.status}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="total-row">
+                      <td>Total</td>
+                      <td>{vaccineData.reduce((sum, v) => sum + v.available, 0).toLocaleString()}</td>
+                      <td></td>
                     </tr>
-                  );
-                })}
-              </tbody>
-              <tfoot>
-                <tr className="total-row">
-                  <td colSpan={2}>Total for {orderMonth}</td>
-                  <td>{monthTotalRequired.toLocaleString()} doses</td>
-                  <td className="td-used">{monthlyOrderData.reduce((s, v) => s + v.usedSoFar, 0).toLocaleString()}</td>
-                  <td className="td-remaining-ok">{monthTotalRemaining.toLocaleString()}</td>
-                  <td colSpan={2} className="tfoot-note">
-                    💉 {monthTotalRemaining.toLocaleString()} doses remaining this month
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+                  </tfoot>
+                </table>
+              </div>
+            </article>
+          </section>
 
-        </section>
-
-      </main>
-    </div>
+        </main>
+      </section>
+    </section>
   );
 };
 

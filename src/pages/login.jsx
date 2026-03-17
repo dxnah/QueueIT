@@ -24,6 +24,9 @@ const LoginScreen = () => {
   const handleLogin = (e) => {
     e.preventDefault();
     if (username === getStoredUsername() && password === getStoredPassword()) {
+      // ── Stamp login timestamp & start a fresh session ──
+      localStorage.setItem('lastLogin', new Date().toISOString());
+      sessionStorage.setItem('sessionStarted', 'true');
       navigate('/dashboard');
     } else {
       setError('Invalid username or password');

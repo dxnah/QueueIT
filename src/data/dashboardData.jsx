@@ -4,6 +4,7 @@
 export const authData = {
   defaultUsername: 'admin',
   defaultPassword: 'pass1',
+  defaultEmail: 'admin@vaxflow.com',
 };
 
 //  ML PREDICTIONS 
@@ -135,4 +136,63 @@ export const notificationsData = [
   { id: 4, type: 'success',  title: 'Restock Completed',             message: 'Anti-Rabies vaccine restocked successfully (500 doses added).',               time: '5 hours ago',   read: true  },
   { id: 5, type: 'warning',  title: 'Expiring Soon',                 message: 'Hepatitis B vaccine (Batch HB-2024-004) expires in 30 days.',                 time: '1 day ago',     read: true  },
   { id: 6, type: 'info',     title: 'System Maintenance',            message: 'Scheduled maintenance on Feb 25, 2025 from 2:00 AM - 4:00 AM.',              time: '2 days ago',    read: true  },
+];
+
+// ─── PATIENT DATA ─────────────────────────────────────────────────────────────
+export const usersData = [
+  {
+    id: 1,
+    name:      'Maria Santos',
+    email:     'maria.santos@gmail.com',
+    phone:     '09171234567',
+    username:  'maria.santos',
+    password:  'Maria@2024',
+    status:    'Active',
+    lastLogin: '2025-03-15T08:32:00',
+    avatar:    'MS',
+  },
+  {
+    id: 2,
+    name:      'Juan dela Cruz',
+    email:     'juan.delacruz@gmail.com',
+    phone:     '09281234567',
+    username:  'juan.delacruz',
+    password:  'Juan@2024',
+    status:    'Active',
+    lastLogin: '2025-03-14T14:10:00',
+    avatar:    'JD',
+  },
+  {
+    id: 3,
+    name:      'Ana Reyes',
+    email:     'ana.reyes@gmail.com',
+    phone:     '09391234567',
+    username:  'ana.reyes',
+    password:  'Ana@2024',
+    status:    'Inactive',
+    lastLogin: '2025-02-28T09:55:00',
+    avatar:    'AR',
+  },
+  {
+    id: 4,
+    name:      'Carlos Mendoza',
+    email:     'carlos.mendoza@gmail.com',
+    phone:     '09451234567',
+    username:  'carlos.mendoza',
+    password:  'Carlos@2024',
+    status:    'Active',
+    lastLogin: '2025-03-16T07:45:00',
+    avatar:    'CM',
+  },
+  {
+    id: 5,
+    name:      'Rosa Bautista',
+    email:     'rosa.bautista@gmail.com',
+    phone:     '09561234567',
+    username:  'rosa.bautista',
+    password:  'Rosa@2024',
+    status:    'Active',
+    lastLogin: '2025-03-13T11:20:00',
+    avatar:    'RB',
+  },
 ];

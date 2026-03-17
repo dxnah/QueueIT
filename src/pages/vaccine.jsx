@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
+import TopBar from '../components/TopBar';
 import VaccineCard from '../components/VaccineCard';
 import {
   vaccineData,
@@ -60,10 +61,8 @@ const VaccineManagement = () => {
   const [showAddForm,      setShowAddForm]       = useState(false);
   const [editingVaccine,   setEditingVaccine]    = useState(null);
   const [filterStatus,     setFilterStatus]      = useState('all');
-  const [searchQuery,      setSearchQuery]       = useState('');
   const [saveMessage,      setSaveMessage]       = useState('');
 
-  // ── Period controls (Monthly / Weekly / Daily) ─────────────────
   const [viewMode,      setViewMode]      = useState('monthly');
   const [selectedMonth, setSelectedMonth] = useState('January');
   const [selectedWeek,  setSelectedWeek]  = useState(0);
@@ -147,13 +146,9 @@ const VaccineManagement = () => {
 
   const isPeak = PEAK_MONTHS.includes(selectedMonth);
 
-  const filteredVaccines = vaccines.filter(v => {
-    const matchesStatus = filterStatus === 'all' || v.status === filterStatus;
-    const matchesSearch =
-      v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (v.batchNumber || '').toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
+  const filteredVaccines = vaccines.filter(v =>
+    filterStatus === 'all' || v.status === filterStatus
+  );
 
   const closeForm = () => {
     setShowAddForm(false);
@@ -161,7 +156,6 @@ const VaccineManagement = () => {
     setFormData({ name: '', available: '', minStock: '', batchNumber: '', expiryDate: '' });
   };
 
-  // ── shared button style ────────────────────────────────────────
   const periodBtnStyle = (active) => ({
     display:'inline-flex', alignItems:'center', gap:'5px',
     padding:'7px 14px', borderRadius:'8px', fontSize:'13px', fontWeight:'600',
@@ -237,151 +231,144 @@ const VaccineManagement = () => {
         </div>
       )}
 
-      <main className="main-content">
+      {/* ── main-wrapper: holds TopBar + scrollable content ── */}
+      <section className="main-wrapper">
+        <TopBar />
 
-        {/* ── Page header ── */}
-        <div className="page-header">
-          <div>
-            <h1 className="dashboard-heading">💉 Vaccine Management</h1>
-            <p className="dashboard-subheading">Manage vaccine inventory and stock levels</p>
-          </div>
+        <main className="main-content">
 
-          <div className="page-header-actions">
-
-            {/* Search */}
-            <div className="search-wrapper">
-              <span className="search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Search vaccines..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="search-input-field"
-              />
+          {/* ── Page header ── */}
+          <div className="page-header">
+            <div>
+              <h1 className="dashboard-heading">💉 Vaccine Management</h1>
+              <p className="dashboard-subheading">Manage vaccine inventory and stock levels</p>
             </div>
 
-            {/* ── MONTHLY toggle + dropdown ── */}
-            <div style={{ position:'relative' }}>
-              <button type="button" style={periodBtnStyle(viewMode === 'monthly')}
-                onClick={() => { setViewMode('monthly'); setMonthDropOpen(v => !v); setWeekDropOpen(false); setCalOpen(false); }}>
-                📅 Monthly {viewMode === 'monthly' ? `(${selectedMonth.slice(0,3)})` : ''}{isPeak && viewMode === 'monthly' ? ' 🔥' : ''} ▾
-              </button>
-              {monthDropOpen && (
-                <div style={{ position:'absolute', top:'110%', right:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'180px', padding:'6px 0', overflow:'hidden' }}>
-                  {MONTHS.map(m => {
-                    const isPeakM = PEAK_MONTHS.includes(m);
-                    return (
-                      <div key={m} style={dropItemStyle(m === selectedMonth, isPeakM)}
-                        onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
-                        onMouseLeave={e => e.currentTarget.style.background = m === selectedMonth ? '#e0f7f4' : 'white'}
-                        onClick={() => { setSelectedMonth(m); setMonthDropOpen(false); setSelectedWeek(0); setSelectedDay(1); }}>
-                        <span>{m}</span>
-                        {isPeakM && <span style={{ fontSize:'10px', background:'#ffebee', color:'#e53935', padding:'2px 6px', borderRadius:'10px', fontWeight:'700' }}>🔥 PEAK</span>}
-                        {m === selectedMonth && !isPeakM && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
+            <div className="page-header-actions">
+
+              {/* ── MONTHLY ── */}
+              <div style={{ position:'relative' }}>
+                <button type="button" style={periodBtnStyle(viewMode === 'monthly')}
+                  onClick={() => { setViewMode('monthly'); setMonthDropOpen(v => !v); setWeekDropOpen(false); setCalOpen(false); }}>
+                  📅 Monthly {viewMode === 'monthly' ? `(${selectedMonth.slice(0,3)})` : ''}{isPeak && viewMode === 'monthly' ? ' 🔥' : ''} ▾
+                </button>
+                {monthDropOpen && (
+                  <div style={{ position:'absolute', top:'110%', right:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'180px', padding:'6px 0', overflow:'hidden' }}>
+                    {MONTHS.map(m => {
+                      const isPeakM = PEAK_MONTHS.includes(m);
+                      return (
+                        <div key={m} style={dropItemStyle(m === selectedMonth, isPeakM)}
+                          onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
+                          onMouseLeave={e => e.currentTarget.style.background = m === selectedMonth ? '#e0f7f4' : 'white'}
+                          onClick={() => { setSelectedMonth(m); setMonthDropOpen(false); setSelectedWeek(0); setSelectedDay(1); }}>
+                          <span>{m}</span>
+                          {isPeakM && <span style={{ fontSize:'10px', background:'#ffebee', color:'#e53935', padding:'2px 6px', borderRadius:'10px', fontWeight:'700' }}>🔥 PEAK</span>}
+                          {m === selectedMonth && !isPeakM && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* ── WEEKLY ── */}
+              <div style={{ position:'relative' }}>
+                <button type="button" style={periodBtnStyle(viewMode === 'weekly')}
+                  onClick={() => { setViewMode('weekly'); setWeekDropOpen(v => !v); setMonthDropOpen(false); setCalOpen(false); }}>
+                  📆 Weekly {viewMode === 'weekly' ? `(Wk ${selectedWeek + 1})` : ''} ▾
+                </button>
+                {weekDropOpen && (
+                  <div style={{ position:'absolute', top:'110%', right:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'160px', padding:'6px 0', overflow:'hidden' }}>
+                    {[0, 1, 2, 3].map(wi => (
+                      <div key={wi} style={dropItemStyle(selectedWeek === wi)}
+                        onMouseEnter={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : '#f5f5f5'}
+                        onMouseLeave={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : 'white'}
+                        onClick={() => { setSelectedWeek(wi); setWeekDropOpen(false); }}>
+                        Week {wi + 1}
+                        {selectedWeek === wi && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-            {/* ── WEEKLY toggle ── */}
-            <div style={{ position:'relative' }}>
-              <button type="button" style={periodBtnStyle(viewMode === 'weekly')}
-                onClick={() => { setViewMode('weekly'); setWeekDropOpen(v => !v); setMonthDropOpen(false); setCalOpen(false); }}>
-                📆 Weekly {viewMode === 'weekly' ? `(Wk ${selectedWeek + 1})` : ''} ▾
-              </button>
-              {weekDropOpen && (
-                <div style={{ position:'absolute', top:'110%', right:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'160px', padding:'6px 0', overflow:'hidden' }}>
-                  {[0, 1, 2, 3].map(wi => (
-                    <div key={wi} style={dropItemStyle(selectedWeek === wi)}
-                      onMouseEnter={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : '#f5f5f5'}
-                      onMouseLeave={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : 'white'}
-                      onClick={() => { setSelectedWeek(wi); setWeekDropOpen(false); }}>
-                      Week {wi + 1}
-                      {selectedWeek === wi && <span style={{ color:'#26a69a', fontSize:'12px' }}>✓</span>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              {/* ── DAILY ── */}
+              <div style={{ position:'relative' }}>
+                <button type="button" style={periodBtnStyle(viewMode === 'daily')}
+                  onClick={() => { setViewMode('daily'); setCalOpen(v => !v); setMonthDropOpen(false); setWeekDropOpen(false); }}>
+                  🗓️ Daily {viewMode === 'daily' ? `(${selectedMonth.slice(0,3)} ${selectedDay})` : ''} ▾
+                </button>
+                {calOpen && (
+                  <div style={{ position:'absolute', top:'110%', right:0, zIndex:999 }}>
+                    <MiniCalendar month={selectedMonth} selectedDay={selectedDay}
+                      onSelectDay={(d) => { setSelectedDay(d); setCalOpen(false); }} />
+                  </div>
+                )}
+              </div>
 
-            {/* ── DAILY toggle + calendar ── */}
-            <div style={{ position:'relative' }}>
-              <button type="button" style={periodBtnStyle(viewMode === 'daily')}
-                onClick={() => { setViewMode('daily'); setCalOpen(v => !v); setMonthDropOpen(false); setWeekDropOpen(false); }}>
-                🗓️ Daily {viewMode === 'daily' ? `(${selectedMonth.slice(0,3)} ${selectedDay})` : ''} ▾
-              </button>
-              {calOpen && (
-                <div style={{ position:'absolute', top:'110%', right:0, zIndex:999 }}>
-                  <MiniCalendar month={selectedMonth} selectedDay={selectedDay}
-                    onSelectDay={(d) => { setSelectedDay(d); setCalOpen(false); }} />
-                </div>
-              )}
-            </div>
+            </div>{/* end page-header-actions */}
+          </div>{/* end page-header */}
 
-          </div>
-        </div>
+          {saveMessage && <div className="alert alert-success">{saveMessage}</div>}
 
-        {saveMessage && <div className="alert alert-success">{saveMessage}</div>}
-
-        {isPeak && (
-          <div className="peak-notice">
-            🔥 <strong>Peak Season ({selectedMonth}):</strong> Monthly dose requirements are 1.5× higher. Cards below show adjusted urgency.
-          </div>
-        )}
-
-        {/* ── Period context label ── */}
-        <div style={{ marginBottom:'14px', fontSize:'13px', color:'#888', fontWeight:'500' }}>
-          Showing urgency for:{' '}
-          <strong style={{ color:'#26a69a' }}>
-            {viewMode === 'daily'
-              ? `${selectedMonth} — Day ${selectedDay}`
-              : viewMode === 'weekly'
-              ? `${selectedMonth} — Week ${selectedWeek + 1}`
-              : selectedMonth}
-          </strong>
-        </div>
-
-        {/* ── Filters ── */}
-        <div className="filters-container">
-          <div className="filter-buttons">
-            {[
-              { key: 'all',       label: `All (${vaccines.length})` },
-              { key: 'In Stock',  label: '✅ In Stock'              },
-              { key: 'Low Stock', label: '⚠️ Low Stock'             },
-              { key: 'Out Stock', label: '🚨 Out of Stock'          },
-            ].map(f => (
-              <button type="button" key={f.key} onClick={() => setFilterStatus(f.key)}
-                className={filterStatus === f.key ? 'filter-btn active' : 'filter-btn'}>
-                {f.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── Vaccine Cards Grid ── */}
-        <div className="vaccines-grid vaccines-grid--padded">
-          {filteredVaccines.length > 0 ? (
-            filteredVaccines.map(vaccine => (
-              <VaccineCard
-                key={vaccine.id}
-                vaccine={{
-                  ...vaccine,
-                  monthlyUrgency: getVaccineMonthlyUrgency(vaccine.vaccine || vaccine.name),
-                }}
-                onEdit={handleEditVaccine}
-                onDelete={handleDeleteVaccine}
-              />
-            ))
-          ) : (
-            <div className="empty-state">
-              <p>📦 No vaccines found matching your criteria</p>
+          {isPeak && (
+            <div className="peak-notice">
+              🔥 <strong>Peak Season ({selectedMonth}):</strong> Monthly dose requirements are 1.5× higher. Cards below show adjusted urgency.
             </div>
           )}
-        </div>
 
-      </main>
+          {/* ── Period context label ── */}
+          <div style={{ marginBottom:'14px', fontSize:'13px', color:'#888', fontWeight:'500' }}>
+            Showing urgency for:{' '}
+            <strong style={{ color:'#26a69a' }}>
+              {viewMode === 'daily'
+                ? `${selectedMonth} — Day ${selectedDay}`
+                : viewMode === 'weekly'
+                ? `${selectedMonth} — Week ${selectedWeek + 1}`
+                : selectedMonth}
+            </strong>
+          </div>
+
+          {/* ── Filters ── */}
+          <div className="filters-container">
+            <div className="filter-buttons">
+              {[
+                { key: 'all',       label: `All (${vaccines.length})` },
+                { key: 'In Stock',  label: '✅ In Stock'              },
+                { key: 'Low Stock', label: '⚠️ Low Stock'             },
+                { key: 'Out Stock', label: '🚨 Out of Stock'          },
+              ].map(f => (
+                <button type="button" key={f.key} onClick={() => setFilterStatus(f.key)}
+                  className={filterStatus === f.key ? 'filter-btn active' : 'filter-btn'}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Vaccine Cards Grid ── */}
+          <div className="vaccines-grid vaccines-grid--padded">
+            {filteredVaccines.length > 0 ? (
+              filteredVaccines.map(vaccine => (
+                <VaccineCard
+                  key={vaccine.id}
+                  vaccine={{
+                    ...vaccine,
+                    monthlyUrgency: getVaccineMonthlyUrgency(vaccine.vaccine || vaccine.name),
+                  }}
+                  onEdit={handleEditVaccine}
+                  onDelete={handleDeleteVaccine}
+                />
+              ))
+            ) : (
+              <div className="empty-state">
+                <p>📦 No vaccines found matching your criteria</p>
+              </div>
+            )}
+          </div>
+
+        </main>
+      </section>
 
       {/* ── Floating Add Button ── */}
       <button
