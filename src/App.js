@@ -12,7 +12,6 @@ import Reports from './pages/reports';
 import Notifications, { NotificationsProvider } from './pages/notifications';
 import Settings from './pages/settings';
 
-
 function App() {
   return (
     <NotificationsProvider>
