@@ -27,17 +27,6 @@ const Reports = () => {
 
   const vaccineRows = reportData['vaccine-usage'];
 
-  const totals = useMemo(() => {
-    const adm = vaccineRows.reduce((s, r) => s + r.administered, 0);
-    const wst = vaccineRows.reduce((s, r) => s + r.wasted,       0);
-    const rem = vaccineRows.reduce((s, r) => s + r.remaining,    0);
-    return { adm, wst, rem, eff: calcEff(adm, wst) };
-  }, [vaccineRows]);
-
-  const mostUsed = useMemo(() =>
-    [...vaccineRows].sort((a, b) => b.administered - a.administered)[0]?.vaccine ?? '—',
-  [vaccineRows]);
-
   const handleSort = (key) => {
     setSortConfig(prev =>
       prev.key === key
@@ -105,7 +94,6 @@ const Reports = () => {
           role="presentation" />
       )}
 
-      {/* ── main-wrapper: holds TopBar + scrollable content ── */}
       <section className="main-wrapper">
         <TopBar />
 
