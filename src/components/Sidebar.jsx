@@ -1,6 +1,7 @@
 // Sidebar.jsx
 
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import logo from '../images/logoit.png';
 
 const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
@@ -8,14 +9,22 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (date) =>
+    date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  const formatDate = (date) =>
+    date.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
   const handleNavClick = (path) => {
     navigate(path);
     if (onMenuClose) onMenuClose();
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('sessionStarted');
-    navigate('/login');
   };
 
   return (
@@ -76,9 +85,10 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
         </button>
       </nav>
 
-      <button type="button" className="nav-link logout-btn" onClick={handleLogout}>
-        🚪 LOGOUT
-      </button>
+      <div className="sidebar-clock">
+        <span className="sidebar-clock-time">{formatTime(now)}</span>
+        <span className="sidebar-clock-date">{formatDate(now)}</span>
+      </div>
 
     </aside>
   );
