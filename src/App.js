@@ -7,8 +7,8 @@ import './App.css';
 import LoginScreen    from './pages/login';
 import Dashboard      from './pages/dashboard';
 import VaccineManagement from './pages/vaccine';
-import VaccineOrders  from 'src/pages/VaccineOrders';  // ✅ NEW
-import Suppliers      from 'src/pages/Suppliers';       // ✅ NEW
+import VaccineOrders  from './pages/VaccineOrders';
+import Suppliers      from './pages/Suppliers';
 import DemandForecast from './pages/DemandForecast';
 import Reports        from './pages/reports';
 import Notifications, { NotificationsProvider } from './pages/notifications';
@@ -25,8 +25,8 @@ function App() {
           <Route path="/login"             element={<LoginScreen />} />
           <Route path="/dashboard"         element={<Dashboard />} />
           <Route path="/vaccine"           element={<VaccineManagement />} />
-          <Route path="/vaccine-orders"    element={<VaccineOrders />} />   {/* ✅ NEW */}
-          <Route path="/suppliers"         element={<Suppliers />} />        {/* ✅ NEW */}
+          <Route path="/vaccine-orders"    element={<VaccineOrders />} />
+          <Route path="/suppliers"         element={<Suppliers />} />
           <Route path="/demand-forecast"   element={<DemandForecast />} />
           <Route path="/reports"           element={<Reports />} />
           <Route path="/notifications"     element={<Notifications />} />
