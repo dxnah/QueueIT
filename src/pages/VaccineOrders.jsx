@@ -1,12 +1,14 @@
-// VaccineOrders.jsx
-// Save in: src/pages/VaccineOrders.jsx
+// src/pages/VaccineOrders.jsx
+
 
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import '../styles/dashboard.css';
 
+
 const STATUS_OPTIONS = ['Pending', 'Approved', 'Shipped', 'Delivered', 'Cancelled'];
+
 
 const statusStyle = (status) => {
   const map = {
@@ -23,11 +25,13 @@ const statusStyle = (status) => {
   };
 };
 
+
 const VaccineOrders = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [orders, setOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
   const [editingOrder, setEditingOrder] = useState(null);
+
 
   // Load from localStorage (written by vaccine.jsx)
   useEffect(() => {
@@ -45,26 +49,32 @@ const VaccineOrders = () => {
     }
   }, []);
 
+
   const saveOrders = (updated) => {
     setOrders(updated);
     localStorage.setItem('vaccineOrders', JSON.stringify(updated));
   };
 
+
   const handleStatusChange = (id, newStatus) => {
     saveOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
   };
+
 
   const handleDelete = (id) => {
     if (!window.confirm('Delete this order?')) return;
     saveOrders(orders.filter(o => o.id !== id));
   };
 
+
   const filtered = filterStatus === 'all' ? orders : orders.filter(o => o.status === filterStatus);
+
 
   const counts = STATUS_OPTIONS.reduce((acc, s) => {
     acc[s] = orders.filter(o => o.status === s).length;
     return acc;
   }, {});
+
 
   return (
     <section className="dashboard-container">
@@ -72,16 +82,19 @@ const VaccineOrders = () => {
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
 
+
       <section className="main-wrapper">
         <TopBar />
         <main className="main-content">
 
+
           <div className="page-header">
             <div>
-              <h1 className="dashboard-heading">📦 Vaccine Orders</h1>
+              <h2 className="dashboard-heading" style={{ marginTop:'-20px' }}>📦 Vaccine Orders</h2>
               <p className="dashboard-subheading">Track and manage all vaccine procurement orders</p>
             </div>
           </div>
+
 
           {/* Status summary chips */}
           <div style={{ display:'flex', gap:'12px', marginBottom:'24px', flexWrap:'wrap' }}>
@@ -103,6 +116,7 @@ const VaccineOrders = () => {
               </button>
             ))}
           </div>
+
 
           {/* Orders table */}
           <div style={{ background:'white', borderRadius:'12px', overflow:'hidden', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10)' }}>
@@ -152,7 +166,7 @@ const VaccineOrders = () => {
                             style={{ padding:'5px 10px', borderRadius:'6px', border:'1.5px solid #e53935', background:'white', color:'#e53935', fontSize:'12px', fontWeight:'600', cursor:'pointer', transition:'all 0.15s' }}
                             onMouseEnter={e => { e.currentTarget.style.background='#e53935'; e.currentTarget.style.color='white'; }}
                             onMouseLeave={e => { e.currentTarget.style.background='white'; e.currentTarget.style.color='#e53935'; }}>
-                            🗑️ Delete
+                            Delete
                           </button>
                         </td>
                       </tr>
@@ -174,10 +188,12 @@ const VaccineOrders = () => {
             )}
           </div>
 
+
         </main>
       </section>
     </section>
   );
 };
+
 
 export default VaccineOrders;

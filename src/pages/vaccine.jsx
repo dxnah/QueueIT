@@ -1,15 +1,9 @@
-// vaccine.jsx
+// src/pages/vaccine.jsx
 
 import React, { useState, useRef, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
-import { useNavigate } from 'react-router-dom';
-import {
-  vaccineData,
-  PEAK_MONTHS,
-  getMonthlyRequirement,
-  getOrderUrgency,
-} from '../data/dashboardData';
+import { PEAK_MONTHS } from '../data/dashboardData';
 import '../styles/dashboard.css';
 import '../styles/vaccine.css';
 
@@ -18,12 +12,12 @@ const MONTHS = [
   'July','August','September','October','November','December',
 ];
 const DAYS_IN_MONTH = {
-  January:31,February:28,March:31,April:30,May:31,June:30,
-  July:31,August:31,September:30,October:31,November:30,December:31,
+  January:31, February:28, March:31, April:30, May:31, June:30,
+  July:31, August:31, September:30, October:31, November:30, December:31,
 };
 const MONTH_START_DAYS = {
-  January:0,February:3,March:3,April:6,May:1,June:4,
-  July:6,August:2,September:5,October:0,November:3,December:5,
+  January:0, February:3, March:3, April:6, May:1, June:4,
+  July:6, August:2, September:5, October:0, November:3, December:5,
 };
 
 const SUPPLIERS_LIST = [
@@ -37,8 +31,8 @@ const SUPPLIERS_LIST = [
 const PRICE_PER_DOSE = 1100;
 
 const calcStatus = (available) => {
-  if (available === 0)      return 'Out Stock';
-  if (available < 100)      return 'Low Stock';
+  if (available === 0)   return 'Out Stock';
+  if (available < 100)  return 'Low Stock';
   return 'In Stock';
 };
 
@@ -63,7 +57,9 @@ const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
     <div style={{ position:'absolute', top:'110%', left:0, zIndex:1000, background:'white', border:'1px solid #e0e0e0', borderRadius:'12px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', padding:'16px', minWidth:'280px' }}>
       <p style={{ margin:'0 0 12px 0', fontWeight:'700', color:'#333', fontSize:'14px', textAlign:'center' }}>📅 {month}</p>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:'2px', textAlign:'center' }}>
-        {dayNames.map(d => <div key={d} style={{ fontSize:'11px', fontWeight:'700', color:'#999', padding:'4px 0' }}>{d}</div>)}
+        {dayNames.map(d => (
+          <div key={d} style={{ fontSize:'11px', fontWeight:'700', color:'#999', padding:'4px 0' }}>{d}</div>
+        ))}
         {cells.map((d, i) => (
           <div key={i} onClick={() => d && onSelectDay(d)}
             style={{ padding:'6px 2px', fontSize:'12px', borderRadius:'6px', cursor:d?'pointer':'default', background:d===selectedDay?'#26a69a':'transparent', color:d===selectedDay?'white':d?'#333':'transparent', transition:'background 0.15s' }}
@@ -103,7 +99,7 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
     background: s==='In Stock' ? '#e8f5e9' : s==='Low Stock' ? '#fff8e1' : '#ffebee',
     color:      s==='In Stock' ? '#2e7d32' : s==='Low Stock' ? '#f57f17' : '#c62828',
     border:     `1.5px solid ${s==='In Stock' ? '#a5d6a7' : s==='Low Stock' ? '#ffe082' : '#ef9a9a'}`,
-    whiteSpace:'nowrap',
+    whiteSpace: 'nowrap',
   });
 
   const openAddBatch = () => {
@@ -141,7 +137,6 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
   return (
     <div style={{ background:'white', borderRadius:'12px', marginBottom:'24px', overflow:'hidden', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10)' }}>
 
-      {/* Table title bar */}
       <div style={{ background:'#26a69a', padding:'12px 20px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
         <h3 style={{ margin:0, color:'white', fontSize:'16px', fontWeight:'700', letterSpacing:'0.5px', textTransform:'uppercase' }}>
           {vaccineName}
@@ -154,7 +149,6 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
         </div>
       </div>
 
-      {/* Table */}
       <div style={{ overflowX:'auto' }}>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
           <thead>
@@ -229,7 +223,6 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
         </table>
       </div>
 
-      {/* Inline Add/Edit Batch Form */}
       {showAddBatch && (
         <div style={{ padding:'20px 24px', borderTop:'2px solid #26a69a', background:'#f8fffe' }}>
           <h4 style={{ margin:'0 0 16px 0', fontSize:'14px', fontWeight:'700', color:'#26a69a' }}>
@@ -280,7 +273,7 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
   );
 };
 
-// ── Order Vaccine Form ─────────────────────────────────────────────────────────
+// ── Order Vaccine Form ────────────────────────────────────────────────────────
 const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
   const [orderData, setOrderData] = useState({ vaccine:'', supplier:'', amount:'', pricePerPiece: PRICE_PER_DOSE });
   const total = (parseInt(orderData.amount) || 0) * orderData.pricePerPiece;
@@ -299,9 +292,6 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
     onClose();
   };
 
-  const inputStyle = { width:'100%', padding:'10px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', boxSizing:'border-box', outline:'none' };
-  const labelStyle = { fontSize:'13px', fontWeight:'600', color:'#555', display:'block', marginBottom:'6px' };
-
   return (
     <div className="modal-overlay">
       <div className="modal-box modal-box--wide" style={{ maxWidth:'460px' }}>
@@ -318,46 +308,42 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
           <form onSubmit={handleSubmit}>
             <div className="modal-field">
               <label className="modal-label">Vaccine</label>
-              <select value={orderData.vaccine} onChange={e => setOrderData(p => ({ ...p, vaccine: e.target.value }))} required style={{ ...inputStyle, background:'white' }}>
+              <select className="modal-input" value={orderData.vaccine}
+                onChange={e => setOrderData(p => ({ ...p, vaccine: e.target.value }))} required style={{ background:'white' }}>
                 <option value="">— Select Vaccine —</option>
                 {vaccines.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
             </div>
             <div className="modal-field">
               <label className="modal-label">Supplier</label>
-              <select value={orderData.supplier} onChange={e => setOrderData(p => ({ ...p, supplier: e.target.value }))} required style={{ ...inputStyle, background:'white' }}>
+              <select className="modal-input" value={orderData.supplier}
+                onChange={e => setOrderData(p => ({ ...p, supplier: e.target.value }))} required style={{ background:'white' }}>
                 <option value="">— Select Supplier —</option>
                 {SUPPLIERS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div className="modal-field">
               <label className="modal-label">Amount (doses)</label>
-              <input type="number" min="1" placeholder="e.g. 200" value={orderData.amount}
-                onChange={e => setOrderData(p => ({ ...p, amount: e.target.value }))} required style={inputStyle}
-                onFocus={e => e.target.style.borderColor='#26a69a'}
-                onBlur={e => e.target.style.borderColor='#e0e0e0'} />
+              <input className="modal-input" type="number" min="1" placeholder="e.g. 200"
+                value={orderData.amount} onChange={e => setOrderData(p => ({ ...p, amount: e.target.value }))} required />
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px', marginBottom:'20px' }}>
               <div>
-                <label style={labelStyle}>Price per piece</label>
+                <label className="modal-label">Price per piece</label>
                 <div style={{ padding:'10px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', background:'#f5f5f5', color:'#555', fontWeight:'600' }}>
                   ₱{orderData.pricePerPiece.toLocaleString()}
                 </div>
               </div>
               <div>
-                <label style={labelStyle}>TOTAL</label>
+                <label className="modal-label">TOTAL</label>
                 <div style={{ padding:'10px 12px', borderRadius:'8px', border:'1.5px solid #26a69a', fontSize:'16px', background:'#e0f7f4', color:'#26a69a', fontWeight:'800' }}>
                   ₱{total.toLocaleString()}
                 </div>
               </div>
             </div>
             <div className="modal-actions">
-              <button type="submit" style={{ flex:1, padding:'11px', borderRadius:'8px', border:'none', background:'#26a69a', color:'white', fontWeight:'700', fontSize:'14px', cursor:'pointer' }}>
-                🛒 ORDER
-              </button>
-              <button type="button" onClick={onClose} style={{ flex:1, padding:'11px', borderRadius:'8px', border:'1.5px solid #e0e0e0', background:'white', color:'#555', fontWeight:'600', fontSize:'14px', cursor:'pointer' }}>
-                Cancel
-              </button>
+              <button type="submit" className="modal-btn-save">🛒 ORDER</button>
+              <button type="button" className="modal-btn-cancel" onClick={onClose}>Cancel</button>
             </div>
           </form>
         </div>
@@ -369,31 +355,27 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
 // ── FAB Options Picker ────────────────────────────────────────────────────────
 const FabOptions = ({ onNewVaccine, onOrderVaccine, onClose }) => (
   <>
-    <div onClick={e => e.stopPropagation()}
-      style={{ position:'fixed', bottom:'90px', left:'50%', transform:'translateX(-50%)', zIndex:1000, display:'flex', gap:'20px' }}>
+    <div className="fab-options" onClick={e => e.stopPropagation()}>
       {[
         { label:'New Vaccine',   icon:'💉', onClick: onNewVaccine   },
         { label:'Order Vaccine', icon:'📦', onClick: onOrderVaccine },
       ].map(opt => (
-        <button key={opt.label} onClick={() => { opt.onClick(); onClose(); }}
-          style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', padding:'20px 28px', borderRadius:'16px', border:'2px solid #e0e0e0', background:'white', cursor:'pointer', boxShadow:'0 8px 28px rgba(0,0,0,0.18)', transition:'all 0.18s', minWidth:'140px' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor='#26a69a'; e.currentTarget.style.transform='translateY(-4px)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor='#e0e0e0'; e.currentTarget.style.transform=''; }}>
-          <span style={{ fontSize:'36px' }}>{opt.icon}</span>
-          <span style={{ fontSize:'14px', fontWeight:'700', color:'#333' }}>{opt.label}</span>
+        <button key={opt.label} className="fab-option-card"
+          onClick={() => { opt.onClick(); onClose(); }}>
+          <span className="fab-option-icon">{opt.icon}</span>
+          <span className="fab-option-label">{opt.label}</span>
         </button>
       ))}
     </div>
-    <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:999 }} />
+    <div className="fab-backdrop" onClick={onClose} />
   </>
 );
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const VaccineManagement = () => {
-  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [saveMessage,  setSaveMessage]  = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [saveMessage,      setSaveMessage]      = useState('');
+  const [filterStatus,     setFilterStatus]     = useState('all');
 
   const [viewMode,      setViewMode]      = useState('monthly');
   const [selectedMonth, setSelectedMonth] = useState('January');
@@ -403,8 +385,8 @@ const VaccineManagement = () => {
   const [weekDropOpen,  setWeekDropOpen]  = useState(false);
   const [calOpen,       setCalOpen]       = useState(false);
 
-  const [vaccineNames, setVaccineNames] = useState(['Anti-Rabies', 'Booster']);
-  const [batchData,    setBatchData]    = useState(INITIAL_BATCH_DATA);
+  const [vaccineNames,     setVaccineNames]     = useState(['Anti-Rabies', 'Booster']);
+  const [batchData,        setBatchData]        = useState(INITIAL_BATCH_DATA);
   const [selectedVaccine,  setSelectedVaccine]  = useState('Anti-Rabies');
   const [vaccineDropOpen,  setVaccineDropOpen]  = useState(false);
   const vaccineDropRef = useRef(null);
@@ -413,7 +395,9 @@ const VaccineManagement = () => {
   const [showNewVaccine,   setShowNewVaccine]   = useState(false);
   const [showOrderVaccine, setShowOrderVaccine] = useState(false);
 
-  const [newVaccineForm, setNewVaccineForm] = useState({ name:'', batchNumber:'', expiryDate:'', available:'', datePurchased:'', supplier:'' });
+  const [newVaccineForm, setNewVaccineForm] = useState({
+    name:'', batchNumber:'', expiryDate:'', available:'', datePurchased:'', supplier:'',
+  });
 
   const addOrder = (order) => {
     const existing = JSON.parse(localStorage.getItem('vaccineOrders') || '[]');
@@ -423,7 +407,10 @@ const VaccineManagement = () => {
   };
 
   useEffect(() => {
-    const handler = (e) => { if (vaccineDropRef.current && !vaccineDropRef.current.contains(e.target)) setVaccineDropOpen(false); };
+    const handler = (e) => {
+      if (vaccineDropRef.current && !vaccineDropRef.current.contains(e.target))
+        setVaccineDropOpen(false);
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
@@ -435,11 +422,16 @@ const VaccineManagement = () => {
     setSaveMessage('✅ Batch added successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
   };
+
   const handleEditBatch = (vaccineName, batchId, data) => {
-    setBatchData(prev => ({ ...prev, [vaccineName]: prev[vaccineName].map(b => b.id === batchId ? { ...b, ...data } : b) }));
+    setBatchData(prev => ({
+      ...prev,
+      [vaccineName]: prev[vaccineName].map(b => b.id === batchId ? { ...b, ...data } : b),
+    }));
     setSaveMessage('✅ Batch updated successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
   };
+
   const handleDeleteBatch = (vaccineName, batchId) => {
     if (!window.confirm('Delete this batch?')) return;
     setBatchData(prev => ({ ...prev, [vaccineName]: prev[vaccineName].filter(b => b.id !== batchId) }));
@@ -455,9 +447,14 @@ const VaccineManagement = () => {
       return;
     }
     const firstBatch = {
-      id: Date.now(), batchNumber: newVaccineForm.batchNumber, expiryDate: newVaccineForm.expiryDate,
-      available: parseInt(newVaccineForm.available) || 0, used: 0,
-      datePurchased: newVaccineForm.datePurchased, supplier: newVaccineForm.supplier, mlRecommended: 200,
+      id: Date.now(),
+      batchNumber:   newVaccineForm.batchNumber,
+      expiryDate:    newVaccineForm.expiryDate,
+      available:     parseInt(newVaccineForm.available) || 0,
+      used:          0,
+      datePurchased: newVaccineForm.datePurchased,
+      supplier:      newVaccineForm.supplier,
+      mlRecommended: 200,
     };
     setVaccineNames(prev => [...prev, name]);
     setBatchData(prev => ({ ...prev, [name]: [firstBatch] }));
@@ -482,22 +479,21 @@ const VaccineManagement = () => {
     ? selectedVaccine
     : (filteredVaccineNames[0] || null);
 
-  // ── Shared button/dropdown styles (declared ONCE) ──────────────────────────
   const periodBtnStyle = (active) => ({
     display:'inline-flex', alignItems:'center', gap:'5px',
     padding:'7px 14px', borderRadius:'8px', fontSize:'13px', fontWeight:'600',
     cursor:'pointer', border:'1.5px solid', transition:'all 0.18s',
-    background: active ? '#26a69a' : 'white',
-    color: active ? 'white' : '#555',
-    borderColor: active ? '#26a69a' : '#ddd',
-    boxShadow: active ? '0 2px 8px rgba(38,166,154,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
+    background:   active ? '#26a69a' : 'white',
+    color:        active ? 'white' : '#555',
+    borderColor:  active ? '#26a69a' : '#ddd',
+    boxShadow:    active ? '0 2px 8px rgba(38,166,154,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
   });
 
   const dropItemStyle = (active, isPeakItem = false) => ({
     padding:'8px 16px', cursor:'pointer', fontSize:'13px',
-    fontWeight: active ? '700' : '500',
-    background: active ? '#e0f7f4' : 'white',
-    color: isPeakItem ? '#e53935' : active ? '#26a69a' : '#333',
+    fontWeight:  active ? '700' : '500',
+    background:  active ? '#e0f7f4' : 'white',
+    color:       isPeakItem ? '#e53935' : active ? '#26a69a' : '#333',
     display:'flex', alignItems:'center', justifyContent:'space-between', gap:'8px',
     transition:'background 0.12s',
   });
@@ -517,7 +513,7 @@ const VaccineManagement = () => {
         />
       )}
 
-      {/* ── New Vaccine Modal ── */}
+      {/* New Vaccine Modal */}
       {showNewVaccine && (
         <div className="modal-overlay">
           <div className="modal-box modal-box--wide">
@@ -534,38 +530,50 @@ const VaccineManagement = () => {
               <form onSubmit={handleAddNewVaccine}>
                 <div className="modal-field">
                   <label className="modal-label">Vaccine Name</label>
-                  <input type="text" value={newVaccineForm.name} onChange={e => setNewVaccineForm(p => ({ ...p, name: e.target.value }))} required placeholder="e.g., Hepatitis B" className="modal-input" />
+                  <input className="modal-input" type="text" required placeholder="e.g., Hepatitis B"
+                    value={newVaccineForm.name}
+                    onChange={e => setNewVaccineForm(p => ({ ...p, name: e.target.value }))} />
                 </div>
                 <div className="modal-grid-2">
                   <div>
                     <label className="modal-label">Batch Number</label>
-                    <input type="text" value={newVaccineForm.batchNumber} onChange={e => setNewVaccineForm(p => ({ ...p, batchNumber: e.target.value }))} required placeholder="e.g., HB-2025-001" className="modal-input" />
+                    <input className="modal-input" type="text" required placeholder="e.g., HB-2025-001"
+                      value={newVaccineForm.batchNumber}
+                      onChange={e => setNewVaccineForm(p => ({ ...p, batchNumber: e.target.value }))} />
                   </div>
                   <div>
                     <label className="modal-label">Available Doses</label>
-                    <input type="number" min="0" value={newVaccineForm.available} onChange={e => setNewVaccineForm(p => ({ ...p, available: e.target.value }))} required placeholder="0" className="modal-input" />
+                    <input className="modal-input" type="number" min="0" required placeholder="0"
+                      value={newVaccineForm.available}
+                      onChange={e => setNewVaccineForm(p => ({ ...p, available: e.target.value }))} />
                   </div>
                 </div>
-                <div className="modal-grid-2 modal-grid-2--mb">
+                <div className="modal-grid-2">
                   <div>
                     <label className="modal-label">Expiry Date</label>
-                    <input type="date" value={newVaccineForm.expiryDate} onChange={e => setNewVaccineForm(p => ({ ...p, expiryDate: e.target.value }))} required className="modal-input" />
+                    <input className="modal-input" type="date" required
+                      value={newVaccineForm.expiryDate}
+                      onChange={e => setNewVaccineForm(p => ({ ...p, expiryDate: e.target.value }))} />
                   </div>
                   <div>
                     <label className="modal-label">Date Purchased</label>
-                    <input type="date" value={newVaccineForm.datePurchased} onChange={e => setNewVaccineForm(p => ({ ...p, datePurchased: e.target.value }))} className="modal-input" />
+                    <input className="modal-input" type="date"
+                      value={newVaccineForm.datePurchased}
+                      onChange={e => setNewVaccineForm(p => ({ ...p, datePurchased: e.target.value }))} />
                   </div>
                 </div>
-                <div className="modal-field modal-grid-2--mb">
+                <div className="modal-field">
                   <label className="modal-label">Supplier</label>
-                  <select value={newVaccineForm.supplier} onChange={e => setNewVaccineForm(p => ({ ...p, supplier: e.target.value }))} className="modal-input" style={{ background:'white' }}>
+                  <select className="modal-input" style={{ background:'white' }}
+                    value={newVaccineForm.supplier}
+                    onChange={e => setNewVaccineForm(p => ({ ...p, supplier: e.target.value }))}>
                     <option value="">— Select Supplier —</option>
                     {SUPPLIERS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div className="modal-actions">
                   <button type="submit" className="modal-btn-save">➕ Add Vaccine</button>
-                  <button type="button" onClick={() => setShowNewVaccine(false)} className="modal-btn-cancel">Cancel</button>
+                  <button type="button" className="modal-btn-cancel" onClick={() => setShowNewVaccine(false)}>Cancel</button>
                 </div>
               </form>
             </div>
@@ -573,6 +581,7 @@ const VaccineManagement = () => {
         </div>
       )}
 
+      {/* Order Vaccine Modal */}
       {showOrderVaccine && (
         <OrderVaccineForm
           vaccines={vaccineNames}
@@ -587,7 +596,7 @@ const VaccineManagement = () => {
 
           <div className="page-header">
             <div>
-              <h1 className="dashboard-heading">💉 Vaccine Management</h1>
+              <h2 className="dashboard-heading" style={{ marginTop:'-20px' }}>💉 Vaccine Management</h2>
               <p className="dashboard-subheading">Manage vaccine inventory and stock levels</p>
             </div>
           </div>
@@ -604,12 +613,13 @@ const VaccineManagement = () => {
             <div className="filter-buttons">
               {[
                 { key:'all',       label:`All (${vaccineNames.length})` },
-                { key:'In Stock',  label:'✅ In Stock'  },
-                { key:'Low Stock', label:'⚠️ Low Stock' },
-                { key:'Out Stock', label:'🚨 Out of Stock' },
+                { key:'In Stock',  label:'In Stock'    },
+                { key:'Low Stock', label:'Low Stock'   },
+                { key:'Out Stock', label:'Out of Stock'},
               ].map(f => (
-                <button type="button" key={f.key} onClick={() => setFilterStatus(f.key)}
-                  className={filterStatus === f.key ? 'filter-btn active' : 'filter-btn'}>
+                <button type="button" key={f.key}
+                  className={filterStatus === f.key ? 'filter-btn active' : 'filter-btn'}
+                  onClick={() => setFilterStatus(f.key)}>
                   {f.label}
                 </button>
               ))}
@@ -623,7 +633,7 @@ const VaccineManagement = () => {
             <div style={{ position:'relative' }}>
               <button type="button" style={periodBtnStyle(viewMode==='monthly')}
                 onClick={() => { setViewMode('monthly'); setMonthDropOpen(v=>!v); setWeekDropOpen(false); setCalOpen(false); setVaccineDropOpen(false); }}>
-                📅 Monthly {viewMode==='monthly'?`(${selectedMonth.slice(0,3)})`:''} ▾
+                📅 Monthly {viewMode==='monthly' ? `(${selectedMonth.slice(0,3)})` : ''} ▾
               </button>
               {monthDropOpen && (
                 <div style={{ position:'absolute', top:'110%', left:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'180px', padding:'6px 0', overflow:'hidden' }}>
@@ -648,7 +658,7 @@ const VaccineManagement = () => {
             <div style={{ position:'relative' }}>
               <button type="button" style={periodBtnStyle(viewMode==='weekly')}
                 onClick={() => { setViewMode('weekly'); setWeekDropOpen(v=>!v); setMonthDropOpen(false); setCalOpen(false); setVaccineDropOpen(false); }}>
-                📆 Weekly {viewMode==='weekly'?`(Wk ${selectedWeek+1})`:''} ▾
+                📆 Weekly {viewMode==='weekly' ? `(Wk ${selectedWeek+1})` : ''} ▾
               </button>
               {weekDropOpen && (
                 <div style={{ position:'absolute', top:'110%', left:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'10px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', minWidth:'160px', padding:'6px 0', overflow:'hidden' }}>
@@ -668,18 +678,19 @@ const VaccineManagement = () => {
             <div style={{ position:'relative' }}>
               <button type="button" style={periodBtnStyle(viewMode==='daily')}
                 onClick={() => { setViewMode('daily'); setCalOpen(v=>!v); setMonthDropOpen(false); setWeekDropOpen(false); setVaccineDropOpen(false); }}>
-                🗓️ Daily {viewMode==='daily'?`(${selectedMonth.slice(0,3)} ${selectedDay})`:''} ▾
+                🗓️ Daily {viewMode==='daily' ? `(${selectedMonth.slice(0,3)} ${selectedDay})` : ''} ▾
               </button>
               {calOpen && (
                 <div style={{ position:'absolute', top:'110%', left:0, zIndex:999 }}>
-                  <MiniCalendar month={selectedMonth} selectedDay={selectedDay} onSelectDay={d => { setSelectedDay(d); setCalOpen(false); }} />
+                  <MiniCalendar month={selectedMonth} selectedDay={selectedDay}
+                    onSelectDay={d => { setSelectedDay(d); setCalOpen(false); }} />
                 </div>
               )}
             </div>
 
             <div style={{ width:'1px', height:'32px', background:'#e0e0e0', margin:'0 4px' }} />
 
-            {/* Available Vaccines dropdown */}
+            {/* Vaccines dropdown */}
             <div ref={vaccineDropRef} style={{ position:'relative' }}>
               <button type="button"
                 style={{ ...periodBtnStyle(true), background:'white', color:'#333', borderColor:'#26a69a' }}
@@ -719,7 +730,11 @@ const VaccineManagement = () => {
           <div style={{ marginBottom:'18px', fontSize:'13px', color:'#888', fontWeight:'500' }}>
             Showing urgency for:{' '}
             <strong style={{ color:'#26a69a' }}>
-              {viewMode==='daily' ? `${selectedMonth} — Day ${selectedDay}` : viewMode==='weekly' ? `${selectedMonth} — Week ${selectedWeek+1}` : selectedMonth}
+              {viewMode==='daily'
+                ? `${selectedMonth} — Day ${selectedDay}`
+                : viewMode==='weekly'
+                  ? `${selectedMonth} — Week ${selectedWeek+1}`
+                  : selectedMonth}
             </strong>
           </div>
 
@@ -742,11 +757,11 @@ const VaccineManagement = () => {
       </section>
 
       {/* Sticky FAB */}
-      <button type="button"
-        onClick={e => { e.stopPropagation(); setFabOpen(v => !v); }}
+      <button
+        type="button"
         title="Add"
-        className="fab-add-btn"
-        style={{ transition:'transform 0.25s ease, box-shadow 0.25s ease', transform: fabOpen ? 'translateX(-50%) rotate(45deg) scale(1.1)' : 'translateX(-50%) rotate(0deg) scale(1)', boxShadow: fabOpen ? '0 12px 30px rgba(38,166,154,0.4)' : '0 6px 16px rgba(0,0,0,0.2)' }}>
+        className={`fab-btn${fabOpen ? ' fab-btn--open' : ''}`}
+        onClick={e => { e.stopPropagation(); setFabOpen(v => !v); }}>
         <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
           <rect x="12" y="4" width="4" height="20" rx="2" fill="rgba(255,255,255,0.9)"/>
           <rect x="4" y="12" width="20" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>

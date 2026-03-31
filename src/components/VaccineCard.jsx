@@ -1,6 +1,8 @@
 // VaccineCard.jsx
 
+
 import React, { useState } from 'react';
+
 
 // ── Expiry info helper ─────────────────────────────────────────────────────────
 const getExpiryInfo = (expiryDate) => {
@@ -15,14 +17,17 @@ const getExpiryInfo = (expiryDate) => {
   return                     { label: `✅ ${expiryDate} · ${daysLeft} days left`,    color: '#2e7d32', daysLeft };
 };
 
+
 // ── Batch Dropdown ─────────────────────────────────────────────────────────────
 const BatchDropdown = ({ batches }) => {
   const [open, setOpen]             = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const count = batches.length;
 
+
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
+
 
       {/* Trigger pill */}
       <button
@@ -42,6 +47,7 @@ const BatchDropdown = ({ batches }) => {
         📦 {count} Batch{count !== 1 ? 'es' : ''} {open ? '▴' : '▾'}
       </button>
 
+
       {/* Dropdown panel — rendered with high z-index so it floats above the card */}
       {open && (
         <div style={{
@@ -59,11 +65,13 @@ const BatchDropdown = ({ batches }) => {
             Batch Numbers &amp; Expiry Dates
           </div>
 
+
           {batches.length === 0 && (
             <div style={{ padding: '14px', fontSize: '13px', color: '#aaa', textAlign: 'center' }}>
               No batch data available
             </div>
           )}
+
 
           {batches.map((b, i) => {
             const expiry    = getExpiryInfo(b.expiryDate);
@@ -95,6 +103,7 @@ const BatchDropdown = ({ batches }) => {
                   </span>
                 </div>
 
+
                 {/* Expiry — always rendered but animates in on hover */}
                 <div style={{
                   fontSize: '12px',
@@ -117,14 +126,17 @@ const BatchDropdown = ({ batches }) => {
   );
 };
 
+
 // ── VaccineCard ────────────────────────────────────────────────────────────────
 const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
+
 
   const getStatusClass = (status) => {
     if (status === 'In Stock')  return 'status-in-stock';
     if (status === 'Low Stock') return 'status-low-stock';
     return 'status-out-stock';
   };
+
 
   const monthlyUrgency = vaccine.monthlyUrgency;
   const getMonthlyBadge = (level) => {
@@ -134,15 +146,18 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
   };
   const monthlyBadge = monthlyUrgency ? getMonthlyBadge(monthlyUrgency) : null;
 
+
   const batches = vaccine.batches && vaccine.batches.length > 0
     ? vaccine.batches
     : vaccine.batchNumber
       ? [{ batchNumber: vaccine.batchNumber, expiryDate: vaccine.expiryDate }]
       : [];
 
+
   return (
     // overflow: visible so the batch dropdown can escape the card boundary
     <div className="vaccine-card-item" style={{ padding: 0, overflow: 'visible' }}>
+
 
       {/* ── Header: full-width vaccine name ── */}
       <div style={{
@@ -159,6 +174,7 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
           {vaccine.name}
         </h3>
       </div>
+
 
       {/* ── Sub-header: batch dropdown | status badge ── */}
       <div style={{
@@ -186,13 +202,16 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
         </div>
       </div>
 
+
       {/* ── Body ── */}
       <div className="vaccine-card-body" style={{ padding: '14px 16px' }}>
+
 
         <div className="vaccine-info-row">
           <span className="info-label">Available:</span>
           <span className="info-value">{vaccine.available.toLocaleString()} doses</span>
         </div>
+
 
         {vaccine.mlRecommended > 0 && (
           <div className="vaccine-info-row highlight">
@@ -200,6 +219,7 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
             <span className="info-value-highlight">{vaccine.mlRecommended.toLocaleString()} doses</span>
           </div>
         )}
+
 
         {monthlyBadge && (
           <div style={{
@@ -213,6 +233,7 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
         )}
       </div>
 
+
       {/* ── Footer ── */}
       <div className="vaccine-card-footer" style={{ padding: '10px 16px' }}>
         <div className="card-actions">
@@ -221,8 +242,11 @@ const VaccineCard = ({ vaccine, onEdit, onDelete }) => {
         </div>
       </div>
 
+
     </div>
   );
 };
 
+
 export default VaccineCard;
+
