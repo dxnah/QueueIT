@@ -218,15 +218,44 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
             })}
           </tbody>
           <tfoot>
-            <tr>
-              <td colSpan={9} style={{ padding:'12px 14px', borderTop:'1px solid #e0e0e0' }}>
-                <button onClick={openAddBatch}
-                  style={{ background:'none', border:'none', color:'#26a69a', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'inline-flex', alignItems:'center', gap:'6px', padding:'4px 0' }}>
-                  ＋ Add new batch
-                </button>
-              </td>
-            </tr>
-          </tfoot>
+  <tr>
+    <td
+      colSpan={9}
+      style={{
+        padding: '12px 14px',
+        borderTop: '1px solid #e0e0e0',
+        textAlign: 'center'
+      }}
+    >
+      <button
+        onClick={openAddBatch}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: '#26a69a',
+          fontSize: '13px',
+          fontWeight: '700',
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px',
+          padding: '6px 10px',
+          borderRadius: '6px',
+          transition: 'all 0.15s ease'
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = '#e0f7f4';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'transparent';
+        }}
+      >
+        ＋ Add new batch
+      </button>
+    </td>
+  </tr>
+</tfoot>
         </table>
       </div>
 
@@ -378,27 +407,60 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
 
 // ── FAB Options Picker ────────────────────────────────────────────────────────
 const FabOptions = ({ onNewVaccine, onOrderVaccine, onClose }) => (
-  <div style={{ position:'fixed', bottom:'90px', left:'50%', transform:'translateX(-50%)', zIndex:1000, display:'flex', gap:'20px', animation:'fadeInUp 0.2s ease' }}>
-    {[
-      { label:'New Vaccine', icon:'💉', emoji:'🧪', onClick: onNewVaccine },
-      { label:'Order Vaccine', icon:'📦', emoji:'💰', onClick: onOrderVaccine },
-    ].map(opt => (
-      <button key={opt.label} onClick={() => { opt.onClick(); onClose(); }}
-        style={{
-          display:'flex', flexDirection:'column', alignItems:'center', gap:'8px',
-          padding:'20px 28px', borderRadius:'16px', border:'2px solid #e0e0e0',
-          background:'white', cursor:'pointer', boxShadow:'0 8px 28px rgba(0,0,0,0.18)',
-          transition:'all 0.18s', minWidth:'140px',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.borderColor='#26a69a'; e.currentTarget.style.transform='translateY(-4px)'; e.currentTarget.style.boxShadow='0 12px 32px rgba(38,166,154,0.25)'; }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor='#e0e0e0'; e.currentTarget.style.transform=''; e.currentTarget.style.boxShadow='0 8px 28px rgba(0,0,0,0.18)'; }}>
-        <span style={{ fontSize:'36px' }}>{opt.icon}</span>
-        <span style={{ fontSize:'14px', fontWeight:'700', color:'#333' }}>{opt.label}</span>
-      </button>
-    ))}
-    {/* backdrop to close */}
-    <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:-1 }} />
-  </div>
+  <>
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        position: 'fixed',
+        bottom: '90px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 1000,
+        display: 'flex',
+        gap: '20px',
+        animation: 'fadeInUp 0.2s ease'
+      }}
+    >
+      {[
+        { label:'New Vaccine', icon:'💉', onClick: onNewVaccine },
+        { label:'Order Vaccine', icon:'📦', onClick: onOrderVaccine },
+      ].map(opt => (
+        <button
+          key={opt.label}
+          onClick={() => { opt.onClick(); onClose(); }}
+          style={{
+            display:'flex',
+            flexDirection:'column',
+            alignItems:'center',
+            gap:'8px',
+            padding:'20px 28px',
+            borderRadius:'16px',
+            border:'2px solid #e0e0e0',
+            background:'white',
+            cursor:'pointer',
+            boxShadow:'0 8px 28px rgba(0,0,0,0.18)',
+            transition:'all 0.18s',
+            minWidth:'140px'
+          }}
+        >
+          <span style={{ fontSize:'36px' }}>{opt.icon}</span>
+          <span style={{ fontSize:'14px', fontWeight:'700', color:'#333' }}>
+            {opt.label}
+          </span>
+        </button>
+      ))}
+    </div>
+
+    {/* backdrop (click outside to close) */}
+    <div
+      onClick={onClose}
+      style={{
+        position:'fixed',
+        inset:0,
+        zIndex:999
+      }}
+    />
+  </>
 );
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
@@ -780,16 +842,28 @@ const VaccineManagement = () => {
 
       {/* ── Sticky FAB ── */}
       <button
-        type="button"
-        onClick={() => setFabOpen(v => !v)}
-        title="Add"
-        className="fab-add-btn"
-        style={{ transition:'transform 0.2s', transform: fabOpen ? 'rotate(45deg)' : 'rotate(0deg)' }}>
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="12" y="4" width="4" height="20" rx="2" fill="rgba(255,255,255,0.9)"/>
-          <rect x="4" y="12" width="20" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>
-        </svg>
-      </button>
+  type="button"
+  onClick={(e) => {
+    e.stopPropagation(); // prevent outside click close
+    setFabOpen(v => !v);
+  }}
+  title="Add"
+  className="fab-add-btn"
+  style={{
+    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
+    transform: fabOpen
+      ? 'translateX(-50%) rotate(45deg) scale(1.1)'
+      : 'translateX(-50%) rotate(0deg) scale(1)',
+    boxShadow: fabOpen
+      ? '0 12px 30px rgba(38,166,154,0.4)'
+      : '0 6px 16px rgba(0,0,0,0.2)'
+  }}
+>
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <rect x="12" y="4" width="4" height="20" rx="2" fill="rgba(255,255,255,0.9)"/>
+    <rect x="4" y="12" width="20" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>
+  </svg>
+</button>
 
     </section>
   );

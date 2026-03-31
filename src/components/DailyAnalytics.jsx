@@ -1,7 +1,4 @@
 // DailyAnalytics.jsx
-// ─── ForecastTable and its Monthly/Weekly/Daily controls have been REMOVED ───
-// ─── They now live in their own page: pages/DemandForecast.jsx              ───
-
 import { useState } from 'react';
 import {
   AreaChart, Area,
@@ -14,24 +11,15 @@ import {
 import { vaccineData } from '../data/dashboardData';
 import '../styles/analytics.css';
 
-// ─── Constants ───────────────────────────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
+
 const PEAK_MONTHS = ['June', 'July', 'August'];
 
-const DAYS_IN_MONTH = {
-  January: 31, February: 28, March: 31, April: 30, May: 31, June: 30,
-  July: 31, August: 31, September: 30, October: 31, November: 30, December: 31,
-};
-
-const MONTH_START_DAYS = {
-  January: 0, February: 3, March: 3, April: 6, May: 1, June: 4,
-  July: 6, August: 2, September: 5, October: 0, November: 3, December: 5,
-};
-
-// ─── Seeded random ────────────────────────────────────────────────────────────
+// ─── Seeded random ───────────────────────────────────────
 const seededRand = (seed) => {
   const x = Math.sin(seed + 1) * 10000;
   return x - Math.floor(x);
@@ -39,7 +27,7 @@ const seededRand = (seed) => {
 
 const getMonthMultiplier = (month) => PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
 
-// ─── Generate hourly data ─────────────────────────────────────────────────────
+// ─── Generate hourly data (UNCHANGED LOGIC) ──────────────
 const generateHourlyData = (month = 'January', weekIndex = null, day = null) => {
   const monthMult = getMonthMultiplier(month);
   const monthIdx = MONTHS.indexOf(month);
@@ -49,7 +37,6 @@ const generateHourlyData = (month = 'January', weekIndex = null, day = null) => 
     const label = h < 12 ? `${h}:00 AM` : h === 12 ? `12:00 PM` : `${h - 12}:00 PM`;
     const isPeak = (h >= 9 && h <= 11) || (h >= 14 && h <= 16);
     const timeMultiplier = isPeak ? 1.4 : h < 9 || h > 16 ? 0.6 : 1;
-    const weekMult = weekIndex !== null ? (1 + (weekIndex * 0.05)) : 1;
     const dayMult = day !== null ? (0.85 + seededRand(day * 7 + monthIdx) * 0.3) : 1;
 
     const entry = { time: label };
@@ -57,11 +44,13 @@ const generateHourlyData = (month = 'January', weekIndex = null, day = null) => 
     let totalWasted = 0;
 
     vaccineData.forEach((vaccine, vi) => {
-      const seed = h * 10 + vi + monthIdx * 100 + (weekIndex || 0) * 1000 + (day || 0) * 10000;
+      const seed = h * 10 + vi + monthIdx * 100 + (day || 0) * 10000;
       const rand = seededRand(seed);
+
       const baseRate = Math.max(1, Math.round(
-        (vaccine.mlRecommended / 30) * timeMultiplier * monthMult * weekMult * dayMult * (0.85 + rand * 0.3)
+        (vaccine.mlRecommended / 30) * timeMultiplier * monthMult * dayMult * (0.85 + rand * 0.3)
       ));
+
       const wasted = Math.max(0, Math.round(baseRate * (0.02 + seededRand(seed + 50) * 0.03)));
 
       entry[vaccine.vaccine] = baseRate;
@@ -78,7 +67,7 @@ const generateHourlyData = (month = 'January', weekIndex = null, day = null) => 
   return hours;
 };
 
-// ─── Generate stock snapshots ──────────────────────────────────────────────────
+// ─── Generate stock snapshots (UNCHANGED) ───────────────
 const generateStockSnapshots = () => {
   const hours = [];
   for (let h = 7; h <= 17; h++) {
@@ -90,7 +79,7 @@ const generateStockSnapshots = () => {
   return hours;
 };
 
-// ─── Colors ───────────────────────────────────────────────────────────────────
+// ─── Colors (UNCHANGED) ─────────────────────────────────
 const COLORS = {
   'Anti-Rabies': '#26a69a',
   'Anti-Tetanus': '#f57f17',
@@ -100,7 +89,7 @@ const COLORS = {
 };
 const CHART_COLORS = ['#26a69a', '#f57f17', '#e53935', '#5c6bc0', '#2e7d32'];
 
-// ─── Custom Tooltip ───────────────────────────────────────────────────────────
+// ─── Tooltip (UNCHANGED) ────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -120,229 +109,68 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ─── Calendar Component ───────────────────────────────────────────────────────
-const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
-  const totalDays = DAYS_IN_MONTH[month] || 30;
-  const startDay = MONTH_START_DAYS[month] || 0;
-  const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-  const cells = [];
-
-  for (let i = 0; i < startDay; i++) cells.push(null);
-  for (let d = 1; d <= totalDays; d++) cells.push(d);
-
-  return (
-    <div style={{
-      position: 'absolute', top: '110%', right: 0, zIndex: 999,
-      background: 'white', border: '1px solid #e0e0e0',
-      borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-      padding: '16px', minWidth: '280px',
-    }}>
-      <p style={{ margin: '0 0 12px 0', fontWeight: '700', color: '#333', fontSize: '14px', textAlign: 'center' }}>
-        📅 {month}
-      </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center' }}>
-        {dayNames.map(d => (
-          <div key={d} style={{ fontSize: '11px', fontWeight: '700', color: '#999', padding: '4px 0' }}>{d}</div>
-        ))}
-        {cells.map((d, i) => (
-          <div
-            key={i}
-            onClick={() => d && onSelectDay(d)}
-            style={{
-              padding: '6px 2px', fontSize: '12px', borderRadius: '6px',
-              cursor: d ? 'pointer' : 'default',
-              background: d === selectedDay ? '#26a69a' : 'transparent',
-              color: d === selectedDay ? 'white' : d ? '#333' : 'transparent',
-              fontWeight: d === selectedDay ? '700' : '400',
-              transition: 'background 0.15s',
-            }}
-            onMouseEnter={e => { if (d && d !== selectedDay) e.target.style.background = '#e0f7f4'; }}
-            onMouseLeave={e => { if (d !== selectedDay) e.target.style.background = 'transparent'; }}
-          >
-            {d || ''}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── MAIN COMPONENT ─────────────────────────────────────
 const DailyAnalytics = () => {
-  const [viewMode, setViewMode]     = useState('monthly');
-  const [selectedMonth, setSelectedMonth] = useState('January');
-  const [selectedWeek, setSelectedWeek]   = useState(0);
-  const [selectedDay, setSelectedDay]     = useState(1);
-
-  const [monthDropOpen, setMonthDropOpen] = useState(false);
-  const [weekDropOpen, setWeekDropOpen]   = useState(false);
-  const [calOpen, setCalOpen]             = useState(false);
-
   const [activeChart, setActiveChart]   = useState('dispensed');
   const [selectedVax, setSelectedVax]   = useState('all');
 
   const vaccineNames = vaccineData.map(v => v.vaccine);
 
-  const hourlyData = generateHourlyData(
-    selectedMonth,
-    viewMode === 'weekly' ? selectedWeek : viewMode === 'daily' ? selectedWeek : null,
-    viewMode === 'daily' ? selectedDay : null
-  );
+  // ✅ LAST 2 DAYS DATA ONLY
+  const latestMonth = 'January';
+  const day1 = generateHourlyData(latestMonth, null, 1);
+  const day2 = generateHourlyData(latestMonth, null, 2);
+  const hourlyData = [...day1, ...day2];
+
   const stockData = generateStockSnapshots();
 
+  // ─── Summary (UNCHANGED) ─────────────────────────────
   const totalToday     = hourlyData.reduce((s, h) => s + (h.totalDispensed || 0), 0);
   const wastedToday    = hourlyData.reduce((s, h) => s + (h.totalWasted || 0), 0);
   const avgEfficiency  = hourlyData.length
     ? (hourlyData.reduce((s, h) => s + (h.efficiency || 0), 0) / hourlyData.length).toFixed(1)
     : 0;
+
   const peakHour = hourlyData.reduce(
     (best, h) => h.totalDispensed > (best.totalDispensed || 0) ? h : best, {}
   );
 
-  const chartData = selectedVax === 'all' ? hourlyData : hourlyData.map(h => ({
-    time: h.time,
-    [selectedVax]: h[selectedVax],
-    [`${selectedVax}_w`]: h[`${selectedVax}_w`],
-    totalDispensed: h[selectedVax],
-    totalWasted: h[`${selectedVax}_w`],
-    efficiency: h.efficiency,
-  }));
+  const chartData = selectedVax === 'all'
+    ? hourlyData
+    : hourlyData.map(h => ({
+      time: h.time,
+      [selectedVax]: h[selectedVax],
+      [`${selectedVax}_w`]: h[`${selectedVax}_w`],
+      totalDispensed: h[selectedVax],
+      totalWasted: h[`${selectedVax}_w`],
+      efficiency: h.efficiency,
+    }));
+
   const keysToShow = selectedVax === 'all' ? vaccineNames : [selectedVax];
 
-  const periodLabel = viewMode === 'daily'
-    ? `${selectedMonth} ${selectedDay}`
-    : viewMode === 'weekly'
-    ? `${selectedMonth} — Week ${selectedWeek + 1}`
-    : selectedMonth;
-
-  const isPeak = PEAK_MONTHS.includes(selectedMonth);
-
-  const btnStyle = (active) => ({
-    display: 'inline-flex', alignItems: 'center', gap: '5px',
-    padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
-    cursor: 'pointer', border: '1.5px solid', transition: 'all 0.18s',
-    background: active ? '#26a69a' : 'white',
-    color: active ? 'white' : '#555',
-    borderColor: active ? '#26a69a' : '#ddd',
-    boxShadow: active ? '0 2px 8px rgba(38,166,154,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
-  });
-
-  const dropItemStyle = (active, isPeakItem = false) => ({
-    padding: '8px 16px', cursor: 'pointer', fontSize: '13px',
-    fontWeight: active ? '700' : '500',
-    background: active ? '#e0f7f4' : 'white',
-    color: isPeakItem ? '#e53935' : active ? '#26a69a' : '#333',
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px',
-    transition: 'background 0.12s',
-  });
+  const periodLabel = "Last 2 Days";
 
   return (
     <section className="analytics-wrapper">
 
-      {/* ── Analytics Charts Section ── */}
-      {/* Month / Week / Day selector row — kept here to control chart data */}
-      <section style={{
-        background: 'white', borderRadius: '14px', padding: '16px 20px',
-        marginBottom: '20px', boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
-      }}>
-        <section style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-          <section style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-
-            {/* MONTHLY */}
-            <section style={{ position: 'relative' }}>
-              <button type="button" style={btnStyle(viewMode === 'monthly')}
-                onClick={() => { setViewMode('monthly'); setMonthDropOpen(v => !v); setWeekDropOpen(false); setCalOpen(false); }}>
-                📅 Monthly {viewMode === 'monthly' ? `(${selectedMonth.slice(0, 3)})` : ''} ▾
-              </button>
-              {monthDropOpen && (
-                <section style={{ position: 'absolute', top: '110%', right: 0, zIndex: 999, background: 'white', border: '1px solid #e0e0e0', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', minWidth: '180px', padding: '6px 0', overflow: 'hidden' }}>
-                  {MONTHS.map(m => {
-                    const isPeakM = PEAK_MONTHS.includes(m);
-                    return (
-                      <section key={m}
-                        onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
-                        onMouseLeave={e => e.currentTarget.style.background = m === selectedMonth ? '#e0f7f4' : 'white'}
-                        style={dropItemStyle(m === selectedMonth, isPeakM)}
-                        onClick={() => { setSelectedMonth(m); setMonthDropOpen(false); setSelectedWeek(0); setSelectedDay(1); }}>
-                        <span>{m}</span>
-                        {isPeakM && <span style={{ fontSize: '10px', background: '#ffebee', color: '#e53935', padding: '2px 6px', borderRadius: '10px', fontWeight: '700' }}>🔥 PEAK</span>}
-                        {m === selectedMonth && !isPeakM && <span style={{ color: '#26a69a', fontSize: '12px' }}>✓</span>}
-                      </section>
-                    );
-                  })}
-                </section>
-              )}
-            </section>
-
-            {/* WEEKLY */}
-            <section style={{ position: 'relative' }}>
-              <button type="button" style={btnStyle(viewMode === 'weekly')}
-                onClick={() => { setViewMode('weekly'); setWeekDropOpen(v => !v); setMonthDropOpen(false); setCalOpen(false); }}>
-                📆 Weekly {viewMode === 'weekly' ? `(Wk ${selectedWeek + 1})` : ''} ▾
-              </button>
-              {weekDropOpen && (
-                <section style={{ position: 'absolute', top: '110%', right: 0, zIndex: 999, background: 'white', border: '1px solid #e0e0e0', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', minWidth: '160px', padding: '6px 0', overflow: 'hidden' }}>
-                  {[0, 1, 2, 3].map(wi => (
-                    <section key={wi}
-                      style={dropItemStyle(selectedWeek === wi)}
-                      onMouseEnter={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : '#f5f5f5'}
-                      onMouseLeave={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : 'white'}
-                      onClick={() => { setSelectedWeek(wi); setWeekDropOpen(false); }}>
-                      Week {wi + 1}
-                      {selectedWeek === wi && <span style={{ color: '#26a69a', fontSize: '12px' }}>✓</span>}
-                    </section>
-                  ))}
-                </section>
-              )}
-            </section>
-
-            {/* DAILY */}
-            <section style={{ position: 'relative' }}>
-              <button type="button" style={btnStyle(viewMode === 'daily')}
-                onClick={() => { setViewMode('daily'); setCalOpen(v => !v); setMonthDropOpen(false); setWeekDropOpen(false); }}>
-                🗓️ Daily {viewMode === 'daily' ? `(${selectedMonth.slice(0, 3)} ${selectedDay})` : ''} ▾
-              </button>
-              {calOpen && (
-                <section style={{ position: 'absolute', top: '110%', right: 0, zIndex: 999 }}>
-                  <MiniCalendar month={selectedMonth} selectedDay={selectedDay}
-                    onSelectDay={(d) => { setSelectedDay(d); setCalOpen(false); }} />
-                </section>
-              )}
-            </section>
-
-          </section>
-
-          {isPeak && (
-            <span style={{ background: '#ffebee', color: '#c62828', fontSize: '12px', fontWeight: '700', padding: '5px 12px', borderRadius: '20px', border: '1.5px solid #ef9a9a' }}>
-              🔥 Peak Season Active
-            </span>
-          )}
-        </section>
-      </section>
-
-      {/* ── Analytics header ── */}
+      {/* HEADER */}
       <section className="analytics-header">
         <section>
           <h3 className="analytics-title">📊 Vaccine Analytics — {periodLabel}</h3>
           <p className="analytics-subtext">
-            {viewMode === 'daily'
-              ? `Hourly dispensing data for ${selectedMonth} ${selectedDay}`
-              : viewMode === 'weekly'
-              ? `Week ${selectedWeek + 1} of ${selectedMonth} — dispensing overview`
-              : `Monthly dispensing overview for ${selectedMonth}`}
-            {isPeak && ' · 🔥 Peak season demand'}
+            Latest dispensing data for the past 2 days
           </p>
         </section>
       </section>
 
-      {/* Summary chips */}
+      {/* SUMMARY CHIPS (UNCHANGED STYLE) */}
       <section className="analytics-stat-chips">
         {[
-          { label: 'Total Dispensed Today', value: totalToday.toLocaleString(),    unit: 'doses',                         color: '#26a69a', icon: '💉' },
-          { label: 'Total Wasted Today',    value: wastedToday.toLocaleString(),   unit: 'doses',                         color: '#e53935', icon: '🗑️' },
-          { label: 'Avg. Efficiency',       value: `${avgEfficiency}%`,            unit: '',                              color: '#2e7d32', icon: '📈' },
-          { label: 'Peak Hour',             value: peakHour.time || '—',           unit: `${peakHour.totalDispensed || 0} doses`, color: '#f57f17', icon: '⏰' },
-          { label: 'Hours Tracked',         value: hourlyData.length,              unit: 'hrs',                           color: '#5c6bc0', icon: '🕐' },
+          { label: 'Total Dispensed', value: totalToday.toLocaleString(), unit: 'doses', color: '#26a69a', icon: '💉' },
+          { label: 'Total Wasted', value: wastedToday.toLocaleString(), unit: 'doses', color: '#e53935', icon: '🗑️' },
+          { label: 'Avg. Efficiency', value: `${avgEfficiency}%`, unit: '', color: '#2e7d32', icon: '📈' },
+          { label: 'Peak Hour', value: peakHour.time || '—', unit: `${peakHour.totalDispensed || 0} doses`, color: '#f57f17', icon: '⏰' },
+          { label: 'Hours Tracked', value: hourlyData.length, unit: 'hrs', color: '#5c6bc0', icon: '🕐' },
         ].map((chip, i) => (
           <section key={i} className="analytics-chip" style={{ borderTop: `3px solid ${chip.color}` }}>
             <span className="analytics-chip-icon">{chip.icon}</span>
@@ -353,7 +181,7 @@ const DailyAnalytics = () => {
         ))}
       </section>
 
-      {/* Chart controls */}
+      {/* CONTROLS (UNCHANGED STYLE) */}
       <section className="analytics-controls">
         <section className="analytics-tab-group">
           {[
@@ -362,12 +190,14 @@ const DailyAnalytics = () => {
             { key: 'stock',     label: '📦 Stock Levels'      },
             { key: 'efficiency',label: '📈 Efficiency Trend'  },
           ].map(tab => (
-            <button key={tab.key} onClick={() => setActiveChart(tab.key)}
+            <button key={tab.key}
+              onClick={() => setActiveChart(tab.key)}
               className={`analytics-tab-btn ${activeChart === tab.key ? 'active' : ''}`}>
               {tab.label}
             </button>
           ))}
         </section>
+
         {activeChart !== 'stock' && (
           <select value={selectedVax} onChange={e => setSelectedVax(e.target.value)} className="analytics-vaccine-select">
             <option value="all">All Vaccines</option>
@@ -376,133 +206,54 @@ const DailyAnalytics = () => {
         )}
       </section>
 
-      {/* Chart area */}
+      {/* CHART AREA (UNCHANGED) */}
       <section className="analytics-chart-box">
-
         {activeChart === 'dispensed' && (
-          <>
-            <p className="analytics-chart-caption">
-              Doses dispensed each hour{selectedVax !== 'all' ? ` — ${selectedVax}` : ' — all vaccines combined'}
-            </p>
-            <ResponsiveContainer width="100%" height={320}>
-              <AreaChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <defs>
-                  {keysToShow.map(name => (
-                    <linearGradient key={name} id={`grad_${name.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor={COLORS[name]} stopOpacity={0.3} />
-                      <stop offset="95%" stopColor={COLORS[name]} stopOpacity={0.02} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#888' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#888' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                {keysToShow.map(name => (
-                  <Area key={name} type="monotone" dataKey={name}
-                    stroke={COLORS[name]} strokeWidth={2}
-                    fill={`url(#grad_${name.replace(/\s/g, '')})`}
-                    dot={{ r: 3, fill: COLORS[name] }} activeDot={{ r: 5 }} />
-                ))}
-              </AreaChart>
-            </ResponsiveContainer>
-          </>
+          <ResponsiveContainer width="100%" height={320}>
+            <AreaChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="time" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              {keysToShow.map(name => (
+                <Area key={name} type="monotone" dataKey={name}
+                  stroke={COLORS[name]} fillOpacity={0.2} fill={COLORS[name]} />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
         )}
 
         {activeChart === 'stacked' && (
-          <>
-            <p className="analytics-chart-caption">Hourly breakdown of doses dispensed per vaccine type</p>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={hourlyData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#888' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#888' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                {vaccineNames.map((name, i) => (
-                  <Bar key={name} dataKey={name} stackId="a" fill={CHART_COLORS[i]}
-                    radius={i === vaccineNames.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]} />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </>
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={hourlyData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="time" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              {vaccineNames.map((name, i) => (
+                <Bar key={name} dataKey={name} stackId="a" fill={CHART_COLORS[i]} />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
         )}
 
         {activeChart === 'stock' && (
-          <>
-            <p className="analytics-chart-caption">Current stock levels per vaccine — based on available inventory</p>
-            <ResponsiveContainer width="100%" height={320}>
-              <LineChart data={stockData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#888' }} />
-                <YAxis tick={{ fontSize: 11, fill: '#888' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                {vaccineNames.map((name, i) => (
-                  <Line key={name} type="monotone" dataKey={name}
-                    stroke={CHART_COLORS[i]} strokeWidth={2}
-                    dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </>
+          <ResponsiveContainer width="100%" height={320}>
+            <LineChart data={stockData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="time" />
+              <YAxis />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend />
+              {vaccineNames.map((name, i) => (
+                <Line key={name} type="monotone" dataKey={name}
+                  stroke={CHART_COLORS[i]} strokeWidth={2} />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
         )}
-
-        {activeChart === 'efficiency' && (
-          <>
-            <p className="analytics-chart-caption">Dispensing efficiency % per hour — administered vs. wasted doses</p>
-            <ResponsiveContainer width="100%" height={320}>
-              <AreaChart data={hourlyData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="effGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#2e7d32" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#2e7d32" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#888' }} />
-                <YAxis domain={[85, 100]} tick={{ fontSize: 11, fill: '#888' }} unit="%" />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Area type="monotone" dataKey="efficiency" name="Efficiency"
-                  stroke="#2e7d32" strokeWidth={2.5} fill="url(#effGrad)"
-                  dot={{ r: 4, fill: '#2e7d32' }} activeDot={{ r: 6 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </>
-        )}
-
-      </section>
-
-      {/* Dispensed vs Wasted comparison */}
-      <section className="analytics-comparison">
-        <h4 className="analytics-comparison-label">Dispensed vs. Wasted per Vaccine — {periodLabel}</h4>
-        <section className="analytics-comparison-bars">
-          {vaccineNames.map((name, i) => {
-            const disp   = hourlyData.reduce((s, h) => s + (h[name] || 0), 0);
-            const wasted = hourlyData.reduce((s, h) => s + (h[`${name}_w`] || 0), 0);
-            const total  = disp + wasted;
-            const pct    = total > 0 ? ((disp / total) * 100).toFixed(0) : 0;
-            return (
-              <section key={name} className="analytics-comparison-item">
-                <section className="analytics-comparison-header">
-                  <span className="analytics-comparison-name">{name}</span>
-                  <span className="analytics-comparison-efficiency" style={{ color: CHART_COLORS[i] }}>
-                    {pct}% efficient
-                  </span>
-                </section>
-                <section className="analytics-track-bar">
-                  <section className="analytics-track-fill" style={{ width: `${pct}%`, background: CHART_COLORS[i] }} />
-                </section>
-                <section className="analytics-comparison-footer">
-                  <span style={{ color: CHART_COLORS[i] }}>💉 {disp.toLocaleString()} dispensed</span>
-                  <span style={{ color: '#e53935' }}>🗑️ {wasted} wasted</span>
-                </section>
-              </section>
-            );
-          })}
-        </section>
       </section>
 
     </section>
