@@ -5,22 +5,20 @@ import { useState, useEffect } from 'react';
 import logo from '../images/logoit.png';
 
 const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isActive = (path) => location.pathname === path;
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const isActive  = (path) => location.pathname === path;
 
   const [now, setNow] = useState(new Date());
-
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
   const formatTime = (date) =>
-    date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
+    date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
   const formatDate = (date) =>
-    date.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    date.toLocaleDateString([], { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
   const handleNavClick = (path) => {
     navigate(path);
@@ -36,53 +34,65 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
       </header>
 
       <nav className="nav">
-        <button
-          type="button"
+
+        <button type="button"
           className={isActive('/dashboard') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/dashboard')}
           aria-current={isActive('/dashboard') ? 'page' : undefined}>
           📊 DASHBOARD
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           className={isActive('/vaccine') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/vaccine')}
           aria-current={isActive('/vaccine') ? 'page' : undefined}>
           💉 VACCINE MANAGEMENT
         </button>
 
-        <button
-          type="button"
+        {/* ✅ NEW */}
+        <button type="button"
+          className={isActive('/vaccine-orders') ? 'nav-link nav-link-active' : 'nav-link'}
+          onClick={() => handleNavClick('/vaccine-orders')}
+          aria-current={isActive('/vaccine-orders') ? 'page' : undefined}>
+          📦 VACCINE ORDERS
+        </button>
+
+        {/* ✅ NEW */}
+        <button type="button"
+          className={isActive('/suppliers') ? 'nav-link nav-link-active' : 'nav-link'}
+          onClick={() => handleNavClick('/suppliers')}
+          aria-current={isActive('/suppliers') ? 'page' : undefined}>
+          🏭 SUPPLIERS
+        </button>
+
+        <button type="button"
           className={isActive('/demand-forecast') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/demand-forecast')}
           aria-current={isActive('/demand-forecast') ? 'page' : undefined}>
           🤖 DEMAND FORECAST
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           className={isActive('/reports') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/reports')}
           aria-current={isActive('/reports') ? 'page' : undefined}>
           📈 REPORTS
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           className={isActive('/patientmanagement') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/patientmanagement')}
           aria-current={isActive('/patientmanagement') ? 'page' : undefined}>
           🧑‍⚕️ PATIENT MANAGEMENT
         </button>
 
-        <button
-          type="button"
+        <button type="button"
           className={isActive('/settings') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/settings')}
           aria-current={isActive('/settings') ? 'page' : undefined}>
           ⚙️ SETTINGS
         </button>
+
       </nav>
 
       <div className="sidebar-clock">

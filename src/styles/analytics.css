@@ -333,3 +333,78 @@ body.dark-mode .analytics-track-bar {
   .analytics-chip-value { font-size: 20px; }
   .analytics-tab-btn { padding: 6px 12px; font-size: 12px; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE — analytics.css additions
+   Paste this block at the very bottom of your analytics.css
+   ═══════════════════════════════════════════════════════════ */
+
+   body.dark-mode .analytics-wrapper { background: transparent; }
+
+   /* ── Wrapper card (the white rounded box around the controls + chart) ── */
+   body.dark-mode .analytics-wrapper > section[style*="background: white"],
+   body.dark-mode .analytics-wrapper > section[style*="background:white"] {
+     background: #252530 !important;
+     box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important;
+   }
+   
+   /* ── Analytics header title + subtext ── */
+   body.dark-mode .analytics-title   { color: #e0e0e0; }
+   body.dark-mode .analytics-subtext { color: #aaa; }
+   
+   /* ── Summary stat chips ── */
+   body.dark-mode .analytics-chip {
+     background: #252530;
+     box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+   }
+   body.dark-mode .analytics-chip-label { color: #aaa; }
+   body.dark-mode .analytics-chip-unit  { color: #888; }
+   
+   /* ── Chart tab buttons ── */
+   body.dark-mode .analytics-tab-btn {
+     background: #252530;
+     border-color: #3a3a4a;
+     color: #ccc;
+   }
+   body.dark-mode .analytics-tab-btn:hover {
+     background: #1a2a28;
+     border-color: #26a69a;
+     color: #4db6ac;
+   }
+   body.dark-mode .analytics-tab-btn.active {
+     background: #26a69a;
+     color: white;
+     border-color: #26a69a;
+   }
+   
+   /* ── Vaccine select dropdown ── */
+   body.dark-mode .analytics-vaccine-select {
+     background: #252530;
+     border-color: #3a3a4a;
+     color: #e0e0e0;
+   }
+   
+   /* ── Chart box ── */
+   body.dark-mode .analytics-chart-box {
+     background: #252530;
+     border-color: #2e2e3e;
+   }
+   body.dark-mode .analytics-chart-caption { color: #aaa; }
+   
+   /* ── Comparison section ── */
+   body.dark-mode .analytics-comparison       { background: #252530; border-color: #2e2e3e; }
+   body.dark-mode .analytics-comparison-label { color: #e0e0e0; }
+   body.dark-mode .analytics-comparison-name  { color: #ccc; }
+   body.dark-mode .analytics-comparison-item  { background: #1e1e2a; border-color: #2e2e3e; }
+   body.dark-mode .analytics-track-bar        { background: #2e2e3e; }
+   
+   /* ── Recharts grid lines and axis text (charts inside analytics) ── */
+   body.dark-mode .analytics-chart-box .recharts-cartesian-grid-horizontal line,
+   body.dark-mode .analytics-chart-box .recharts-cartesian-grid-vertical line {
+     stroke: #2e2e3e !important;
+   }
+   body.dark-mode .analytics-chart-box .recharts-text { fill: #888 !important; }
+   body.dark-mode .analytics-chart-box .recharts-legend-item-text { color: #bbb !important; }
+   
+   /* ── Controls row white card (Monthly/Weekly/Daily selector bar) ── */
+   body.dark-mode .analytics-controls { background: transparent; }
