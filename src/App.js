@@ -4,14 +4,17 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
-import LoginScreen from './pages/login';
-import Dashboard from './pages/dashboard';
+import LoginScreen    from './pages/login';
+import Dashboard      from './pages/dashboard';
 import VaccineManagement from './pages/vaccine';
-import DemandForecast from './pages/DemandForecast'; // ✅ NEW
-import Reports from './pages/reports';
+import VaccineOrders  from './pages/VaccineOrders';
+import Suppliers      from './pages/Suppliers';
+import DemandForecast from './pages/DemandForecast';
+import Reports        from './pages/reports';
 import Notifications, { NotificationsProvider } from './pages/notifications';
-import Settings from './pages/settings';
-
+import Settings       from './pages/settings';
+import Profile        from './pages/profile';
+import UserManagement from './pages/patientmanagement';
 
 function App() {
   return (
@@ -22,10 +25,14 @@ function App() {
           <Route path="/login"             element={<LoginScreen />} />
           <Route path="/dashboard"         element={<Dashboard />} />
           <Route path="/vaccine"           element={<VaccineManagement />} />
-          <Route path="/demand-forecast"   element={<DemandForecast />} /> {/* ✅ NEW */}
+          <Route path="/vaccine-orders"    element={<VaccineOrders />} />
+          <Route path="/suppliers"         element={<Suppliers />} />
+          <Route path="/demand-forecast"   element={<DemandForecast />} />
           <Route path="/reports"           element={<Reports />} />
           <Route path="/notifications"     element={<Notifications />} />
           <Route path="/settings"          element={<Settings />} />
+          <Route path="/profile"           element={<Profile />} />
+          <Route path="/patientmanagement" element={<UserManagement />} />
         </Routes>
       </Router>
     </NotificationsProvider>
