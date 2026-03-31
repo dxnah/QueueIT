@@ -1077,3 +1077,26 @@ body.dark-mode p[style*="color: #999"],
 body.dark-mode p[style*="color:#999"] {
   color: #aaa !important;
 }
+
+.fab-add-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.fab-add-btn:hover {
+  transform: translateX(-50%) scale(1.08);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
