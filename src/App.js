@@ -7,8 +7,8 @@ import './App.css';
 import LoginScreen    from './pages/login';
 import Dashboard      from './pages/dashboard';
 import VaccineManagement from './pages/vaccine';
-import VaccineOrders  from './pages/VaccineOrders';  // ✅ NEW
-import Suppliers      from './pages/Suppliers';       // ✅ NEW
+import VaccineOrders  from 'src/pages/VaccineOrders';  // ✅ NEW
+import Suppliers      from 'src/pages/Suppliers';       // ✅ NEW
 import DemandForecast from './pages/DemandForecast';
 import Reports        from './pages/reports';
 import Notifications, { NotificationsProvider } from './pages/notifications';
