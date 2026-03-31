@@ -26,7 +26,6 @@ const MONTH_START_DAYS = {
   July:6,August:2,September:5,October:0,November:3,December:5,
 };
 
-// ── Hard-coded suppliers list (editable from Suppliers page later) ─────────────
 const SUPPLIERS_LIST = [
   'MedSource Philippines',
   'VaccinePro Asia',
@@ -35,17 +34,14 @@ const SUPPLIERS_LIST = [
   'BioLogic Partners',
 ];
 
-// ── Price per dose (fixed per instructions) ────────────────────────────────────
-const PRICE_PER_DOSE = 1100; // ₱1,100 per dose
+const PRICE_PER_DOSE = 1100;
 
-// ── Status thresholds ──────────────────────────────────────────────────────────
 const calcStatus = (available) => {
-  if (available === 0)       return 'Out Stock';
-  if (available < 100)       return 'Low Stock';
+  if (available === 0)      return 'Out Stock';
+  if (available < 100)      return 'Low Stock';
   return 'In Stock';
 };
 
-// ── Initial batch data per vaccine ────────────────────────────────────────────
 const INITIAL_BATCH_DATA = {
   'Anti-Rabies': [
     { id: 1, batchNumber: 'AR-2025-005', expiryDate: '2029-06-15', available: 320, used: 60, datePurchased: '2025-07-27', supplier: 'MedSource Philippines', mlRecommended: 200 },
@@ -85,9 +81,9 @@ const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
 const getExpiryColor = (expiryDate) => {
   if (!expiryDate) return '#999';
   const daysLeft = Math.ceil((new Date(expiryDate) - new Date()) / (1000*60*60*24));
-  if (daysLeft < 0)    return '#b71c1c';
-  if (daysLeft <= 30)  return '#c62828';
-  if (daysLeft <= 90)  return '#f57f17';
+  if (daysLeft < 0)   return '#b71c1c';
+  if (daysLeft <= 30) return '#c62828';
+  if (daysLeft <= 90) return '#f57f17';
   return '#2e7d32';
 };
 
@@ -136,7 +132,7 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
     if (editingBatch) {
       onEditBatch(vaccineName, editingBatch.id, data);
     } else {
-      onAddBatch(vaccineName, { ...data, id: Date.now(), mlRecommended: mlRecommended });
+      onAddBatch(vaccineName, { ...data, id: Date.now(), mlRecommended });
     }
     setShowAddBatch(false);
     setEditingBatch(null);
@@ -182,7 +178,8 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
               const expiryColor = getExpiryColor(batch.expiryDate);
               const bStatus     = calcStatus(batch.available);
               return (
-                <tr key={batch.id} style={{ borderBottom:'1px solid #f0f0f0', background: i%2===0 ? '#fafafa' : 'white', transition:'background 0.12s' }}
+                <tr key={batch.id}
+                  style={{ borderBottom:'1px solid #f0f0f0', background: i%2===0 ? '#fafafa' : 'white', transition:'background 0.12s' }}
                   onMouseEnter={e => e.currentTarget.style.background='#f0fffe'}
                   onMouseLeave={e => e.currentTarget.style.background=i%2===0?'#fafafa':'white'}>
                   <td style={{ padding:'12px 14px', fontWeight:'700', color:'#333', fontFamily:'monospace', fontSize:'13px' }}>{batch.batchNumber}</td>
@@ -218,44 +215,17 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
             })}
           </tbody>
           <tfoot>
-  <tr>
-    <td
-      colSpan={9}
-      style={{
-        padding: '12px 14px',
-        borderTop: '1px solid #e0e0e0',
-        textAlign: 'center'
-      }}
-    >
-      <button
-        onClick={openAddBatch}
-        style={{
-          background: 'none',
-          border: 'none',
-          color: '#26a69a',
-          fontSize: '13px',
-          fontWeight: '700',
-          cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px',
-          padding: '6px 10px',
-          borderRadius: '6px',
-          transition: 'all 0.15s ease'
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.background = '#e0f7f4';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.background = 'transparent';
-        }}
-      >
-        ＋ Add new batch
-      </button>
-    </td>
-  </tr>
-</tfoot>
+            <tr>
+              <td colSpan={9} style={{ padding:'12px 14px', borderTop:'1px solid #e0e0e0', textAlign:'center' }}>
+                <button onClick={openAddBatch}
+                  style={{ background:'none', border:'none', color:'#26a69a', fontSize:'13px', fontWeight:'700', cursor:'pointer', display:'inline-flex', alignItems:'center', justifyContent:'center', gap:'6px', padding:'6px 10px', borderRadius:'6px', transition:'all 0.15s ease' }}
+                  onMouseEnter={e => e.currentTarget.style.background='#e0f7f4'}
+                  onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                  ＋ Add new batch
+                </button>
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
@@ -277,7 +247,8 @@ const VaccineTable = ({ vaccineName, batches, onAddBatch, onEditBatch, onDeleteB
                 <div key={f.name}>
                   <label style={{ fontSize:'12px', fontWeight:'600', color:'#555', display:'block', marginBottom:'5px' }}>{f.label}</label>
                   <input type={f.type} placeholder={f.placeholder}
-                    value={batchForm[f.name]} onChange={e => setBatchForm(p => ({ ...p, [f.name]: e.target.value }))}
+                    value={batchForm[f.name]}
+                    onChange={e => setBatchForm(p => ({ ...p, [f.name]: e.target.value }))}
                     required={f.name !== 'used'}
                     style={{ width:'100%', padding:'8px 10px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', boxSizing:'border-box', outline:'none' }}
                     onFocus={e => e.target.style.borderColor='#26a69a'}
@@ -345,8 +316,6 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
         </div>
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
-
-            {/* Vaccine dropdown */}
             <div className="modal-field">
               <label className="modal-label">Vaccine</label>
               <select value={orderData.vaccine} onChange={e => setOrderData(p => ({ ...p, vaccine: e.target.value }))} required style={{ ...inputStyle, background:'white' }}>
@@ -354,8 +323,6 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
                 {vaccines.map(v => <option key={v} value={v}>{v}</option>)}
               </select>
             </div>
-
-            {/* Supplier dropdown */}
             <div className="modal-field">
               <label className="modal-label">Supplier</label>
               <select value={orderData.supplier} onChange={e => setOrderData(p => ({ ...p, supplier: e.target.value }))} required style={{ ...inputStyle, background:'white' }}>
@@ -363,8 +330,6 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
                 {SUPPLIERS_LIST.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
-
-            {/* Amount */}
             <div className="modal-field">
               <label className="modal-label">Amount (doses)</label>
               <input type="number" min="1" placeholder="e.g. 200" value={orderData.amount}
@@ -372,8 +337,6 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
                 onFocus={e => e.target.style.borderColor='#26a69a'}
                 onBlur={e => e.target.style.borderColor='#e0e0e0'} />
             </div>
-
-            {/* Price per piece + Total */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px', marginBottom:'20px' }}>
               <div>
                 <label style={labelStyle}>Price per piece</label>
@@ -388,7 +351,6 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
                 </div>
               </div>
             </div>
-
             <div className="modal-actions">
               <button type="submit" style={{ flex:1, padding:'11px', borderRadius:'8px', border:'none', background:'#26a69a', color:'white', fontWeight:'700', fontSize:'14px', cursor:'pointer' }}>
                 🛒 ORDER
@@ -397,7 +359,6 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
                 Cancel
               </button>
             </div>
-
           </form>
         </div>
       </div>
@@ -408,58 +369,22 @@ const OrderVaccineForm = ({ vaccines, onClose, onOrderSubmit }) => {
 // ── FAB Options Picker ────────────────────────────────────────────────────────
 const FabOptions = ({ onNewVaccine, onOrderVaccine, onClose }) => (
   <>
-    <div
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        position: 'fixed',
-        bottom: '90px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000,
-        display: 'flex',
-        gap: '20px',
-        animation: 'fadeInUp 0.2s ease'
-      }}
-    >
+    <div onClick={e => e.stopPropagation()}
+      style={{ position:'fixed', bottom:'90px', left:'50%', transform:'translateX(-50%)', zIndex:1000, display:'flex', gap:'20px' }}>
       {[
-        { label:'New Vaccine', icon:'💉', onClick: onNewVaccine },
+        { label:'New Vaccine',   icon:'💉', onClick: onNewVaccine   },
         { label:'Order Vaccine', icon:'📦', onClick: onOrderVaccine },
       ].map(opt => (
-        <button
-          key={opt.label}
-          onClick={() => { opt.onClick(); onClose(); }}
-          style={{
-            display:'flex',
-            flexDirection:'column',
-            alignItems:'center',
-            gap:'8px',
-            padding:'20px 28px',
-            borderRadius:'16px',
-            border:'2px solid #e0e0e0',
-            background:'white',
-            cursor:'pointer',
-            boxShadow:'0 8px 28px rgba(0,0,0,0.18)',
-            transition:'all 0.18s',
-            minWidth:'140px'
-          }}
-        >
+        <button key={opt.label} onClick={() => { opt.onClick(); onClose(); }}
+          style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', padding:'20px 28px', borderRadius:'16px', border:'2px solid #e0e0e0', background:'white', cursor:'pointer', boxShadow:'0 8px 28px rgba(0,0,0,0.18)', transition:'all 0.18s', minWidth:'140px' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor='#26a69a'; e.currentTarget.style.transform='translateY(-4px)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor='#e0e0e0'; e.currentTarget.style.transform=''; }}>
           <span style={{ fontSize:'36px' }}>{opt.icon}</span>
-          <span style={{ fontSize:'14px', fontWeight:'700', color:'#333' }}>
-            {opt.label}
-          </span>
+          <span style={{ fontSize:'14px', fontWeight:'700', color:'#333' }}>{opt.label}</span>
         </button>
       ))}
     </div>
-
-    {/* backdrop (click outside to close) */}
-    <div
-      onClick={onClose}
-      style={{
-        position:'fixed',
-        inset:0,
-        zIndex:999
-      }}
-    />
+    <div onClick={onClose} style={{ position:'fixed', inset:0, zIndex:999 }} />
   </>
 );
 
@@ -470,7 +395,6 @@ const VaccineManagement = () => {
   const [saveMessage,  setSaveMessage]  = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
-  // Period controls
   const [viewMode,      setViewMode]      = useState('monthly');
   const [selectedMonth, setSelectedMonth] = useState('January');
   const [selectedWeek,  setSelectedWeek]  = useState(0);
@@ -479,26 +403,18 @@ const VaccineManagement = () => {
   const [weekDropOpen,  setWeekDropOpen]  = useState(false);
   const [calOpen,       setCalOpen]       = useState(false);
 
-  // Vaccine list (names only — batches stored separately)
   const [vaccineNames, setVaccineNames] = useState(['Anti-Rabies', 'Booster']);
-
-  // Batch data: { [vaccineName]: [...batches] }
-  const [batchData, setBatchData] = useState(INITIAL_BATCH_DATA);
-
-  // Selected vaccine for table view
-  const [selectedVaccine, setSelectedVaccine] = useState('Anti-Rabies');
-  const [vaccineDropOpen, setVaccineDropOpen] = useState(false);
+  const [batchData,    setBatchData]    = useState(INITIAL_BATCH_DATA);
+  const [selectedVaccine,  setSelectedVaccine]  = useState('Anti-Rabies');
+  const [vaccineDropOpen,  setVaccineDropOpen]  = useState(false);
   const vaccineDropRef = useRef(null);
 
-  // FAB state
   const [fabOpen,          setFabOpen]          = useState(false);
   const [showNewVaccine,   setShowNewVaccine]   = useState(false);
   const [showOrderVaccine, setShowOrderVaccine] = useState(false);
 
-  // New vaccine form
   const [newVaccineForm, setNewVaccineForm] = useState({ name:'', batchNumber:'', expiryDate:'', available:'', datePurchased:'', supplier:'' });
 
-  // Orders (passed to VaccineOrders page via localStorage)
   const addOrder = (order) => {
     const existing = JSON.parse(localStorage.getItem('vaccineOrders') || '[]');
     localStorage.setItem('vaccineOrders', JSON.stringify([order, ...existing]));
@@ -506,7 +422,6 @@ const VaccineManagement = () => {
     setTimeout(() => setSaveMessage(''), 4000);
   };
 
-  // Close vaccine dropdown on outside click
   useEffect(() => {
     const handler = (e) => { if (vaccineDropRef.current && !vaccineDropRef.current.contains(e.target)) setVaccineDropOpen(false); };
     document.addEventListener('mousedown', handler);
@@ -515,17 +430,13 @@ const VaccineManagement = () => {
 
   const isPeak = PEAK_MONTHS.includes(selectedMonth);
 
-  // Batch CRUD handlers
   const handleAddBatch = (vaccineName, batch) => {
     setBatchData(prev => ({ ...prev, [vaccineName]: [...(prev[vaccineName] || []), batch] }));
     setSaveMessage('✅ Batch added successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
   };
   const handleEditBatch = (vaccineName, batchId, data) => {
-    setBatchData(prev => ({
-      ...prev,
-      [vaccineName]: prev[vaccineName].map(b => b.id === batchId ? { ...b, ...data } : b),
-    }));
+    setBatchData(prev => ({ ...prev, [vaccineName]: prev[vaccineName].map(b => b.id === batchId ? { ...b, ...data } : b) }));
     setSaveMessage('✅ Batch updated successfully!');
     setTimeout(() => setSaveMessage(''), 3000);
   };
@@ -536,7 +447,6 @@ const VaccineManagement = () => {
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
-  // Add new vaccine
   const handleAddNewVaccine = (e) => {
     e.preventDefault();
     const name = newVaccineForm.name.trim();
@@ -545,14 +455,9 @@ const VaccineManagement = () => {
       return;
     }
     const firstBatch = {
-      id: Date.now(),
-      batchNumber:   newVaccineForm.batchNumber,
-      expiryDate:    newVaccineForm.expiryDate,
-      available:     parseInt(newVaccineForm.available) || 0,
-      used:          0,
-      datePurchased: newVaccineForm.datePurchased,
-      supplier:      newVaccineForm.supplier,
-      mlRecommended: 200,
+      id: Date.now(), batchNumber: newVaccineForm.batchNumber, expiryDate: newVaccineForm.expiryDate,
+      available: parseInt(newVaccineForm.available) || 0, used: 0,
+      datePurchased: newVaccineForm.datePurchased, supplier: newVaccineForm.supplier, mlRecommended: 200,
     };
     setVaccineNames(prev => [...prev, name]);
     setBatchData(prev => ({ ...prev, [name]: [firstBatch] }));
@@ -563,40 +468,21 @@ const VaccineManagement = () => {
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
-  // Filter vaccines by status
   const getVaccineStatus = (name) => {
     const batches = batchData[name] || [];
     const total   = batches.reduce((s, b) => s + (b.available || 0), 0);
     return calcStatus(total);
   };
 
-  const filteredVaccineNames = vaccineNames.filter(name => {
-    if (filterStatus === 'all') return true;
-    return getVaccineStatus(name) === filterStatus;
-  });
+  const filteredVaccineNames = vaccineNames.filter(name =>
+    filterStatus === 'all' ? true : getVaccineStatus(name) === filterStatus
+  );
 
-  // If selected vaccine is filtered out, pick first available
-  const displayVaccine = filteredVaccineNames.includes(selectedVaccine) ? selectedVaccine : (filteredVaccineNames[0] || null);
+  const displayVaccine = filteredVaccineNames.includes(selectedVaccine)
+    ? selectedVaccine
+    : (filteredVaccineNames[0] || null);
 
-  const periodBtnStyle = (active) => ({
-    display:'inline-flex', alignItems:'center', gap:'5px',
-    padding:'7px 14px', borderRadius:'8px', fontSize:'13px', fontWeight:'600',
-    cursor:'pointer', border:'1.5px solid', transition:'all 0.18s',
-    background: active ? '#26a69a' : 'white',
-    color: active ? 'white' : '#555',
-    borderColor: active ? '#26a69a' : '#ddd',
-    boxShadow: active ? '0 2px 8px rgba(38,166,154,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
-  });
-
-  const dropItemStyle = (active, isPeakItem=false) => ({
-    padding:'8px 16px', cursor:'pointer', fontSize:'13px',
-    fontWeight: active ? '700' : '500',
-    background: active ? '#e0f7f4' : 'white',
-    color: isPeakItem ? '#e53935' : active ? '#26a69a' : '#333',
-    display:'flex', alignItems:'center', justifyContent:'space-between', gap:'8px',
-  });
-
-  // ── shared button style ────────────────────────────────────────
+  // ── Shared button/dropdown styles (declared ONCE) ──────────────────────────
   const periodBtnStyle = (active) => ({
     display:'inline-flex', alignItems:'center', gap:'5px',
     padding:'7px 14px', borderRadius:'8px', fontSize:'13px', fontWeight:'600',
@@ -623,7 +509,6 @@ const VaccineManagement = () => {
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
 
-      {/* ── FAB option cards ── */}
       {fabOpen && (
         <FabOptions
           onNewVaccine={() => setShowNewVaccine(true)}
@@ -688,7 +573,6 @@ const VaccineManagement = () => {
         </div>
       )}
 
-      {/* ── Order Vaccine Modal ── */}
       {showOrderVaccine && (
         <OrderVaccineForm
           vaccines={vaccineNames}
@@ -697,12 +581,10 @@ const VaccineManagement = () => {
         />
       )}
 
-      {/* ── Main wrapper ── */}
       <section className="main-wrapper">
         <TopBar />
         <main className="main-content">
 
-          {/* Page header */}
           <div className="page-header">
             <div>
               <h1 className="dashboard-heading">💉 Vaccine Management</h1>
@@ -717,7 +599,7 @@ const VaccineManagement = () => {
             </div>
           )}
 
-          {/* ── Filter buttons ── */}
+          {/* Filter buttons */}
           <div className="filters-container">
             <div className="filter-buttons">
               {[
@@ -734,7 +616,7 @@ const VaccineManagement = () => {
             </div>
           </div>
 
-          {/* ── Period + Vaccine selector row ── */}
+          {/* Period + Vaccine selector row */}
           <div style={{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'8px', flexWrap:'wrap' }}>
 
             {/* MONTHLY */}
@@ -795,10 +677,9 @@ const VaccineManagement = () => {
               )}
             </div>
 
-            {/* Divider */}
             <div style={{ width:'1px', height:'32px', background:'#e0e0e0', margin:'0 4px' }} />
 
-            {/* ── Available Vaccines dropdown ── */}
+            {/* Available Vaccines dropdown */}
             <div ref={vaccineDropRef} style={{ position:'relative' }}>
               <button type="button"
                 style={{ ...periodBtnStyle(true), background:'white', color:'#333', borderColor:'#26a69a' }}
@@ -842,7 +723,7 @@ const VaccineManagement = () => {
             </strong>
           </div>
 
-          {/* ── Vaccine Table ── */}
+          {/* Vaccine Table */}
           {displayVaccine ? (
             <VaccineTable
               key={displayVaccine}
@@ -860,30 +741,17 @@ const VaccineManagement = () => {
         </main>
       </section>
 
-      {/* ── Sticky FAB ── */}
-      <button
-  type="button"
-  onClick={(e) => {
-    e.stopPropagation(); // prevent outside click close
-    setFabOpen(v => !v);
-  }}
-  title="Add"
-  className="fab-add-btn"
-  style={{
-    transition: 'transform 0.25s ease, box-shadow 0.25s ease',
-    transform: fabOpen
-      ? 'translateX(-50%) rotate(45deg) scale(1.1)'
-      : 'translateX(-50%) rotate(0deg) scale(1)',
-    boxShadow: fabOpen
-      ? '0 12px 30px rgba(38,166,154,0.4)'
-      : '0 6px 16px rgba(0,0,0,0.2)'
-  }}
->
-  <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-    <rect x="12" y="4" width="4" height="20" rx="2" fill="rgba(255,255,255,0.9)"/>
-    <rect x="4" y="12" width="20" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>
-  </svg>
-</button>
+      {/* Sticky FAB */}
+      <button type="button"
+        onClick={e => { e.stopPropagation(); setFabOpen(v => !v); }}
+        title="Add"
+        className="fab-add-btn"
+        style={{ transition:'transform 0.25s ease, box-shadow 0.25s ease', transform: fabOpen ? 'translateX(-50%) rotate(45deg) scale(1.1)' : 'translateX(-50%) rotate(0deg) scale(1)', boxShadow: fabOpen ? '0 12px 30px rgba(38,166,154,0.4)' : '0 6px 16px rgba(0,0,0,0.2)' }}>
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="12" y="4" width="4" height="20" rx="2" fill="rgba(255,255,255,0.9)"/>
+          <rect x="4" y="12" width="20" height="4" rx="2" fill="rgba(255,255,255,0.9)"/>
+        </svg>
+      </button>
 
     </section>
   );
