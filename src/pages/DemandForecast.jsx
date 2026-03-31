@@ -1,6 +1,7 @@
 // DemandForecast.jsx
 // src/pages/DemandForecast.jsx
 
+
 import { useState } from 'react';
 import {
   BarChart, Bar, LineChart, Line,
@@ -13,6 +14,7 @@ import { vaccineData } from '../data/dashboardData';
 import '../styles/dashboard.css';
 import '../styles/analytics.css';
 
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -20,17 +22,21 @@ const MONTHS = [
 ];
 const PEAK_MONTHS = ['June', 'July', 'August'];
 
+
 const DAYS_IN_MONTH = {
   January: 31, February: 28, March: 31, April: 30, May: 31, June: 30,
   July: 31, August: 31, September: 30, October: 31, November: 30, December: 31,
 };
+
 
 const MONTH_START_DAYS = {
   January: 0, February: 3, March: 3, April: 6, May: 1, June: 4,
   July: 6, August: 2, September: 5, October: 0, November: 3, December: 5,
 };
 
+
 const CHART_COLORS = ['#26a69a', '#f57f17', '#e53935', '#5c6bc0', '#2e7d32'];
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const seededRand = (seed) => {
@@ -38,12 +44,15 @@ const seededRand = (seed) => {
   return x - Math.floor(x);
 };
 
+
 const getMonthMultiplier = (month) => PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
+
 
 const generateForecastData = (month, weekIndex = null, day = null) => {
   const monthMult = getMonthMultiplier(month);
   const weekMult  = weekIndex !== null ? (1 + weekIndex * 0.05) : 1;
   const dayMult   = day !== null ? (1 / 30) : weekIndex !== null ? (1 / 4) : 1;
+
 
   return vaccineData.map((v) => {
     const baseAvail  = v.available;
@@ -51,6 +60,7 @@ const generateForecastData = (month, weekIndex = null, day = null) => {
     const peakNeed   = Math.round(neededBase * 1.5);
     const divisor    = day ? 1 : weekIndex !== null ? 7 : 30;
     const weeksLeft  = baseAvail > 0 ? parseFloat((baseAvail / (neededBase / divisor)).toFixed(1)) : 0;
+
 
     let status, action;
     if (baseAvail === 0) {
@@ -70,6 +80,7 @@ const generateForecastData = (month, weekIndex = null, day = null) => {
   });
 };
 
+
 // ─── Mini Calendar ────────────────────────────────────────────────────────────
 const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
   const totalDays = DAYS_IN_MONTH[month] || 30;
@@ -78,6 +89,7 @@ const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
   const cells     = [];
   for (let i = 0; i < startDay; i++) cells.push(null);
   for (let d = 1; d <= totalDays; d++) cells.push(d);
+
 
   return (
     <div style={{ position:'absolute', top:'110%', right:0, zIndex:999, background:'white', border:'1px solid #e0e0e0', borderRadius:'12px', boxShadow:'0 8px 24px rgba(0,0,0,0.15)', padding:'16px', minWidth:'280px' }}>
@@ -97,12 +109,15 @@ const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
   );
 };
 
+
 // ─── Forecast Table ───────────────────────────────────────────────────────────
 const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }) => {
   const isPeak = PEAK_MONTHS.includes(month);
   let data     = generateForecastData(month, weekIndex, day);
 
+
   if (filterAction !== 'all') data = data.filter(r => r.action === filterAction);
+
 
   const actionOrder = { order_now: 0, order_soon: 1, ok: 2 };
   data = [...data].sort((a, b) => {
@@ -112,9 +127,11 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
     return a.vaccine.localeCompare(b.vaccine);
   });
 
+
   const periodLabel = day
     ? `${month} ${day}`
     : weekIndex !== null ? `${month} — Week ${weekIndex + 1}` : month;
+
 
   return (
     <div>
@@ -136,6 +153,7 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
         {data.length < vaccineData.length && ` · Showing ${data.length} of ${vaccineData.length} vaccines`}
       </p>
 
+
       <div style={{ overflowX:'auto' }}>
         <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
           <thead>
@@ -150,6 +168,7 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
               const confSeed   = vaccineData.findIndex(v => v.vaccine === row.vaccine) * 13 + MONTHS.indexOf(month);
               const confidence = Math.round(85 + seededRand(confSeed) * 12);
               const confColor  = confidence >= 92 ? '#2e7d32' : confidence >= 87 ? '#f57f17' : '#e53935';
+
 
               return (
                 <tr key={row.vaccine} style={{ borderBottom:'1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : 'white', transition:'background 0.15s' }}
@@ -201,6 +220,7 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
   );
 };
 
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const DemandForecast = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -215,7 +235,9 @@ const DemandForecast = () => {
   const [filterAction,  setFilterAction]  = useState('all');
   const [activeView,    setActiveView]    = useState('table');
 
+
   const isPeak = PEAK_MONTHS.includes(selectedMonth);
+
 
   const forecastData = generateForecastData(
     selectedMonth,
@@ -223,12 +245,14 @@ const DemandForecast = () => {
     viewMode === 'daily' ? selectedDay : null
   );
 
+
   const barData = forecastData.map((r) => ({
     name:        r.vaccine.replace('Anti-', 'A-'),
     'Stock':     r.available,
     'Needed':    r.neededBase,
     'Peak Need': r.peakNeed,
   }));
+
 
   const trendData = MONTHS.map(m => {
     const mult = getMonthMultiplier(m);
@@ -238,11 +262,13 @@ const DemandForecast = () => {
     return row;
   });
 
+
   const periodLabel = viewMode === 'daily'
     ? `${selectedMonth} ${selectedDay}`
     : viewMode === 'weekly'
     ? `${selectedMonth} — Week ${selectedWeek + 1}`
     : selectedMonth;
+
 
   const btnStyle = (active) => ({
     display:'inline-flex', alignItems:'center', gap:'5px',
@@ -254,6 +280,7 @@ const DemandForecast = () => {
     boxShadow: active ? '0 2px 8px rgba(38,166,154,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
   });
 
+
   const dropItemStyle = (active, isPeakItem = false) => ({
     padding:'8px 16px', cursor:'pointer', fontSize:'13px',
     fontWeight: active ? '700' : '500',
@@ -263,20 +290,24 @@ const DemandForecast = () => {
     transition:'background 0.12s',
   });
 
+
   return (
     <div className="dashboard-container">
       <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>☰</button>
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
 
+
       <section className="main-wrapper">
         <TopBar />
         <main className="main-content">
+
 
           <header>
             <h1 className="dashboard-heading">🤖 Demand Forecast</h1>
             <p className="dashboard-subheading">ML-powered vaccine demand predictions and restock planning</p>
           </header>
+
 
           {isPeak && (
             <div style={{ marginBottom:'20px', padding:'12px 18px', background:'#fff3e0', borderRadius:'10px', border:'1px solid #ffcc80', fontSize:'13px', color:'#e65100', fontWeight:'600' }}>
@@ -284,9 +315,11 @@ const DemandForecast = () => {
             </div>
           )}
 
+
           {/* Period selector + View toggle */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'18px', flexWrap:'wrap', gap:'12px' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
+
 
               {/* MONTHLY */}
               <div style={{ position:'relative' }}>
@@ -313,6 +346,7 @@ const DemandForecast = () => {
                 )}
               </div>
 
+
               {/* WEEKLY */}
               <div style={{ position:'relative' }}>
                 <button type="button" style={btnStyle(viewMode === 'weekly')}
@@ -334,6 +368,7 @@ const DemandForecast = () => {
                 )}
               </div>
 
+
               {/* DAILY */}
               <div style={{ position:'relative' }}>
                 <button type="button" style={btnStyle(viewMode === 'daily')}
@@ -349,6 +384,7 @@ const DemandForecast = () => {
               </div>
             </div>
 
+
             {/* View toggle */}
             <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
               {[
@@ -362,6 +398,7 @@ const DemandForecast = () => {
               ))}
             </div>
           </div>
+
 
           {/* Sort + filter (table only) */}
           {activeView === 'table' && (
@@ -383,6 +420,7 @@ const DemandForecast = () => {
             </div>
           )}
 
+
           {/* TABLE VIEW */}
           {activeView === 'table' && (
             <div style={{ background:'white', borderRadius:'12px', padding:'20px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
@@ -396,6 +434,7 @@ const DemandForecast = () => {
               />
             </div>
           )}
+
 
           {/* BAR CHART VIEW */}
           {activeView === 'chart' && (
@@ -431,6 +470,7 @@ const DemandForecast = () => {
               </div>
             </div>
           )}
+
 
           {/* YEAR TREND VIEW */}
           {activeView === 'trend' && (
@@ -492,10 +532,13 @@ const DemandForecast = () => {
             </div>
           )}
 
+
         </main>
       </section>
     </div>
   );
 };
 
+
 export default DemandForecast;
+

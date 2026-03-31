@@ -1,5 +1,3 @@
-// notifications.jsx
-
 import React, { useState, createContext, useContext } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
@@ -7,12 +5,13 @@ import { notificationsData } from '../data/dashboardData';
 import '../styles/dashboard.css';
 import '../styles/notifications.css';
 
-// ─── Context ────────────────────────────────────────────────────────────────
+// ─── Context ─────────────────────────────────────────────
 export const NotificationsContext = createContext();
 
 export const NotificationsProvider = ({ children }) => {
   const [notifications, setNotifications] = useState(notificationsData);
   const unreadCount = notifications.filter(n => !n.read).length;
+
   return (
     <NotificationsContext.Provider value={{ notifications, setNotifications, unreadCount }}>
       {children}
@@ -22,7 +21,7 @@ export const NotificationsProvider = ({ children }) => {
 
 export const useNotifications = () => useContext(NotificationsContext);
 
-// ─── Group notifications by date label ──────────────────────────────────────
+// ─── Date grouping ───────────────────────────────────────
 const getDateGroup = (timeStr = '') => {
   const t = timeStr.toLowerCase();
   if (t.includes('minute') || t.includes('hour') || t === 'just now') return 'Today';
@@ -34,7 +33,8 @@ const DATE_GROUP_ORDER = ['Today', 'Yesterday', 'Older'];
 
 const Notifications = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [filterType, setFilterType]             = useState('all');
+  const [filterType, setFilterType] = useState('all');
+  const [searchTerm, setSearchTerm] = useState(''); // ✅ NEW
 
   const { notifications, setNotifications, unreadCount } = useNotifications();
 
@@ -58,8 +58,13 @@ const Notifications = () => {
     }
   };
 
+  // ✅ FILTER + SEARCH COMBINED
   const filteredNotifications = notifications
-    .filter(n => filterType === 'all' || n.type === filterType);
+    .filter(n => filterType === 'all' || n.type === filterType)
+    .filter(n =>
+      n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      n.message.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
   const grouped = filteredNotifications.reduce((acc, notif) => {
     const group = getDateGroup(notif.time);
@@ -71,20 +76,20 @@ const Notifications = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'critical': return '🚨';
-      case 'warning':  return '⚠️';
-      case 'success':  return '✅';
-      case 'info':     return 'ℹ️';
-      default:         return '📢';
+      case 'warning': return '⚠️';
+      case 'success': return '✅';
+      case 'info': return 'ℹ️';
+      default: return '📢';
     }
   };
 
   const getNotificationClass = (type) => {
     switch (type) {
       case 'critical': return 'notification-critical';
-      case 'warning':  return 'notification-warning';
-      case 'success':  return 'notification-success';
-      case 'info':     return 'notification-info';
-      default:         return 'notification-default';
+      case 'warning': return 'notification-warning';
+      case 'success': return 'notification-success';
+      case 'info': return 'notification-info';
+      default: return 'notification-default';
     }
   };
 
@@ -100,49 +105,70 @@ const Notifications = () => {
 
       <Sidebar
         isMobileMenuOpen={isMobileMenuOpen}
-        onMenuClose={() => setIsMobileMenuOpen(false)} />
+        onMenuClose={() => setIsMobileMenuOpen(false)}
+      />
 
       {isMobileMenuOpen && (
         <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
-      {/* ── main-wrapper: TopBar + content, same as all other pages ── */}
       <section className="main-wrapper">
         <TopBar />
 
         <section className="main-content">
 
-          {/* ── Header ── */}
+          {/* HEADER */}
           <div className="page-header">
             <div>
-              <h2 className="dashboard-heading">🔔 Notifications</h2>
+              <h2 className="dashboard-heading" style={{ marginTop: '-20px' }}>🔔 Notifications</h2>
               <p className="dashboard-subheading">
                 {unreadCount > 0
                   ? `You have ${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`
                   : 'All caught up!'}
               </p>
             </div>
+
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              <button type="button" onClick={handleMarkAllAsRead} className="btn btn-secondary">
+              <button onClick={handleMarkAllAsRead} className="btn btn-secondary">
                 ✓ Mark All Read
               </button>
-              <button type="button" onClick={handleClearAll} className="btn btn-secondary">
+              <button onClick={handleClearAll} className="btn btn-secondary">
                 🗑️ Clear All
               </button>
             </div>
           </div>
 
-          {/* ── Filters ── */}
-          <div className="filter-buttons" style={{ marginBottom: '20px' }}>
+          {/* ✅ SEARCH BAR */}
+          <div className="notif-search-wrapper">
+            <span className="notif-search-icon">🔍</span>
+
+            <input
+              type="text"
+              className="notif-search-input"
+              placeholder="Search notifications..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+
+            {searchTerm && (
+              <button
+                className="notif-search-clear"
+                onClick={() => setSearchTerm('')}>
+                ✖
+              </button>
+            )}
+          </div>
+
+          {/* FILTERS */}
+          <div className="filter-buttons">
             {[
-              { key: 'all',      label: `All (${notifications.length})` },
+              { key: 'all', label: `All (${notifications.length})` },
               { key: 'critical', label: '🚨 Critical' },
-              { key: 'warning',  label: '⚠️ Warning' },
-              { key: 'success',  label: '✅ Success' },
-              { key: 'info',     label: 'ℹ️ Info' },
+              { key: 'warning', label: '⚠️ Warning' },
+              { key: 'success', label: '✅ Success' },
+              { key: 'info', label: 'ℹ️ Info' },
             ].map(f => (
               <button
-                type="button"
                 key={f.key}
                 onClick={() => setFilterType(f.key)}
                 className={filterType === f.key ? 'filter-btn active' : 'filter-btn'}>
@@ -151,43 +177,45 @@ const Notifications = () => {
             ))}
           </div>
 
-          {/* ── Notifications List ── */}
+          {/* LIST */}
           <div className="notifications-list">
             {filteredNotifications.length > 0 ? (
               DATE_GROUP_ORDER.filter(g => grouped[g]).map(group => (
                 <div key={group}>
                   <div className="notif-date-label">{group}</div>
+
                   <div className="notif-group">
                     {grouped[group].map(notif => (
                       <div
                         key={notif.id}
                         className={`notification-item ${getNotificationClass(notif.type)} ${notif.read ? 'read' : 'unread'}`}>
+
                         <div className="notification-icon">
                           {getNotificationIcon(notif.type)}
                         </div>
+
                         <div className="notification-content">
                           <h3 className="notification-title">{notif.title}</h3>
                           <p className="notification-message">{notif.message}</p>
                           <span className="notification-time">{notif.time}</span>
                         </div>
+
                         <div className="notification-actions">
                           {!notif.read && (
                             <button
-                              type="button"
                               onClick={() => handleMarkAsRead(notif.id)}
-                              className="btn-icon"
-                              title="Mark as read">
+                              className="btn-icon">
                               ✓
                             </button>
                           )}
+
                           <button
-                            type="button"
                             onClick={() => handleDeleteNotification(notif.id)}
-                            className="btn-icon"
-                            title="Delete">
+                            className="btn-icon">
                             🗑️
                           </button>
                         </div>
+
                       </div>
                     ))}
                   </div>
@@ -196,8 +224,8 @@ const Notifications = () => {
             ) : (
               <div className="empty-state">
                 <div className="empty-state-illustration">🔕</div>
-                <h3 className="empty-state-title">You're all caught up!</h3>
-                <p className="empty-state-subtitle">No notifications to display right now.</p>
+                <h3 className="empty-state-title">No results found</h3>
+                <p className="empty-state-subtitle">Try a different search or filter.</p>
               </div>
             )}
           </div>

@@ -1,68 +1,13 @@
 // Suppliers.jsx
 // Save in: src/pages/Suppliers.jsx
 
+
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import '../styles/dashboard.css';
+import { suppliersData } from '../data/dashboardData';
 
-const INITIAL_SUPPLIERS = [
-  {
-    id: 1,
-    name: 'MedSource Philippines',
-    contact: 'info@medsource.ph',
-    phone: '+63 2 8234 5678',
-    address: '123 Bonifacio St., Makati City, Metro Manila',
-    vaccines: ['Anti-Rabies', 'Flu Shot'],
-    status: 'Active',
-    leadTimeDays: 5,
-    notes: 'Preferred supplier for ARV. Offers bulk discounts above 500 doses.',
-  },
-  {
-    id: 2,
-    name: 'VaccinePro Asia',
-    contact: 'orders@vaccinepro.com.ph',
-    phone: '+63 32 412 9000',
-    address: '45 Osmeña Blvd., Cebu City',
-    vaccines: ['Booster', 'Hepatitis B'],
-    status: 'Active',
-    leadTimeDays: 7,
-    notes: 'Handles Booster and Hep B supply for Visayas region.',
-  },
-  {
-    id: 3,
-    name: 'GlobalHealth Supply Co.',
-    contact: 'ph@globalhealth.com',
-    phone: '+63 2 8900 1122',
-    address: '88 Ayala Ave., Makati City, Metro Manila',
-    vaccines: ['Anti-Tetanus', 'Flu Shot'],
-    status: 'Active',
-    leadTimeDays: 10,
-    notes: 'International supplier. Good for large volume orders.',
-  },
-  {
-    id: 4,
-    name: 'PhilMed Distribution',
-    contact: 'supply@philmed.ph',
-    phone: '+63 82 221 3344',
-    address: '10 Ilustre St., Davao City',
-    vaccines: ['Anti-Rabies', 'Anti-Tetanus'],
-    status: 'Inactive',
-    leadTimeDays: 14,
-    notes: 'Currently on hold. Contact before placing orders.',
-  },
-  {
-    id: 5,
-    name: 'BioLogic Partners',
-    contact: 'hello@biologicph.com',
-    phone: '+63 2 7789 0055',
-    address: '22 Rizal Ave., Quezon City, Metro Manila',
-    vaccines: ['Hepatitis B', 'Booster'],
-    status: 'Active',
-    leadTimeDays: 6,
-    notes: 'Specializes in cold-chain logistics. Reliable for perishable stock.',
-  },
-];
 
 const statusStyle = (status) => ({
   padding:'3px 10px', borderRadius:'20px', fontSize:'12px', fontWeight:'700',
@@ -71,17 +16,20 @@ const statusStyle = (status) => ({
   border:     `1.5px solid ${status==='Active' ? '#a5d6a7' : '#ef9a9a'}`,
 });
 
+
 const Suppliers = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [suppliers, setSuppliers] = useState(INITIAL_SUPPLIERS);
+  const [suppliers, setSuppliers] = useState(suppliersData);
   const [showForm, setShowForm] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [saveMessage, setSaveMessage] = useState('');
 
+
   const emptyForm = { name:'', contact:'', phone:'', address:'', vaccines:'', status:'Active', leadTimeDays:'', notes:'' };
   const [form, setForm] = useState(emptyForm);
+
 
   const openAdd = () => { setEditingSupplier(null); setForm(emptyForm); setShowForm(true); };
   const openEdit = (s) => {
@@ -89,6 +37,7 @@ const Suppliers = () => {
     setForm({ ...s, vaccines: s.vaccines.join(', ') });
     setShowForm(true);
   };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -104,12 +53,14 @@ const Suppliers = () => {
     setTimeout(() => setSaveMessage(''), 3000);
   };
 
+
   const handleDelete = (id) => {
     if (!window.confirm('Delete this supplier?')) return;
     setSuppliers(prev => prev.filter(s => s.id!==id));
     setSaveMessage('✅ Supplier deleted.');
     setTimeout(() => setSaveMessage(''), 3000);
   };
+
 
   const filtered = suppliers.filter(s => {
     const matchStatus = filterStatus==='all' || s.status===filterStatus;
@@ -118,13 +69,16 @@ const Suppliers = () => {
     return matchStatus && matchSearch;
   });
 
+
   const inputStyle = { width:'100%', padding:'9px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', boxSizing:'border-box', outline:'none' };
+
 
   return (
     <section className="dashboard-container">
       <button type="button" className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>☰</button>
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
+
 
       {/* Add/Edit Modal */}
       {showForm && (
@@ -192,13 +146,15 @@ const Suppliers = () => {
         </div>
       )}
 
+
       <section className="main-wrapper">
         <TopBar />
         <main className="main-content">
 
+
           <div className="page-header" style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', flexWrap:'wrap', gap:'12px' }}>
             <div>
-              <h1 className="dashboard-heading">🏭 Suppliers</h1>
+              <h2 className="dashboard-heading" style={{ marginTop:'-20px' }}>🏭 Suppliers</h2>
               <p className="dashboard-subheading">Manage vaccine suppliers and procurement contacts</p>
             </div>
             <button onClick={openAdd}
@@ -207,7 +163,9 @@ const Suppliers = () => {
             </button>
           </div>
 
+
           {saveMessage && <div className="alert alert-success">{saveMessage}</div>}
+
 
           {/* Search + filter */}
           <div style={{ display:'flex', gap:'10px', marginBottom:'20px', flexWrap:'wrap', alignItems:'center' }}>
@@ -221,6 +179,7 @@ const Suppliers = () => {
               </button>
             ))}
           </div>
+
 
           {/* Suppliers table */}
           <div style={{ background:'white', borderRadius:'12px', overflow:'hidden', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10)', marginBottom:'30px' }}>
@@ -264,13 +223,13 @@ const Suppliers = () => {
                               style={{ padding:'5px 10px', borderRadius:'6px', border:'1.5px solid #26a69a', background:'white', color:'#26a69a', fontSize:'12px', fontWeight:'600', cursor:'pointer', transition:'all 0.15s' }}
                               onMouseEnter={e=>{e.currentTarget.style.background='#26a69a';e.currentTarget.style.color='white';}}
                               onMouseLeave={e=>{e.currentTarget.style.background='white';e.currentTarget.style.color='#26a69a';}}>
-                              ✏️ Edit
+                              Edit
                             </button>
                             <button onClick={()=>handleDelete(s.id)}
                               style={{ padding:'5px 10px', borderRadius:'6px', border:'1.5px solid #e53935', background:'white', color:'#e53935', fontSize:'12px', fontWeight:'600', cursor:'pointer', transition:'all 0.15s' }}
                               onMouseEnter={e=>{e.currentTarget.style.background='#e53935';e.currentTarget.style.color='white';}}
                               onMouseLeave={e=>{e.currentTarget.style.background='white';e.currentTarget.style.color='#e53935';}}>
-                              🗑️ Delete
+                              Delete
                             </button>
                           </div>
                         </td>
@@ -282,10 +241,12 @@ const Suppliers = () => {
             )}
           </div>
 
+
         </main>
       </section>
     </section>
   );
 };
+
 
 export default Suppliers;
