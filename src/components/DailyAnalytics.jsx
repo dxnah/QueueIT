@@ -8,8 +8,10 @@ import {
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
+
 import { vaccineData } from '../data/dashboardData';
 import '../styles/analytics.css';
+
 
 // ─── Constants ───────────────────────────────────────────
 const MONTHS = [
@@ -17,7 +19,9 @@ const MONTHS = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+
 const PEAK_MONTHS = ['June', 'July', 'August'];
+
 
 // ─── Seeded random ───────────────────────────────────────
 const seededRand = (seed) => {
@@ -25,7 +29,9 @@ const seededRand = (seed) => {
   return x - Math.floor(x);
 };
 
+
 const getMonthMultiplier = (month) => PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
+
 
 // ─── Generate hourly data (UNCHANGED LOGIC) ──────────────
 const generateHourlyData = (month = 'January', weekIndex = null, day = null) => {
@@ -33,31 +39,38 @@ const generateHourlyData = (month = 'January', weekIndex = null, day = null) => 
   const monthIdx = MONTHS.indexOf(month);
   const hours = [];
 
+
   for (let h = 7; h <= 17; h++) {
     const label = h < 12 ? `${h}:00 AM` : h === 12 ? `12:00 PM` : `${h - 12}:00 PM`;
     const isPeak = (h >= 9 && h <= 11) || (h >= 14 && h <= 16);
     const timeMultiplier = isPeak ? 1.4 : h < 9 || h > 16 ? 0.6 : 1;
     const dayMult = day !== null ? (0.85 + seededRand(day * 7 + monthIdx) * 0.3) : 1;
 
+
     const entry = { time: label };
     let totalDispensed = 0;
     let totalWasted = 0;
+
 
     vaccineData.forEach((vaccine, vi) => {
       const seed = h * 10 + vi + monthIdx * 100 + (day || 0) * 10000;
       const rand = seededRand(seed);
 
+
       const baseRate = Math.max(1, Math.round(
         (vaccine.mlRecommended / 30) * timeMultiplier * monthMult * dayMult * (0.85 + rand * 0.3)
       ));
 
+
       const wasted = Math.max(0, Math.round(baseRate * (0.02 + seededRand(seed + 50) * 0.03)));
+
 
       entry[vaccine.vaccine] = baseRate;
       entry[`${vaccine.vaccine}_w`] = wasted;
       totalDispensed += baseRate;
       totalWasted += wasted;
     });
+
 
     entry.totalDispensed = totalDispensed;
     entry.totalWasted = totalWasted;
@@ -66,6 +79,7 @@ const generateHourlyData = (month = 'January', weekIndex = null, day = null) => 
   }
   return hours;
 };
+
 
 // ─── Generate stock snapshots (UNCHANGED) ───────────────
 const generateStockSnapshots = () => {
@@ -79,6 +93,7 @@ const generateStockSnapshots = () => {
   return hours;
 };
 
+
 // ─── Colors (UNCHANGED) ─────────────────────────────────
 const COLORS = {
   'Anti-Rabies': '#26a69a',
@@ -88,6 +103,7 @@ const COLORS = {
   'Flu Shot': '#2e7d32',
 };
 const CHART_COLORS = ['#26a69a', '#f57f17', '#e53935', '#5c6bc0', '#2e7d32'];
+
 
 // ─── Tooltip (UNCHANGED) ────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
@@ -109,12 +125,15 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
+
 // ─── MAIN COMPONENT ─────────────────────────────────────
 const DailyAnalytics = () => {
   const [activeChart, setActiveChart]   = useState('dispensed');
   const [selectedVax, setSelectedVax]   = useState('all');
 
+
   const vaccineNames = vaccineData.map(v => v.vaccine);
+
 
   // ✅ LAST 2 DAYS DATA ONLY
   const latestMonth = 'January';
@@ -122,7 +141,9 @@ const DailyAnalytics = () => {
   const day2 = generateHourlyData(latestMonth, null, 2);
   const hourlyData = [...day1, ...day2];
 
+
   const stockData = generateStockSnapshots();
+
 
   // ─── Summary (UNCHANGED) ─────────────────────────────
   const totalToday     = hourlyData.reduce((s, h) => s + (h.totalDispensed || 0), 0);
@@ -131,9 +152,11 @@ const DailyAnalytics = () => {
     ? (hourlyData.reduce((s, h) => s + (h.efficiency || 0), 0) / hourlyData.length).toFixed(1)
     : 0;
 
+
   const peakHour = hourlyData.reduce(
     (best, h) => h.totalDispensed > (best.totalDispensed || 0) ? h : best, {}
   );
+
 
   const chartData = selectedVax === 'all'
     ? hourlyData
@@ -146,12 +169,16 @@ const DailyAnalytics = () => {
       efficiency: h.efficiency,
     }));
 
+
   const keysToShow = selectedVax === 'all' ? vaccineNames : [selectedVax];
+
 
   const periodLabel = "Last 2 Days";
 
+
   return (
     <section className="analytics-wrapper">
+
 
       {/* HEADER */}
       <section className="analytics-header">
@@ -162,6 +189,7 @@ const DailyAnalytics = () => {
           </p>
         </section>
       </section>
+
 
       {/* SUMMARY CHIPS (UNCHANGED STYLE) */}
       <section className="analytics-stat-chips">
@@ -181,6 +209,7 @@ const DailyAnalytics = () => {
         ))}
       </section>
 
+
       {/* CONTROLS (UNCHANGED STYLE) */}
       <section className="analytics-controls">
         <section className="analytics-tab-group">
@@ -198,6 +227,7 @@ const DailyAnalytics = () => {
           ))}
         </section>
 
+
         {activeChart !== 'stock' && (
           <select value={selectedVax} onChange={e => setSelectedVax(e.target.value)} className="analytics-vaccine-select">
             <option value="all">All Vaccines</option>
@@ -205,6 +235,7 @@ const DailyAnalytics = () => {
           </select>
         )}
       </section>
+
 
       {/* CHART AREA (UNCHANGED) */}
       <section className="analytics-chart-box">
@@ -224,6 +255,7 @@ const DailyAnalytics = () => {
           </ResponsiveContainer>
         )}
 
+
         {activeChart === 'stacked' && (
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={hourlyData}>
@@ -238,6 +270,7 @@ const DailyAnalytics = () => {
             </BarChart>
           </ResponsiveContainer>
         )}
+
 
         {activeChart === 'stock' && (
           <ResponsiveContainer width="100%" height={320}>
@@ -256,8 +289,11 @@ const DailyAnalytics = () => {
         )}
       </section>
 
+
     </section>
   );
 };
 
+
 export default DailyAnalytics;
+

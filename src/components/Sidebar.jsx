@@ -1,24 +1,12 @@
 // Sidebar.jsx
 
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import logo from '../images/logoit.png';
 
 const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const isActive  = (path) => location.pathname === path;
-
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (date) =>
-    date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-  const formatDate = (date) =>
-    date.toLocaleDateString([], { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
   const handleNavClick = (path) => {
     navigate(path);
@@ -94,13 +82,23 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
         </button>
 
       </nav>
-
-      <div className="sidebar-clock">
-        <span className="sidebar-clock-time">{formatTime(now)}</span>
-        <span className="sidebar-clock-date">{formatDate(now)}</span>
-      </div>
-
+      <footer style={{
+        marginTop: "auto",
+        padding: "14px",
+        background: "linear-gradient(180deg, #89CBB6 0%, #5ba99a 100%)",
+        color: "#fff",
+        borderTopLeftRadius: "10px",
+        borderTopRightRadius: "10px",
+        fontSize: "11px",
+        textAlign: "center"}}>
+        <div style={{ fontWeight: "bold", fontSize: "13px" }}>VaxFlow</div>
+        <div style={{ opacity: 0.8 }}>ML Vaccine Management System</div>
+        <div style={{ height: "1px", background: "rgba(255,255,255,0.3)", margin: "6px 0" }}></div>
+        <div>© {new Date().getFullYear()} VaxFlow. All rights reserved.</div>
+        <div style={{ opacity: 0.7, fontStyle: "italic" }}>Developed by Group 6</div>
+      </footer>
     </aside>
+
   );
 };
 
