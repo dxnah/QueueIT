@@ -1,0 +1,404 @@
+/* styles/suppliers.css */
+
+/* ═══════════════════════════════════════════════════════════
+   SUPPLIERS PAGE
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Page Header ─────────────────────────────────────────── */
+.suppliers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.suppliers-heading {
+  font-size: 32px;
+  margin: 0 0 5px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.suppliers-subheading {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+}
+
+.suppliers-add-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #26a69a;
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+
+.suppliers-add-btn:hover {
+  background: #1a8174;
+}
+
+/* ─── Filter Bar ──────────────────────────────────────────── */
+.suppliers-filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.suppliers-filter-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #e0e0e0;
+  background: white;
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.suppliers-filter-btn:hover {
+  border-color: #26a69a;
+  color: #26a69a;
+}
+
+.suppliers-filter-btn--active {
+  background: #26a69a;
+  border-color: #26a69a;
+  color: white;
+}
+
+.suppliers-filter-btn--active:hover {
+  background: #1a8174;
+  border-color: #1a8174;
+  color: white;
+}
+
+/* ─── Table Card ──────────────────────────────────────────── */
+.suppliers-table-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 6px 16px rgba(0, 0, 0, 0.10);
+  margin-bottom: 30px;
+}
+
+.suppliers-table-scroll {
+  overflow-x: auto;
+}
+
+.suppliers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+/* ─── Table Head ──────────────────────────────────────────── */
+.suppliers-table thead tr {
+  background: #26a69a;
+  color: white;
+}
+
+.suppliers-table th {
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+/* ─── Table Body ──────────────────────────────────────────── */
+.suppliers-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.12s;
+}
+
+.suppliers-table tbody tr:nth-child(odd) {
+  background: #fafafa;
+}
+
+.suppliers-table tbody tr:nth-child(even) {
+  background: white;
+}
+
+.suppliers-table tbody tr:hover {
+  background: #f0fffe !important;
+}
+
+.suppliers-table td {
+  padding: 12px 14px;
+  color: #555;
+}
+
+.suppliers-td-name {
+  font-weight: 700;
+  color: #333;
+}
+
+.suppliers-td-contact a {
+  color: #26a69a;
+  text-decoration: none;
+}
+
+.suppliers-td-contact a:hover {
+  text-decoration: underline;
+}
+
+.suppliers-td-address {
+  font-size: 12px;
+  color: #666;
+  max-width: 200px;
+}
+
+.suppliers-td-notes {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+  max-width: 180px;
+}
+
+.suppliers-lead-time {
+  text-align: center;
+}
+
+/* ─── Vaccine Tags ────────────────────────────────────────── */
+.suppliers-vaccine-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.suppliers-vaccine-tag {
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #e0f7f4;
+  color: #26a69a;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ─── Status Badge ────────────────────────────────────────── */
+.suppliers-status-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.suppliers-status-badge--active {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1.5px solid #a5d6a7;
+}
+
+.suppliers-status-badge--inactive {
+  background: #ffebee;
+  color: #c62828;
+  border: 1.5px solid #ef9a9a;
+}
+
+/* ─── Row Actions ─────────────────────────────────────────── */
+.suppliers-row-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.suppliers-btn-edit {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1.5px solid #26a69a;
+  background: white;
+  color: #26a69a;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.suppliers-btn-edit:hover {
+  background: #26a69a;
+  color: white;
+}
+
+.suppliers-btn-delete {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1.5px solid #e53935;
+  background: white;
+  color: #e53935;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.suppliers-btn-delete:hover {
+  background: #e53935;
+  color: white;
+}
+
+/* ─── Empty State ─────────────────────────────────────────── */
+.suppliers-empty {
+  padding: 48px;
+  text-align: center;
+  color: #aaa;
+}
+
+.suppliers-empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+/* ─── Modal Inputs ────────────────────────────────────────── */
+.suppliers-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0e0;
+  font-size: 13px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s;
+  background: white;
+  color: #333;
+}
+
+.suppliers-input:focus {
+  border-color: #26a69a;
+}
+
+.suppliers-select {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════════════════ */
+
+body.dark-mode .suppliers-heading   { color: #e0e0e0; }
+body.dark-mode .suppliers-subheading { color: #aaa; }
+
+body.dark-mode .suppliers-filter-btn {
+  background: #252530;
+  border-color: #3a3a4a;
+  color: #ccc;
+}
+
+body.dark-mode .suppliers-filter-btn:hover {
+  border-color: #26a69a;
+  color: #26a69a;
+}
+
+body.dark-mode .suppliers-filter-btn--active,
+body.dark-mode .suppliers-filter-btn--active:hover {
+  background: #26a69a;
+  border-color: #26a69a;
+  color: white;
+}
+
+body.dark-mode .suppliers-table-card {
+  background: #252530;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .suppliers-table tbody tr:nth-child(odd)  { background: #1e1e2a; }
+body.dark-mode .suppliers-table tbody tr:nth-child(even) { background: #252530; }
+body.dark-mode .suppliers-table tbody tr:hover           { background: #2c2c3a !important; }
+
+body.dark-mode .suppliers-table td      { color: #ccc;    border-bottom-color: #2e2e3e; }
+body.dark-mode .suppliers-td-name       { color: #e0e0e0; }
+body.dark-mode .suppliers-td-address    { color: #aaa; }
+body.dark-mode .suppliers-td-notes      { color: #777; }
+body.dark-mode .suppliers-td-contact a  { color: #4db6ac; }
+
+body.dark-mode .suppliers-vaccine-tag {
+  background: #1a2a28;
+  color: #4db6ac;
+}
+
+body.dark-mode .suppliers-btn-edit {
+  background: #252530;
+  border-color: #26a69a;
+  color: #4db6ac;
+}
+
+body.dark-mode .suppliers-btn-edit:hover {
+  background: #26a69a;
+  color: white;
+}
+
+body.dark-mode .suppliers-btn-delete {
+  background: #252530;
+  border-color: #e53935;
+  color: #ef9a9a;
+}
+
+body.dark-mode .suppliers-btn-delete:hover {
+  background: #e53935;
+  color: white;
+}
+
+body.dark-mode .suppliers-empty { color: #555; }
+
+body.dark-mode .suppliers-input {
+  background: #1e1e2a;
+  border-color: #3a3a4a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .suppliers-input:focus {
+  border-color: #26a69a;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .suppliers-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .suppliers-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .suppliers-table th,
+  .suppliers-table td {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  .suppliers-td-address,
+  .suppliers-td-notes {
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .suppliers-table { font-size: 11px; }
+
+  .suppliers-row-actions { flex-direction: column; }
+
+  .suppliers-btn-edit,
+  .suppliers-btn-delete {
+    width: 100%;
+    text-align: center;
+  }
+}

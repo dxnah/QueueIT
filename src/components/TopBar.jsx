@@ -3,6 +3,7 @@
 import React, { useState, useContext, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationsContext } from '../pages/notifications';
+import { vaccineData, notificationsData } from '../data/dashboardData';
 
 const TopBar = () => {
   const navigate  = useNavigate();
@@ -24,16 +25,39 @@ const TopBar = () => {
 
   const isOnProfile = location.pathname === '/profile';
 
-  // ── Searchable pages ──────────────────────────────────────────────────────
+  // ── Searchable pages ──
   const pages = [
     { label: 'Dashboard',          icon: '📊', path: '/dashboard',       keywords: ['dashboard', 'home', 'overview', 'stats'] },
     { label: 'Vaccine Management', icon: '💉', path: '/vaccine',         keywords: ['vaccine', 'stock', 'inventory', 'doses'] },
     { label: 'Demand Forecast',    icon: '🤖', path: '/demand-forecast', keywords: ['forecast', 'demand', 'ml', 'predict', 'order'] },
     { label: 'Reports',            icon: '📈', path: '/reports',         keywords: ['reports', 'analytics', 'usage', 'data'] },
+    { label: 'Suppliers',          icon: '🏭', path: '/suppliers',       keywords: ['suppliers', 'procurement', 'vendor', 'contact'] },
     { label: 'Settings',           icon: '⚙️', path: '/settings',        keywords: ['settings', 'preferences', 'dark mode', 'notifications'] },
     { label: 'Profile',            icon: '👤', path: '/profile',         keywords: ['profile', 'account', 'username', 'password', 'email'] },
     { label: 'Notifications',      icon: '🔔', path: '/notifications',   keywords: ['notifications', 'alerts', 'messages'] },
   ];
+
+  // ── Searchable vaccines from mockdata ──
+  const vaccineResults = vaccineData.map(v => ({
+    label: v.vaccine,
+    icon: '💉',
+    path: '/vaccine',
+    keywords: [v.vaccine.toLowerCase(), v.status.toLowerCase(), 'vaccine', 'stock'],
+    meta: v.status,
+    metaColor: v.status === 'In Stock' ? '#2e7d32' : v.status === 'Low Stock' ? '#f57f17' : '#c62828',
+  }));
+
+  // ── Searchable notifications from mockdata ──
+  const notifResults = notificationsData.map(n => ({
+    label: n.title,
+    icon: n.type === 'critical' ? '🚨' : n.type === 'warning' ? '⚠️' : n.type === 'success' ? '✅' : 'ℹ️',
+    path: '/notifications',
+    keywords: [n.title.toLowerCase(), n.message.toLowerCase(), 'notification', 'alert'],
+    meta: n.time,
+    metaColor: '#999',
+  }));
+
+  const allSearchItems = [...pages, ...vaccineResults, ...notifResults];
 
   const handleSearch = (e) => {
     const q = e.target.value;
@@ -44,7 +68,7 @@ const TopBar = () => {
       return;
     }
     const lower = q.toLowerCase();
-    const results = pages.filter(p =>
+    const results = allSearchItems.filter(p =>
       p.label.toLowerCase().includes(lower) ||
       p.keywords.some(k => k.includes(lower))
     );
@@ -78,20 +102,22 @@ const TopBar = () => {
         <input
           type="text"
           className="topbar-search-input"
-          placeholder="Search vaccines, reports, analytics..."
+          placeholder="Search vaccines, pages, notifications..."
           value={searchQuery}
           onChange={handleSearch}
         />
         {showSearch && (
           <div className="topbar-search-dropdown">
             {searchResults.length > 0 ? (
-              searchResults.map(r => (
-                <div key={r.path} className="topbar-search-item"
+              searchResults.map((r, i) => (
+                <div key={`${r.path}-${i}`} className="topbar-search-item"
                   onClick={() => handleSelect(r.path)}>
                   <span className="topbar-search-item-icon">{r.icon}</span>
                   <div className="topbar-search-item-info">
                     <span className="topbar-search-label">{r.label}</span>
-                    <span className="topbar-search-path">{r.path}</span>
+                    <span className="topbar-search-path" style={{ color: r.metaColor || '#999' }}>
+                      {r.meta || r.path}
+                    </span>
                   </div>
                 </div>
               ))
@@ -127,8 +153,6 @@ const TopBar = () => {
 
           {showProfile && (
             <div className="topbar-profile-dropdown">
-
-              {/* User info header */}
               <div className="topbar-profile-header">
                 <div className="topbar-profile-header-avatar">{initials}</div>
                 <div className="topbar-profile-header-info">
@@ -139,30 +163,23 @@ const TopBar = () => {
 
               <div className="topbar-profile-divider" />
 
-              {/* View Profile */}
               {!isOnProfile && (
-                <button
-                  type="button"
-                  className="topbar-profile-item"
+                <button type="button" className="topbar-profile-item"
                   onClick={() => { navigate('/profile'); setShowProfile(false); }}>
                   <span className="topbar-profile-item-icon">👤</span>
                   <span>View Profile</span>
                 </button>
               )}
 
-              {/* Logout */}
-              <button
-                type="button"
+              <button type="button"
                 className="topbar-profile-item topbar-profile-item--danger"
                 onClick={() => navigate('/login')}>
                 <span className="topbar-profile-item-icon">🚪</span>
                 <span>Logout</span>
               </button>
-
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
