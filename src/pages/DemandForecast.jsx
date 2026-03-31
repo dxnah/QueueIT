@@ -1,5 +1,5 @@
 // DemandForecast.jsx
-// Save this file in: src/pages/DemandForecast.jsx
+// src/pages/DemandForecast.jsx
 
 import { useState } from 'react';
 import {
@@ -155,9 +155,7 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
                 <tr key={row.vaccine} style={{ borderBottom:'1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : 'white', transition:'background 0.15s' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#f0fffe'}
                   onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? '#fafafa' : 'white'}>
-
                   <td style={{ padding:'12px 14px', fontWeight:'700', color:'#333' }}>{row.vaccine}</td>
-
                   <td style={{ padding:'12px 14px' }}>
                     <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
                       <span style={{ color: row.available < row.mlRecommended * 0.5 ? '#e53935' : '#f57f17', fontWeight:'700' }}>
@@ -169,16 +167,13 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
                       </div>
                     </div>
                   </td>
-
                   <td style={{ padding:'12px 14px', color:'#333', fontWeight:'600' }}>{row.neededBase}</td>
                   <td style={{ padding:'12px 14px', color:'#e53935', fontWeight:'600' }}>{row.peakNeed}</td>
-
                   <td style={{ padding:'12px 14px' }}>
                     <span style={{ color: row.action === 'ok' ? '#2e7d32' : row.action === 'order_soon' ? '#f57f17' : '#e53935', fontSize:'12px' }}>
                       {row.status}
                     </span>
                   </td>
-
                   <td style={{ padding:'12px 14px' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:'6px' }}>
                       <div style={{ flex:1, background:'#f0f0f0', borderRadius:'99px', height:'6px', minWidth:'60px' }}>
@@ -187,7 +182,6 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
                       <span style={{ fontSize:'12px', fontWeight:'700', color: confColor, whiteSpace:'nowrap' }}>{confidence}%</span>
                     </div>
                   </td>
-
                   <td style={{ padding:'12px 14px' }}>
                     {row.action === 'ok' ? (
                       <span style={{ background:'#e8f5e9', color:'#2e7d32', padding:'5px 12px', borderRadius:'20px', fontSize:'12px', fontWeight:'700', border:'1.5px solid #a5d6a7' }}>✅ OK</span>
@@ -210,19 +204,16 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const DemandForecast = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const [viewMode,      setViewMode]      = useState('monthly');
   const [selectedMonth, setSelectedMonth] = useState('January');
   const [selectedWeek,  setSelectedWeek]  = useState(0);
   const [selectedDay,   setSelectedDay]   = useState(1);
-
   const [monthDropOpen, setMonthDropOpen] = useState(false);
   const [weekDropOpen,  setWeekDropOpen]  = useState(false);
   const [calOpen,       setCalOpen]       = useState(false);
-
-  const [sortBy,       setSortBy]       = useState('urgency');
-  const [filterAction, setFilterAction] = useState('all');
-  const [activeView,   setActiveView]   = useState('table');
+  const [sortBy,        setSortBy]        = useState('urgency');
+  const [filterAction,  setFilterAction]  = useState('all');
+  const [activeView,    setActiveView]    = useState('table');
 
   const isPeak = PEAK_MONTHS.includes(selectedMonth);
 
@@ -274,34 +265,27 @@ const DemandForecast = () => {
 
   return (
     <div className="dashboard-container">
-
       <button className="mobile-menu-toggle" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>☰</button>
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
 
-      {/* ── main-wrapper holds TopBar + scrollable content, same as Dashboard/Settings ── */}
       <section className="main-wrapper">
         <TopBar />
-
         <main className="main-content">
 
-          {/* ── Page header ── */}
           <header>
             <h1 className="dashboard-heading">🤖 Demand Forecast</h1>
             <p className="dashboard-subheading">ML-powered vaccine demand predictions and restock planning</p>
           </header>
 
-          {/* ── Peak banner ── */}
           {isPeak && (
             <div style={{ marginBottom:'20px', padding:'12px 18px', background:'#fff3e0', borderRadius:'10px', border:'1px solid #ffcc80', fontSize:'13px', color:'#e65100', fontWeight:'600' }}>
               🔥 <strong>Peak Season ({selectedMonth}):</strong> Dose requirements are automatically increased by 1.5×. Plan restocking accordingly.
             </div>
           )}
 
-          {/* ── Period selector + View toggle row ── */}
+          {/* Period selector + View toggle */}
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'18px', flexWrap:'wrap', gap:'12px' }}>
-
-            {/* Period controls */}
             <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
 
               {/* MONTHLY */}
@@ -363,7 +347,6 @@ const DemandForecast = () => {
                   </div>
                 )}
               </div>
-
             </div>
 
             {/* View toggle */}
@@ -380,7 +363,7 @@ const DemandForecast = () => {
             </div>
           </div>
 
-          {/* ── Sort + filter (table only) ── */}
+          {/* Sort + filter (table only) */}
           {activeView === 'table' && (
             <div style={{ display:'flex', gap:'8px', marginBottom:'16px', flexWrap:'wrap' }}>
               <select value={sortBy} onChange={e => setSortBy(e.target.value)}
@@ -400,7 +383,7 @@ const DemandForecast = () => {
             </div>
           )}
 
-          {/* ══ TABLE VIEW ══════════════════════════════════════════════ */}
+          {/* TABLE VIEW */}
           {activeView === 'table' && (
             <div style={{ background:'white', borderRadius:'12px', padding:'20px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
               <ForecastTable
@@ -414,7 +397,7 @@ const DemandForecast = () => {
             </div>
           )}
 
-          {/* ══ BAR CHART VIEW ══════════════════════════════════════════ */}
+          {/* BAR CHART VIEW */}
           {activeView === 'chart' && (
             <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
               <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>Stock vs Demand — {periodLabel}</h3>
@@ -449,7 +432,7 @@ const DemandForecast = () => {
             </div>
           )}
 
-          {/* ══ YEAR TREND VIEW ══════════════════════════════════════════ */}
+          {/* YEAR TREND VIEW */}
           {activeView === 'trend' && (
             <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
               <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>12-Month Demand Forecast</h3>
@@ -511,7 +494,6 @@ const DemandForecast = () => {
 
         </main>
       </section>
-
     </div>
   );
 };
