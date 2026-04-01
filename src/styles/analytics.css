@@ -57,15 +57,31 @@
 
 .analytics-chip {
   flex: 1 1 140px;
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 14px 16px;
+
+  background: #ffffff;              /* stronger separation */
+  border-radius: 10px;
+  padding: 16px 18px;
+
   display: flex;
   flex-direction: column;
   gap: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* ✨ stronger card elevation */
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.10),
+    0 1px 3px rgba(0,0,0,0.06);
+
+  border: 1px solid #ececec;        /* visible edge */
+
+  transition: all 0.25s ease;
 }
 
+.analytics-chip:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.15),
+    0 4px 8px rgba(0,0,0,0.08);
+}
 
 .analytics-chip-icon {
   font-size: 20px;
@@ -289,8 +305,12 @@ body.dark-mode .analytics-subtext {
 
 
 body.dark-mode .analytics-chip {
-  background: #1e1e2a;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: #252530;
+  border: 1px solid #2e2e3e;
+
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.45),
+    0 1px 3px rgba(0,0,0,0.25);
 }
 
 

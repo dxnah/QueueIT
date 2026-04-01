@@ -1,6 +1,8 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationsContext } from '../pages/notifications';
+import useClock from '../hooks/useClock';
+import useClickOutside from '../hooks/useClickOutside';
 
 const TopBar = () => {
   const navigate    = useNavigate();
@@ -8,21 +10,16 @@ const TopBar = () => {
   const context     = useContext(NotificationsContext);
   const unreadCount = context?.unreadCount ?? 0;
 
-  const [now,         setNow]         = useState(new Date());
+  // ── Hooks ──────────────────────────────────────────────
+  const now         = useClock();
   const [showProfile, setShowProfile] = useState(false);
-
-  const profileRef = useRef(null);
+  const profileRef  = useRef(null);
+  useClickOutside(profileRef, () => setShowProfile(false));
 
   const adminUsername = localStorage.getItem('adminUsername') || 'Admin';
   const adminEmail    = localStorage.getItem('adminEmail')    || 'admin@vaxflow.com';
   const initials      = adminUsername.slice(0, 2).toUpperCase();
   const isOnProfile   = location.pathname === '/profile';
-
-  // ── Live clock ──
-  useEffect(() => {
-    const timer = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const formatTime = (date) =>
     date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -30,22 +27,11 @@ const TopBar = () => {
   const formatDate = (date) =>
     date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handler = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) setShowProfile(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, []);
-
   return (
     <div className="topbar">
 
-      {/* ── Date & Time (replaces search) ── */}
-      <div style={{
-        display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px',
-      }}>
+      {/* ── Date & Time ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px' }}>
         <span style={{ fontSize: '16px', fontWeight: '700', color: '#333', letterSpacing: '0.5px' }}>
           {formatTime(now)}
         </span>
@@ -64,7 +50,7 @@ const TopBar = () => {
           {unreadCount > 0 && <span className="topbar-badge">{unreadCount}</span>}
         </button>
 
-        <span style={{ width: '0px' }} /> {/* spacer */}
+        <span style={{ width: '0px' }} />
 
         {/* ── Avatar + dropdown ── */}
         <div className="topbar-profile-wrap" ref={profileRef}>

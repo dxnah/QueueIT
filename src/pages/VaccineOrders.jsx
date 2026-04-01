@@ -3,17 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
+import { INITIAL_ORDERS, ORDER_STATUS_OPTIONS } from '../data/ordersData';
 import '../styles/dashboard.css';
 
 const STATUS_OPTIONS = ['Pending', 'Approved', 'Shipped', 'Delivered', 'Cancelled'];
 
 const statusStyle = (status) => {
   const map = {
-    Pending:   { bg:'#fff8e1', color:'#f57f17', border:'#ffe082' },
-    Approved:  { bg:'#e3f2fd', color:'#1565c0', border:'#90caf9' },
-    Shipped:   { bg:'#f3e5f5', color:'#6a1b9a', border:'#ce93d8' },
-    Delivered: { bg:'#e8f5e9', color:'#2e7d32', border:'#a5d6a7' },
-    Cancelled: { bg:'#ffebee', color:'#c62828', border:'#ef9a9a' },
+    Pending:   { bg: '#fff8e1', color: '#f57f17', border: '#ffe082' },
+    Approved:  { bg: '#e3f2fd', color: '#1565c0', border: '#90caf9' },
+    Shipped:   { bg: '#f3e5f5', color: '#6a1b9a', border: '#ce93d8' },
+    Delivered: { bg: '#e8f5e9', color: '#2e7d32', border: '#a5d6a7' },
+    Cancelled: { bg: '#ffebee', color: '#c62828', border: '#ef9a9a' },
   };
   const s = map[status] || map.Pending;
   return {
@@ -33,12 +34,8 @@ const VaccineOrders = () => {
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem('vaccineOrders') || '[]');
     if (stored.length === 0) {
-      const seed = [
-        { id:1, vaccine:'Anti-Rabies', supplier:'MedSource Philippines', amount:200, pricePerPiece:1100, total:220000, status:'Delivered', orderedAt:'2025-01-10T09:00:00.000Z' },
-        { id:2, vaccine:'Booster',     supplier:'VaccinePro Asia',        amount:500, pricePerPiece:1100, total:550000, status:'Pending',   orderedAt:'2025-03-15T14:00:00.000Z' },
-      ];
-      localStorage.setItem('vaccineOrders', JSON.stringify(seed));
-      setOrders(seed);
+      localStorage.setItem('vaccineOrders', JSON.stringify(INITIAL_ORDERS));
+      setOrders(INITIAL_ORDERS);
     } else {
       setOrders(stored);
     }
@@ -86,7 +83,7 @@ const VaccineOrders = () => {
 
           <div className="page-header">
             <div>
-              <h2 className="dashboard-heading" style={{ marginTop:'-20px' }}>📦 Vaccine Orders</h2>
+              <h2 className="dashboard-heading" style={{ marginTop: '-20px' }}>📦 Vaccine Orders</h2>
               <p className="dashboard-subheading">Track and manage all vaccine procurement orders</p>
             </div>
           </div>
@@ -157,19 +154,19 @@ const VaccineOrders = () => {
           </div>
 
           {/* Orders table */}
-          <div style={{ background:'white', borderRadius:'12px', overflow:'hidden', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10)' }}>
+          <div style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10)' }}>
             {filtered.length === 0 ? (
-              <div style={{ padding:'48px', textAlign:'center', color:'#aaa', fontSize:'14px' }}>
-                <div style={{ fontSize:'40px', marginBottom:'12px' }}>📭</div>
+              <div style={{ padding: '48px', textAlign: 'center', color: '#aaa', fontSize: '14px' }}>
+                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
                 No orders found.
               </div>
             ) : (
-              <div style={{ overflowX:'auto' }}>
-                <table style={{ width:'100%', borderCollapse:'collapse', fontSize:'13px' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
-                    <tr style={{ background:'#26a69a', color:'white' }}>
-                      {['Order ID','Vaccine','Supplier','Amount (doses)','Price / dose','Total','Date Ordered','Status','Actions'].map(col => (
-                        <th key={col} style={{ padding:'11px 14px', textAlign:'left', fontWeight:'700', fontSize:'12px', whiteSpace:'nowrap' }}>{col}</th>
+                    <tr style={{ background: '#26a69a', color: 'white' }}>
+                      {['Order ID', 'Vaccine', 'Supplier', 'Amount (doses)', 'Price / dose', 'Total', 'Date Ordered', 'Status', 'Actions'].map(col => (
+                        <th key={col} style={{ padding: '11px 14px', textAlign: 'left', fontWeight: '700', fontSize: '12px', whiteSpace: 'nowrap' }}>{col}</th>
                       ))}
                     </tr>
                   </thead>
@@ -194,7 +191,7 @@ const VaccineOrders = () => {
                         <td style={{ padding:'12px 14px', color:'#666', fontSize:'12px' }}>
                           {new Date(order.orderedAt).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' })}
                         </td>
-                        <td style={{ padding:'12px 14px' }}>
+                        <td style={{ padding: '12px 14px' }}>
                           {editingOrder === order.id ? (
                             <select
                               value={order.status}
@@ -208,11 +205,11 @@ const VaccineOrders = () => {
                             </span>
                           )}
                         </td>
-                        <td style={{ padding:'12px 14px' }}>
+                        <td style={{ padding: '12px 14px' }}>
                           <button onClick={() => handleDelete(order.id)}
-                            style={{ padding:'5px 10px', borderRadius:'6px', border:'1.5px solid #e53935', background:'white', color:'#e53935', fontSize:'12px', fontWeight:'600', cursor:'pointer', transition:'all 0.15s' }}
-                            onMouseEnter={e => { e.currentTarget.style.background='#e53935'; e.currentTarget.style.color='white'; }}
-                            onMouseLeave={e => { e.currentTarget.style.background='white'; e.currentTarget.style.color='#e53935'; }}>
+                            style={{ padding: '5px 10px', borderRadius: '6px', border: '1.5px solid #e53935', background: 'white', color: '#e53935', fontSize: '12px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.15s' }}
+                            onMouseEnter={e => { e.currentTarget.style.background = '#e53935'; e.currentTarget.style.color = 'white'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#e53935'; }}>
                             Delete
                           </button>
                         </td>
