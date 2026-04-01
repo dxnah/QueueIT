@@ -1,20 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '../images/logoit.png';
-import useClock from '../hooks/useClock';
 
 const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
-  // ── Live clock from hook ───────────────────────────────
-  const now = useClock();
-
-  const formatTime = (date) =>
-    date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-  const formatDate = (date) =>
-    date.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   const handleNavClick = (path) => {
     navigate(path);
@@ -88,12 +79,6 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
         </button>
 
       </nav>
-
-      {/* ── Live clock ── */}
-      <div className="sidebar-clock">
-        <span className="sidebar-clock-time">{formatTime(now)}</span>
-        <span className="sidebar-clock-date">{formatDate(now)}</span>
-      </div>
 
       <footer style={{
         padding: '14px',

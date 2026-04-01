@@ -65,12 +65,21 @@
   justify-content: center;
   z-index: 1001;
   box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.fab-btn:hover {
+  background: #1a8174;
 }
 
 .fab-btn--open {
   transform: translateX(-50%) rotate(45deg) scale(1.1);
   box-shadow: 0 12px 30px rgba(38,166,154,0.4);
+  background: #e53935;
+}
+
+.fab-btn--open:hover {
+  background: #c62828;
 }
 
 /* ── FAB Option Cards ── */

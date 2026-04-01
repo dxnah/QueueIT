@@ -250,7 +250,6 @@ const DemandForecast = () => {
   // ── stat card values ─────────────────────────────────────────
   const totalVaccines  = vaccineData.length;
   const totalStock     = forecastData.reduce((s, r) => s + r.available, 0);
-  const totalNeeded    = forecastData.reduce((s, r) => s + r.neededBase, 0);
   const orderNowCount  = forecastData.filter(r => r.action === 'order_now').length;
   const orderSoonCount = forecastData.filter(r => r.action === 'order_soon').length;
   const okCount        = forecastData.filter(r => r.action === 'ok').length;

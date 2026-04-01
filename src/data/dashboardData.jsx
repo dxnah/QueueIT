@@ -70,12 +70,6 @@ export const getMonthlyRequirement = (vaccineName, month) => {
 };
 
 
-
-const MONTHS_LIST = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December',
-];
-
 export const getMonthMultiplier = (month) =>
   PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
 

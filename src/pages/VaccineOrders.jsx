@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
-import { INITIAL_ORDERS, ORDER_STATUS_OPTIONS } from '../data/ordersData';
+import { INITIAL_ORDERS } from '../data/ordersData';
 import '../styles/dashboard.css';
 
 const STATUS_OPTIONS = ['Pending', 'Approved', 'Shipped', 'Delivered', 'Cancelled'];
