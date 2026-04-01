@@ -1,5 +1,3 @@
-// dashboard.jsx
-
 import React from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
@@ -10,28 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   vaccineData,
   PEAK_MONTHS,
+  generateForecastData,
 } from '../data/dashboardData';
-
-const MONTHS = [
-  'January','February','March','April','May','June',
-  'July','August','September','October','November','December',
-];
-
-const getMonthMultiplier = (month) => PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
-
-const generateForecastData = (month) => {
-  const monthMult = getMonthMultiplier(month);
-  return vaccineData.map((v) => {
-    const neededBase = Math.round(v.mlRecommended * monthMult);
-    const weeksLeft  = v.available > 0 ? parseFloat((v.available / (neededBase / 30)).toFixed(1)) : 0;
-    let action;
-    if (v.available === 0)    action = 'order_now';
-    else if (weeksLeft < 1.5) action = 'order_soon';
-    else if (weeksLeft < 3)   action = 'order_soon';
-    else                      action = 'ok';
-    return { ...v, neededBase, weeksLeft, action };
-  });
-};
+import { MONTHS } from '../data/analyticsConstants';
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 const Dashboard = () => {
@@ -58,7 +37,7 @@ const Dashboard = () => {
   const getVaccineStatusClass = (s) => s === 'In Stock' ? 'status-in-stock' : s === 'Low Stock' ? 'status-low-stock' : 'status-out-stock';
 
   // ── TOP 3 URGENT VACCINES for snapshot card ───────────
-  const actionOrder = { order_now: 0, order_soon: 1, ok: 2 };
+  const actionOrder  = { order_now: 0, order_soon: 1, ok: 2 };
   const snapshotData = generateForecastData(currentMonth)
     .sort((a, b) => actionOrder[a.action] - actionOrder[b.action])
     .slice(0, 3);
@@ -137,21 +116,18 @@ const Dashboard = () => {
                 const pct   = v.neededBase > 0 ? Math.min(100, Math.round((v.available / v.neededBase) * 100)) : 100;
                 return (
                   <div key={v.id} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'14px 16px', borderRadius:'10px', background:bg, border:`1.5px solid ${bdr}`, flexWrap:'wrap' }}>
-
                     <div style={{ flex:'1 1 160px', minWidth:0 }}>
                       <div style={{ fontSize:'14px', fontWeight:'700', color:'#333', marginBottom:'3px' }}>{v.vaccine}</div>
                       <span style={{ fontSize:'11px', fontWeight:'700', color, background:'white', padding:'2px 8px', borderRadius:'10px', border:`1px solid ${bdr}` }}>
                         {lbl}
                       </span>
                     </div>
-
                     <div style={{ textAlign:'center', flex:'0 0 auto' }}>
                       <div style={{ fontSize:'18px', fontWeight:'800', color: v.available === 0 ? '#c62828' : v.available < v.minStock ? '#f57f17' : '#26a69a' }}>
                         {v.available.toLocaleString()}
                       </div>
                       <div style={{ fontSize:'10px', color:'#999', textTransform:'uppercase', letterSpacing:'0.4px' }}>doses left</div>
                     </div>
-
                     <div style={{ flex:'1 1 120px', minWidth:'100px' }}>
                       <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'4px' }}>
                         <span style={{ fontSize:'10px', color:'#888' }}>vs monthly need</span>
@@ -164,7 +140,6 @@ const Dashboard = () => {
                         {v.available.toLocaleString()} / {v.neededBase.toLocaleString()} doses needed
                       </div>
                     </div>
-
                     {v.mlRecommended > 0 && (
                       <div style={{ flex:'0 0 auto', padding:'8px 12px', borderRadius:'8px', background:'white', border:`1px solid ${bdr}`, textAlign:'center' }}>
                         <div style={{ fontSize:'13px', fontWeight:'800', color:'#5c6bc0' }}>{v.mlRecommended.toLocaleString()}</div>
