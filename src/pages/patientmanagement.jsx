@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
-import { usersData } from '../data/dashboardData';
+import { usersData, mobileRegistrationsData } from '../data/dashboardData';
 import '../styles/dashboard.css';
 import '../styles/patientmanagement.css';
 import { MOCK_VACCINATION_HISTORY, MOCK_SCHEDULES } from '../data/mockHistory';
@@ -30,7 +30,6 @@ const formatDate = (iso) => {
   });
 };
 
-
 const scheduleStatusStyle = (s) => {
   const map = {
     scheduled:  { bg: '#e3f2fd', color: '#1565c0', border: '#90caf9' },
@@ -45,14 +44,14 @@ const scheduleStatusStyle = (s) => {
 const PatientDetailPanel = ({ user, onClose }) => {
   const [activeTab, setActiveTab] = useState('register');
   const [registerForm, setRegisterForm] = useState({
-    first_name:   user.name.split(' ')[0] || '',
-    last_name:    user.name.split(' ').slice(1).join(' ') || '',
-    email:        user.email || '',
-    phone:        user.phone || '',
+    first_name:    user.name.split(' ')[0] || '',
+    last_name:     user.name.split(' ').slice(1).join(' ') || '',
+    email:         user.email || '',
+    phone:         user.phone || '',
     date_of_birth: '',
-    address:      '',
-    gender:       '',
-    notes:        '',
+    address:       '',
+    gender:        '',
+    notes:         '',
   });
   const [formSaved, setFormSaved] = useState(false);
 
@@ -61,8 +60,6 @@ const PatientDetailPanel = ({ user, onClose }) => {
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
-    // TODO: POST to /api/patients/ with registerForm data
-    // const res = await fetch('/api/patients/', { method: 'POST', body: JSON.stringify(registerForm) });
     setFormSaved(true);
     setTimeout(() => setFormSaved(false), 3000);
   };
@@ -185,6 +182,9 @@ const PatientDetailPanel = ({ user, onClose }) => {
                     onChange={e => setRegisterForm(p => ({ ...p, notes: e.target.value }))}
                     placeholder="Any medical notes or allergies..." />
                 </div>
+                <button type="submit" className="queue-lookup-btn" style={{ marginTop: '8px' }}>
+                  💾 Save Patient
+                </button>
               </form>
             </div>
           )}
@@ -267,26 +267,28 @@ const PatientDetailPanel = ({ user, onClose }) => {
 
 // ── Main Component ─────────────────────────────────────────────────────────────
 const PatientManagement = () => {
-  const [users, setUsers]               = useState(usersData);
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [searchQuery,  setSearchQuery]  = useState('');
-  const [saveMessage,  setSaveMessage]  = useState('');
+  const [users, setUsers]             = useState(usersData);
+  const [saveMessage, setSaveMessage] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [queueSearch,  setQueueSearch]  = useState('');
+  const [queueResult,  setQueueResult]  = useState(null);
+  const [queueNotFound, setQueueNotFound] = useState(false);
 
   const totalUsers    = users.length;
   const activeUsers   = users.filter(u => u.status === 'Active').length;
   const inactiveUsers = users.filter(u => u.status === 'Inactive').length;
 
-  const filteredUsers = users.filter(u => {
-    const matchStatus = filterStatus === 'all' || u.status === filterStatus;
-    const q = searchQuery.toLowerCase();
-    const matchSearch = !q
-      || u.name.toLowerCase().includes(q)
-      || u.email.toLowerCase().includes(q)
-      || u.username.toLowerCase().includes(q)
-      || u.phone.toLowerCase().includes(q);
-    return matchStatus && matchSearch;
-  });
+  const handleQueueSearch = () => {
+    const q = queueSearch.trim().toUpperCase();
+    const found = mobileRegistrationsData.find(r => r.queueNumber === q);
+    if (found) {
+      setQueueResult(found);
+      setQueueNotFound(false);
+    } else {
+      setQueueResult(null);
+      setQueueNotFound(true);
+    }
+  };
 
   const handleToggleStatus = (id) => {
     setUsers(prev => prev.map(u =>
@@ -304,7 +306,6 @@ const PatientManagement = () => {
     <section className="dashboard-container">
       <Sidebar />
 
-      {/* Detail Panel */}
       {selectedUser && (
         <PatientDetailPanel
           user={selectedUser}
@@ -345,39 +346,51 @@ const PatientManagement = () => {
             <div className="alert alert-success">{saveMessage}</div>
           )}
 
-          {/* ── Search + Filters ── */}
-          <div className="um-filters">
-            <div className="um-search-wrapper">
-              <span className="um-search-icon">🔍</span>
+          {/* ── Queue Number Lookup ── */}
+          <div className="queue-lookup-section">
+            <h3 className="queue-lookup-title">🎫 Queue Number Lookup</h3>
+            <div className="queue-lookup-bar">
               <input
                 type="text"
                 className="um-search-input"
-                placeholder="Search by name, email, username, phone..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Enter queue number (e.g. Q-001)..."
+                value={queueSearch}
+                onChange={e => {
+                  setQueueSearch(e.target.value);
+                  setQueueResult(null);
+                  setQueueNotFound(false);
+                }}
+                onKeyDown={e => e.key === 'Enter' && handleQueueSearch()}
               />
-              {searchQuery && (
-                <button className="um-search-clear" onClick={() => setSearchQuery('')} type="button">
-                  ✕
-                </button>
-              )}
+              <button className="queue-lookup-btn" onClick={handleQueueSearch}>
+                🔍 Search
+              </button>
             </div>
-            <div className="filter-buttons">
-              {[
-                { key: 'all',      label: `All (${totalUsers})` },
-                { key: 'Active',   label: '✅ Active'           },
-                { key: 'Inactive', label: '⛔ Inactive'         },
-              ].map(f => (
-                <button key={f.key} type="button"
-                  className={filterStatus === f.key ? 'filter-btn active' : 'filter-btn'}
-                  onClick={() => setFilterStatus(f.key)}>
-                  {f.label}
-                </button>
-              ))}
-            </div>
-            <span className="um-results-count">
-              {filteredUsers.length} of {totalUsers} patient{totalUsers !== 1 ? 's' : ''}
-            </span>
+
+            {queueNotFound && (
+              <div className="queue-result-notfound">❌ No patient found for "{queueSearch}"</div>
+            )}
+
+            {queueResult && (
+              <div className="queue-result-card">
+                <div className="queue-result-header">
+                  <span className="queue-badge">{queueResult.queueNumber}</span>
+                  <span className="queue-result-name">{queueResult.fullName}</span>
+                </div>
+                <div className="queue-result-grid">
+                  <div><span className="qr-label">Age</span><span className="qr-value">{queueResult.age}</span></div>
+                  <div><span className="qr-label">Birthdate</span><span className="qr-value">{new Date(queueResult.birthdate).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                  <div><span className="qr-label">Address</span><span className="qr-value">{queueResult.address}</span></div>
+                  <div><span className="qr-label">Contact Number</span><span className="qr-value">{queueResult.contactNumber}</span></div>
+                  <div><span className="qr-label">Date of Incident</span><span className="qr-value">{new Date(queueResult.dateOfIncident).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                  <div><span className="qr-label">Type of Injury</span><span className="qr-value">{queueResult.typeOfInjury}</span></div>
+                  <div><span className="qr-label">Animal Involved</span><span className="qr-value">{queueResult.animalInvolved}</span></div>
+                  <div><span className="qr-label">Animal Owner</span><span className="qr-value">{queueResult.animalOwner}</span></div>
+                  <div><span className="qr-label">Animal Vaccinated</span><span className="qr-value">{queueResult.animalVaccinated}</span></div>
+                  <div><span className="qr-label">Body Part(s) Affected</span><span className="qr-value">{queueResult.bodyPartsAffected}</span></div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Table ── */}
@@ -395,7 +408,7 @@ const PatientManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.length > 0 ? filteredUsers.map(user => (
+                  {users.length > 0 ? users.map(user => (
                     <tr key={user.id}
                       className="um-table-row"
                       onClick={() => setSelectedUser(user)}

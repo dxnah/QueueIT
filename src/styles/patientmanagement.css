@@ -726,3 +726,119 @@ body.dark-mode .pm-empty { color: #555; }
     .filter-buttons    { gap: 6px; }
     .um-username-badge { font-size: 11px; padding: 2px 8px; }
   }
+
+
+
+  /* ── Queue Lookup ── */
+.queue-lookup-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border-left: 4px solid #26a69a;
+}
+.queue-lookup-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #26a69a;
+  margin-bottom: 12px;
+}
+.queue-lookup-bar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.queue-lookup-btn {
+  background: #26a69a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.queue-lookup-btn:hover { background: #1e8a80; }
+.queue-result-notfound {
+  margin-top: 12px;
+  color: #e53935;
+  font-size: 14px;
+}
+.queue-result-card {
+  margin-top: 16px;
+  background: #f0faf9;
+  border: 1px solid #b2dfdb;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+.queue-result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.queue-badge {
+  background: #26a69a;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+.queue-result-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+}
+.queue-result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 20px;
+}
+.qr-label {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.qr-value {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+
+/* ── Queue Lookup Dark Mode Fix ── */
+.dark-mode .queue-lookup-section {
+  background: #1e1e2e;
+  border-left-color: #26a69a;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.dark-mode .queue-lookup-title {
+  color: #26a69a;
+}
+
+.dark-mode .queue-result-card {
+  background: #2a2a3d;
+  border-color: #26a69a55;
+}
+
+.dark-mode .queue-result-name {
+  color: #e0e0e0;
+}
+
+.dark-mode .qr-label {
+  color: #aaa;
+}
+
+.dark-mode .qr-value {
+  color: #e0e0e0;
+}
+
+.dark-mode .queue-result-notfound {
+  color: #ef5350;
+}
