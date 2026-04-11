@@ -8,29 +8,22 @@ const LoginScreen = () => {
   const [username,     setUsername]     = useState('');
   const [password,     setPassword]     = useState('');
   const [error,        setError]        = useState('');
-  const [loading,      setLoading]      = useState(false);
+  const [loading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
-  // ── HANDLERS ──────────────────────────────────────────────────────────────
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      const result = await authAPI.login(username, password);
-      // Store the logged-in user in localStorage so other pages can read it
-      localStorage.setItem('currentUser', JSON.stringify(result.user));
-      localStorage.setItem('lastLogin', new Date().toISOString());
-      sessionStorage.setItem('sessionStarted', 'true');
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message || 'Invalid username or password');
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const data = await authAPI.login(username, password);
+    localStorage.setItem('lastLogin', new Date().toISOString());
+    localStorage.setItem('adminUsername', data.username);
+    sessionStorage.setItem('sessionStarted', 'true');
+    navigate('/dashboard');
+  } catch (err) {
+    setError(err.message || 'Invalid username or password');
+  }
+};
 
   // ── Eye SVG icons ──────────────────────────────────────────────────────────
   const EyeIcon = () => (

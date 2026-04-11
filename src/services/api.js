@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'http://127.0.0.1:8000/api';
 
 // ── Core request helper ───────────────────────────────────────────────────────
 const request = async (endpoint, method = 'GET', body = null) => {
