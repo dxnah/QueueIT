@@ -57,8 +57,8 @@ export const supplierAPI = {
 export const patientAPI = {
   getAll: ()         => request('/patients/'),
   update: (id, data) => request(`/patients/${id}/`, 'PUT', data),
+  delete: (id)       => request(`/patients/${id}/`, 'DELETE'),
 };
-
 // ── Announcements ─────────────────────────────────────────────────────────────
 export const announcementAPI = {
   getAll: ()     => request('/announcements/'),
