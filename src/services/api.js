@@ -10,13 +10,11 @@ const request = async (endpoint, method = 'GET', body = null) => {
 
   const response = await fetch(`${BASE_URL}${endpoint}`, options);
 
-  // 204 No Content — DELETE responses have no body
   if (response.status === 204) return null;
 
   const data = await response.json();
 
   if (!response.ok) {
-    // Surface the Django error message if present
     const message = data?.error || data?.detail || `HTTP ${response.status}`;
     throw new Error(message);
   }
@@ -25,23 +23,34 @@ const request = async (endpoint, method = 'GET', body = null) => {
 };
 
 // ── Vaccines ──────────────────────────────────────────────────────────────────
+// GET  /api/vaccines/           → returns each vaccine with nested batches[]
+// POST /api/vaccines/{id}/batches/ → add batch to a vaccine
+// PUT  /api/batches/{id}/       → edit a batch
+// DELETE /api/batches/{id}/     → delete a batch
 export const vaccineAPI = {
-  getAll:      ()                    => request('/vaccines/'),
-  getById:     (id)                  => request(`/vaccines/${id}/`),
-  create:      (data)                => request('/vaccines/', 'POST', data),
-  update:      (id, data)            => request(`/vaccines/${id}/`, 'PUT', data),
-  delete:      (id)                  => request(`/vaccines/${id}/`, 'DELETE'),
-  addBatch:    (vaccineId, data)     => request(`/vaccines/${vaccineId}/batches/`, 'POST', data),
-  updateBatch: (batchId, data)       => request(`/batches/${batchId}/`, 'PUT', data),
-  deleteBatch: (batchId)             => request(`/batches/${batchId}/`, 'DELETE'),
+  getAll:      ()                => request('/vaccines/'),
+  getById:     (id)              => request(`/vaccines/${id}/`),
+  create:      (data)            => request('/vaccines/', 'POST', data),
+  update:      (id, data)        => request(`/vaccines/${id}/`, 'PUT', data),
+  delete:      (id)              => request(`/vaccines/${id}/`, 'DELETE'),
+  addBatch:    (vaccineId, data) => request(`/vaccines/${vaccineId}/batches/`, 'POST', data),
+  updateBatch: (batchId, data)   => request(`/batches/${batchId}/`, 'PUT', data),
+  deleteBatch: (batchId)         => request(`/batches/${batchId}/`, 'DELETE'),
 };
 
 // ── Vaccine Orders ────────────────────────────────────────────────────────────
+// vaccine and supplier are stored as plain strings (names) in the DB
+// price_per_piece matches the model field name
 export const orderAPI = {
   getAll:       ()         => request('/orders/'),
   create:       (data)     => request('/orders/', 'POST', data),
-  updateStatus: (id, data) => request(`/orders/${id}/`, 'PUT', data),
+  updateStatus: (id, data) => request(`/orders/${id}/`, 'PATCH', data),
   delete:       (id)       => request(`/orders/${id}/`, 'DELETE'),
+};
+
+// ── Suppliers ────────────────────────────────────────────────────────────────
+export const supplierAPI = {
+  getAll: () => request('/suppliers/'),
 };
 
 // ── Patients ──────────────────────────────────────────────────────────────────
@@ -58,6 +67,6 @@ export const announcementAPI = {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 export const authAPI = {
-  login:    (username, password)        => request('/login/',    'POST', { username, password }),
-  register: (username, password, name)  => request('/register/', 'POST', { username, password, name }),
+  login:    (username, password)       => request('/login/',  'POST', { username, password }),
+  register: (username, password, name) => request('/signup/', 'POST', { username, password, name }),
 };
