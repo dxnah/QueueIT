@@ -11,7 +11,8 @@ const Settings = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem('darkMode') === 'true';
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode ? JSON.parse(savedMode) : false;
   });
 
   useEffect(() => {
