@@ -25,7 +25,11 @@
   
   .um-table-card {
     margin-bottom: 30px;
-    margin-top: -13px;
+    margin-top: 0;
+  }
+
+  .stats-container {
+    max-width: 2600px;
   }
   
   /* ═══════════════════════════════════════════════════════════
@@ -127,6 +131,63 @@
     color: white;
   }
   
+/* ── View button ── */
+.um-btn-view {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid #5c6bc0;
+  background: #f0f4ff;
+  color: #5c6bc0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.um-btn-view:hover {
+  background: #5c6bc0;
+  color: white;
+}
+
+/* ── Delete button ── */
+.um-btn-delete {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1.5px solid #e0e0e0;
+  background: white;
+  color: #e53935;
+  transition: all 0.2s ease;
+}
+
+.um-btn-delete:hover {
+  background: #ffebee;
+  border-color: #e53935;
+}
+
+/* ── Dark mode ── */
+body.dark-mode .um-btn-view {
+  background: #1e2240;
+  border-color: #5c6bc0;
+  color: #9fa8da;
+}
+body.dark-mode .um-btn-view:hover {
+  background: #5c6bc0;
+  color: white;
+}
+
+body.dark-mode .um-btn-delete {
+  background: #252530;
+  border-color: #3a3a4a;
+  color: #ef9a9a;
+}
+body.dark-mode .um-btn-delete:hover {
+  background: #2a1a1a;
+  border-color: #e53935;
+}
+
   /* ─── Search + Filter bar ─────────────────────────────────── */
 .um-filters {
   display: flex;
@@ -142,7 +203,7 @@
   align-items: center;
   min-width: 220px;
   max-width: 320px;
-  margin-top: -25px;
+  margin-top: 0;
 }
 
 .um-search-icon {
@@ -252,7 +313,6 @@ body.dark-mode .um-results-count {
   background: white;
   display: flex;
   flex-direction: column;
-  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
   animation: pm-slide-in 0.25s ease;
   overflow: hidden;
 }
@@ -702,8 +762,11 @@ body.dark-mode .pm-empty { color: #555; }
   
   @media (max-width: 768px) {
     .um-filters {
-      flex-direction: column;
-      align-items: flex-start;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
     }
   
     .um-avatar {
@@ -735,7 +798,6 @@ body.dark-mode .pm-empty { color: #555; }
   border-radius: 12px;
   padding: 20px 24px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   border-left: 4px solid #26a69a;
 }
 .queue-lookup-title {
@@ -815,7 +877,6 @@ body.dark-mode .pm-empty { color: #555; }
 .dark-mode .queue-lookup-section {
   background: #1e1e2e;
   border-left-color: #26a69a;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .dark-mode .queue-lookup-title {
