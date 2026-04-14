@@ -23,10 +23,6 @@ const request = async (endpoint, method = 'GET', body = null) => {
 };
 
 // ── Vaccines ──────────────────────────────────────────────────────────────────
-// GET  /api/vaccines/           → returns each vaccine with nested batches[]
-// POST /api/vaccines/{id}/batches/ → add batch to a vaccine
-// PUT  /api/batches/{id}/       → edit a batch
-// DELETE /api/batches/{id}/     → delete a batch
 export const vaccineAPI = {
   getAll:      ()                => request('/vaccines/'),
   getById:     (id)              => request(`/vaccines/${id}/`),
@@ -48,7 +44,7 @@ export const orderAPI = {
   delete:       (id)       => request(`/orders/${id}/`, 'DELETE'),
 };
 
-// ── Suppliers ────────────────────────────────────────────────────────────────
+// ── Suppliers ─────────────────────────────────────────────────────────────────
 export const supplierAPI = {
   getAll: () => request('/suppliers/'),
 };
@@ -59,10 +55,27 @@ export const patientAPI = {
   update: (id, data) => request(`/patients/${id}/`, 'PUT', data),
   delete: (id)       => request(`/patients/${id}/`, 'DELETE'),
 };
+
 // ── Announcements ─────────────────────────────────────────────────────────────
 export const announcementAPI = {
   getAll: ()     => request('/announcements/'),
   create: (data) => request('/announcements/', 'POST', data),
+};
+
+// ── Vaccine Usage Reports ─────────────────────────────────────────────────────
+export const usageReportAPI = {
+  getAll: ()         => request('/usage-reports/'),
+  create: (data)     => request('/usage-reports/', 'POST', data),
+  update: (id, data) => request(`/usage-reports/${id}/`, 'PUT', data),
+  delete: (id)       => request(`/usage-reports/${id}/`, 'DELETE'),
+};
+
+// ── Stock Level Reports ───────────────────────────────────────────────────────
+export const stockReportAPI = {
+  getAll: ()         => request('/stock-reports/'),
+  create: (data)     => request('/stock-reports/', 'POST', data),
+  update: (id, data) => request(`/stock-reports/${id}/`, 'PUT', data),
+  delete: (id)       => request(`/stock-reports/${id}/`, 'DELETE'),
 };
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
