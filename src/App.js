@@ -13,6 +13,7 @@ import Notifications, { NotificationsProvider } from './pages/notifications';
 import Settings from './pages/settings';
 import Profile from './pages/profile';
 import UserManagement from './pages/patientmanagement';
+import Announcements from './pages/announcements';
 
 function App() {
   useEffect(() => {
@@ -41,6 +42,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/patientmanagement" element={<UserManagement />} />
+          <Route path="/announcements" element={<Announcements />} />
         </Routes>
       </Router>
     </NotificationsProvider>

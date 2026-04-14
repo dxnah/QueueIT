@@ -71,6 +71,13 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
           🧑 PATIENT MANAGEMENT
         </button>
 
+                <button type="button"
+          className={isActive('/announcements') ? 'nav-link nav-link-active' : 'nav-link'}
+          onClick={() => handleNavClick('/announcements')}
+          aria-current={isActive('/announcements') ? 'page' : undefined}>
+          📢 ANNOUNCEMENTS
+        </button>
+
         <button type="button"
           className={isActive('/settings') ? 'nav-link nav-link-active' : 'nav-link'}
           onClick={() => handleNavClick('/settings')}

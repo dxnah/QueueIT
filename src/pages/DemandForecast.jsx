@@ -1,7 +1,6 @@
-// DemandForecast.jsx
 // src/pages/DemandForecast.jsx
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid,
@@ -9,7 +8,7 @@ import {
 } from 'recharts';
 import TopBar from '../components/TopBar';
 import Sidebar from '../components/Sidebar';
-import { vaccineData } from '../data/dashboardData';
+import { vaccineAPI } from '../services/api';
 import '../styles/dashboard.css';
 import '../styles/analytics.css';
 
@@ -40,12 +39,13 @@ const seededRand = (seed) => {
 
 const getMonthMultiplier = (month) => PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
 
-const generateForecastData = (month, weekIndex = null, day = null) => {
+// vaccineList shape: [{ vaccine, available, mlRecommended }, ...]
+const generateForecastData = (vaccineList, month, weekIndex = null, day = null) => {
   const monthMult = getMonthMultiplier(month);
   const weekMult  = weekIndex !== null ? (1 + weekIndex * 0.05) : 1;
   const dayMult   = day !== null ? (1 / 30) : weekIndex !== null ? (1 / 4) : 1;
 
-  return vaccineData.map((v) => {
+  return vaccineList.map((v) => {
     const baseAvail  = v.available;
     const neededBase = Math.round(v.mlRecommended * monthMult * weekMult * dayMult);
     const peakNeed   = Math.round(neededBase * 1.5);
@@ -121,9 +121,9 @@ const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
 };
 
 // ─── Forecast Table ───────────────────────────────────────────────────────────
-const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }) => {
+const ForecastTable = ({ vaccineList, month, weekIndex, day, viewMode, sortBy, filterAction }) => {
   const isPeak = PEAK_MONTHS.includes(month);
-  let data     = generateForecastData(month, weekIndex, day);
+  let data     = generateForecastData(vaccineList, month, weekIndex, day);
 
   if (filterAction !== 'all') data = data.filter(r => r.action === filterAction);
 
@@ -156,7 +156,7 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
       </div>
       <p style={{ margin:'0 0 14px 0', fontSize:'12px', color:'#888', fontStyle:'italic' }}>
         How long will each vaccine last {viewMode === 'daily' ? 'today' : viewMode === 'weekly' ? 'this week' : 'this month'}?
-        {data.length < vaccineData.length && ` · Showing ${data.length} of ${vaccineData.length} vaccines`}
+        {data.length < vaccineList.length && ` · Showing ${data.length} of ${vaccineList.length} vaccines`}
       </p>
 
       <div style={{ overflowX:'auto' }}>
@@ -170,7 +170,7 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
           </thead>
           <tbody>
             {data.map((row, i) => {
-              const confSeed   = vaccineData.findIndex(v => v.vaccine === row.vaccine) * 13 + MONTHS.indexOf(month);
+              const confSeed   = vaccineList.findIndex(v => v.vaccine === row.vaccine) * 13 + MONTHS.indexOf(month);
               const confidence = Math.round(85 + seededRand(confSeed) * 12);
               const confColor  = confidence >= 92 ? '#2e7d32' : confidence >= 87 ? '#f57f17' : '#e53935';
 
@@ -224,6 +224,15 @@ const ForecastTable = ({ month, weekIndex, day, viewMode, sortBy, filterAction }
   );
 };
 
+// ─── Loading Skeleton ─────────────────────────────────────────────────────────
+const LoadingSkeleton = () => (
+  <div style={{ display:'flex', gap:'20px', marginBottom:'28px', flexWrap:'wrap' }}>
+    {[1,2,3,4,5].map(i => (
+      <div key={i} style={{ flex:'1 1 0', minWidth:0, background:'#f5f5f5', borderRadius:'12px', padding:'22px 20px', height:'100px', animation:'pulse 1.5s ease-in-out infinite' }} />
+    ))}
+  </div>
+);
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const DemandForecast = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -238,17 +247,49 @@ const DemandForecast = () => {
   const [filterAction,  setFilterAction]  = useState('all');
   const [activeView,    setActiveView]    = useState('table');
 
+  // ── API state ─────────────────────────────────────────────────────────────
+  const [vaccineList, setVaccineList] = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState(null);
+
+  useEffect(() => {
+    const fetchVaccines = async () => {
+      try {
+        setLoading(true);
+        const data = await vaccineAPI.getAll();
+        // Map API fields → shape expected by forecast logic
+        const mapped = data.map(v => ({
+          vaccine:       v.name,
+          available:     v.available,
+          mlRecommended: v.ml_recommended,
+          status:        v.status,
+          id:            v.id,
+        }));
+        setVaccineList(mapped);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVaccines();
+  }, []);
+
   const isPeak = PEAK_MONTHS.includes(selectedMonth);
 
   // ── always compute from current period ──────────────────────
-  const forecastData = generateForecastData(
-    selectedMonth,
-    viewMode === 'weekly' || viewMode === 'daily' ? selectedWeek : null,
-    viewMode === 'daily' ? selectedDay : null
-  );
+  const forecastData = vaccineList.length > 0
+    ? generateForecastData(
+        vaccineList,
+        selectedMonth,
+        viewMode === 'weekly' || viewMode === 'daily' ? selectedWeek : null,
+        viewMode === 'daily' ? selectedDay : null
+      )
+    : [];
 
   // ── stat card values ─────────────────────────────────────────
-  const totalVaccines  = vaccineData.length;
+  const totalVaccines  = vaccineList.length;
   const totalStock     = forecastData.reduce((s, r) => s + r.available, 0);
   const orderNowCount  = forecastData.filter(r => r.action === 'order_now').length;
   const orderSoonCount = forecastData.filter(r => r.action === 'order_soon').length;
@@ -264,8 +305,8 @@ const DemandForecast = () => {
   const trendData = MONTHS.map(m => {
     const mult = getMonthMultiplier(m);
     const row  = { month: m.slice(0,3), isPeak: PEAK_MONTHS.includes(m) };
-    vaccineData.forEach(v => { row[v.vaccine] = Math.round(v.mlRecommended * mult); });
-    row.total = vaccineData.reduce((s, v) => s + Math.round(v.mlRecommended * mult), 0);
+    vaccineList.forEach(v => { row[v.vaccine] = Math.round(v.mlRecommended * mult); });
+    row.total = vaccineList.reduce((s, v) => s + Math.round(v.mlRecommended * mult), 0);
     return row;
   });
 
@@ -310,58 +351,23 @@ const DemandForecast = () => {
             <p className="dashboard-subheading">ML-powered vaccine demand predictions and restock planning</p>
           </header>
 
+          {/* ── Error banner ── */}
+          {error && (
+            <div style={{ marginBottom:'16px', padding:'12px 18px', background:'#ffebee', borderRadius:'10px', border:'1px solid #ef9a9a', fontSize:'13px', color:'#c62828', fontWeight:'600' }}>
+              ⚠️ Could not load vaccine data: {error}. Showing empty state.
+            </div>
+          )}
+
           {/* ── STAT CARDS ── */}
-          <div style={{ display:'flex', gap:'20px', marginBottom:'28px', flexWrap:'wrap' }}>
-
-            {/* Total Vaccines Tracked — teal */}
-            <StatCard
-              icon="💉"
-              label="Vaccines Tracked"
-              value={totalVaccines}
-              note="vaccine types in system"
-              borderColor="#26a69a"
-            />
-
-            {/* Total Stock Available — blue/indigo */}
-            <StatCard
-              icon="📦"
-              label="Total Stock"
-              value={totalStock.toLocaleString()}
-              note={`doses available — ${periodLabel}`}
-              borderColor="#5c6bc0"
-            />
-
-            {/* Order Now — red */}
-            <StatCard
-              icon="🚨"
-              label="Order Now"
-              value={orderNowCount}
-              note="vaccine(s) out of stock"
-              borderColor="#e53935"
-              valueColor="#c62828"
-            />
-
-            {/* Order Soon — orange */}
-            <StatCard
-              icon="⚠️"
-              label="Order Soon"
-              value={orderSoonCount}
-              note="vaccine(s) running low"
-              borderColor="#f57f17"
-              valueColor="#e65100"
-            />
-
-            {/* Sufficient Stock — green */}
-            <StatCard
-              icon="✅"
-              label="Sufficient Stock"
-              value={okCount}
-              note="vaccine(s) well stocked"
-              borderColor="#2e7d32"
-              valueColor="#2e7d32"
-            />
-
-          </div>
+          {loading ? <LoadingSkeleton /> : (
+            <div style={{ display:'flex', gap:'20px', marginBottom:'28px', flexWrap:'wrap' }}>
+              <StatCard icon="💉" label="Vaccines Tracked"  value={totalVaccines}              note="vaccine types in system"        borderColor="#26a69a" />
+              <StatCard icon="📦" label="Total Stock"        value={totalStock.toLocaleString()} note={`doses available — ${periodLabel}`} borderColor="#5c6bc0" />
+              <StatCard icon="🚨" label="Order Now"          value={orderNowCount}              note="vaccine(s) out of stock"        borderColor="#e53935" valueColor="#c62828" />
+              <StatCard icon="⚠️" label="Order Soon"         value={orderSoonCount}             note="vaccine(s) running low"         borderColor="#f57f17" valueColor="#e65100" />
+              <StatCard icon="✅" label="Sufficient Stock"   value={okCount}                    note="vaccine(s) well stocked"        borderColor="#2e7d32" valueColor="#2e7d32" />
+            </div>
+          )}
 
           {/* ── Peak banner ── */}
           {isPeak && (
@@ -469,10 +475,20 @@ const DemandForecast = () => {
             </div>
           )}
 
+          {/* ── Empty state ── */}
+          {!loading && vaccineList.length === 0 && !error && (
+            <div style={{ textAlign:'center', padding:'60px 20px', color:'#999' }}>
+              <div style={{ fontSize:'48px', marginBottom:'12px' }}>💉</div>
+              <p style={{ fontSize:'16px', fontWeight:'600', color:'#555' }}>No vaccines found</p>
+              <p style={{ fontSize:'13px' }}>Add vaccines in the backend admin or Vaccines page to see forecast data.</p>
+            </div>
+          )}
+
           {/* ══ TABLE VIEW ══ */}
-          {activeView === 'table' && (
+          {activeView === 'table' && !loading && vaccineList.length > 0 && (
             <div style={{ background:'white', borderRadius:'12px', padding:'20px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
               <ForecastTable
+                vaccineList={vaccineList}
                 month={selectedMonth}
                 weekIndex={viewMode === 'weekly' || viewMode === 'daily' ? selectedWeek : null}
                 day={viewMode === 'daily' ? selectedDay : null}
@@ -484,7 +500,7 @@ const DemandForecast = () => {
           )}
 
           {/* ══ BAR CHART VIEW ══ */}
-          {activeView === 'chart' && (
+          {activeView === 'chart' && !loading && vaccineList.length > 0 && (
             <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
               <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>Stock vs Demand — {periodLabel}</h3>
               <p style={{ margin:'0 0 20px 0', fontSize:'12px', color:'#999' }}>Current stock, required doses, and peak season projections per vaccine</p>
@@ -519,7 +535,7 @@ const DemandForecast = () => {
           )}
 
           {/* ══ YEAR TREND VIEW ══ */}
-          {activeView === 'trend' && (
+          {activeView === 'trend' && !loading && vaccineList.length > 0 && (
             <div style={{ background:'white', borderRadius:'12px', padding:'24px', marginBottom:'30px', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)' }}>
               <h3 style={{ margin:'0 0 4px 0', fontSize:'16px', fontWeight:'700', color:'#333' }}>12-Month Demand Forecast</h3>
               <p style={{ margin:'0 0 6px 0', fontSize:'12px', color:'#999' }}>Projected monthly dose requirements. Peak months (Jun–Aug) are 1.5× base demand.</p>
@@ -537,9 +553,9 @@ const DemandForecast = () => {
                   <ReferenceLine x="Jun" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
                   <ReferenceLine x="Jul" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
                   <ReferenceLine x="Aug" stroke="#ffcc80" strokeWidth={28} strokeOpacity={0.3} />
-                  {vaccineData.map((v, i) => (
+                  {vaccineList.map((v, i) => (
                     <Line key={v.vaccine} type="monotone" dataKey={v.vaccine}
-                      stroke={CHART_COLORS[i]} strokeWidth={2} dot={{ r:3 }} />
+                      stroke={CHART_COLORS[i % CHART_COLORS.length]} strokeWidth={2} dot={{ r:3 }} />
                   ))}
                   <Line type="monotone" dataKey="total" name="Total Demand"
                     stroke="#26a69a" strokeWidth={3} dot={{ r:4 }} strokeDasharray="6 3" />
@@ -550,7 +566,7 @@ const DemandForecast = () => {
                   <thead>
                     <tr style={{ background:'#f5f5f5' }}>
                       <th style={{ padding:'8px 12px', textAlign:'left', color:'#888', fontWeight:'700', fontSize:'11px', textTransform:'uppercase' }}>Month</th>
-                      {vaccineData.map(v => (
+                      {vaccineList.map(v => (
                         <th key={v.vaccine} style={{ padding:'8px 12px', textAlign:'right', color:'#888', fontWeight:'700', fontSize:'11px', textTransform:'uppercase', whiteSpace:'nowrap' }}>
                           {v.vaccine.replace('Anti-', 'A-')}
                         </th>
@@ -564,9 +580,9 @@ const DemandForecast = () => {
                         <td style={{ padding:'8px 12px', fontWeight: row.isPeak ? '700' : '500', color: row.isPeak ? '#e65100' : '#333' }}>
                           {MONTHS[i].slice(0,3)} {row.isPeak ? '🔥' : ''}
                         </td>
-                        {vaccineData.map(v => (
+                        {vaccineList.map(v => (
                           <td key={v.vaccine} style={{ padding:'8px 12px', textAlign:'right', color:'#555' }}>
-                            {row[v.vaccine].toLocaleString()}
+                            {row[v.vaccine]?.toLocaleString() ?? '—'}
                           </td>
                         ))}
                         <td style={{ padding:'8px 12px', textAlign:'right', fontWeight:'700', color:'#26a69a' }}>{row.total.toLocaleString()}</td>

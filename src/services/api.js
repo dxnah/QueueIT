@@ -35,8 +35,6 @@ export const vaccineAPI = {
 };
 
 // ── Vaccine Orders ────────────────────────────────────────────────────────────
-// vaccine and supplier are stored as plain strings (names) in the DB
-// price_per_piece matches the model field name
 export const orderAPI = {
   getAll:       ()         => request('/orders/'),
   create:       (data)     => request('/orders/', 'POST', data),
@@ -58,9 +56,22 @@ export const patientAPI = {
 
 // ── Announcements ─────────────────────────────────────────────────────────────
 export const announcementAPI = {
-  getAll: ()     => request('/announcements/'),
-  create: (data) => request('/announcements/', 'POST', data),
+  getAll:  ()         => request('/announcements/'),
+  create:  (data)     => request('/announcements/', 'POST', data),
+  update:  (id, data) => request(`/announcements/${id}/`, 'PUT', data),
+  delete:  (id)       => request(`/announcements/${id}/`, 'DELETE'),
 };
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+export const notificationAPI = {
+  getAll:      ()         => request('/notifications/'),
+  markRead:    (id)       => request(`/notifications/${id}/`, 'PATCH', { read: true }),
+  markAllRead: ()         => request('/notifications/mark_all_read/', 'POST'),
+  delete:      (id)       => request(`/notifications/${id}/`, 'DELETE'),
+  clearAll:    ()         => request('/notifications/clear_all/', 'DELETE'),
+};
+
+
 
 // ── Vaccine Usage Reports ─────────────────────────────────────────────────────
 export const usageReportAPI = {

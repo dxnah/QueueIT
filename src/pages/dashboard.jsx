@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import DailyAnalytics from '../components/DailyAnalytics';
 import '../styles/dashboard.css';
 import '../styles/topbar.css';
 import { useNavigate } from 'react-router-dom';
+import { vaccineAPI } from '../services/api';
 import {
-  vaccineData,
   PEAK_MONTHS,
   generateForecastData,
 } from '../data/dashboardData';
@@ -16,16 +16,37 @@ import { MONTHS } from '../data/analyticsConstants';
 const Dashboard = () => {
   const navigate = useNavigate();
 
+  const [vaccines, setVaccines]   = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+
+  useEffect(() => {
+    const fetchVaccines = async () => {
+      try {
+        setLoading(true);
+        const data = await vaccineAPI.getAll();
+        setVaccines(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVaccines();
+  }, []);
+
   const currentMonthIdx = new Date().getMonth();
   const currentMonth    = MONTHS[currentMonthIdx];
   const isPeak          = PEAK_MONTHS.includes(currentMonth);
 
-  // ── DYNAMIC CALCULATIONS ──────────────────────────────
-  const totalAvailable  = vaccineData.reduce((sum, v) => sum + v.available, 0);
-  const lowStockCount   = vaccineData.filter(v => v.status === 'Low Stock').length;
-  const outOfStockCount = vaccineData.filter(v => v.status === 'Out Stock').length;
-  const totalToOrder    = vaccineData.reduce((sum, v) => sum + v.mlRecommended, 0);
-  const vaccinesToOrder = vaccineData.filter(v => v.status === 'Low Stock' || v.status === 'Out Stock');
+  // ── DYNAMIC CALCULATIONS from live data ───────────────
+  const totalAvailable  = vaccines.reduce((sum, v) => sum + (v.available ?? v.quantity ?? 0), 0);
+  const lowStockCount   = vaccines.filter(v => v.status === 'Low Stock').length;
+  const outOfStockCount = vaccines.filter(v => v.status === 'Out Stock').length;
+
+  // mlRecommended may not be in backend; fall back to 0
+  const totalToOrder    = vaccines.reduce((sum, v) => sum + (v.mlRecommended ?? 0), 0);
+  const vaccinesToOrder = vaccines.filter(v => v.status === 'Low Stock' || v.status === 'Out Stock');
 
   // ── COLOR HELPERS ──────────────────────────────────────
   const getAvailableColor     = (t) => t > 500 ? '#26a69a' : t > 100 ? '#f57f17' : '#c62828';
@@ -37,10 +58,38 @@ const Dashboard = () => {
   const getVaccineStatusClass = (s) => s === 'In Stock' ? 'status-in-stock' : s === 'Low Stock' ? 'status-low-stock' : 'status-out-stock';
 
   // ── TOP 3 URGENT VACCINES for snapshot card ───────────
+  // generateForecastData still uses local data; pass live vaccines if it accepts them
   const actionOrder  = { order_now: 0, order_soon: 1, ok: 2 };
   const snapshotData = generateForecastData(currentMonth)
     .sort((a, b) => actionOrder[a.action] - actionOrder[b.action])
     .slice(0, 3);
+
+  // ── RENDER HELPERS ─────────────────────────────────────
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', color: '#888', fontSize: '15px' }}>
+          ⏳ Loading dashboard data...
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div style={{ background: '#ffebee', border: '1px solid #ef9a9a', borderRadius: '10px', padding: '18px 22px', color: '#c62828', marginBottom: '24px' }}>
+          <strong>⚠️ Could not load vaccine data:</strong> {error}
+          <br />
+          <button
+            onClick={() => window.location.reload()}
+            style={{ marginTop: '10px', padding: '6px 14px', borderRadius: '6px', border: '1.5px solid #c62828', background: 'white', color: '#c62828', cursor: 'pointer', fontWeight: '600' }}>
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <section className="dashboard-container">
@@ -57,29 +106,33 @@ const Dashboard = () => {
             <p className="dashboard-subheading">Welcome back, Admin</p>
           </header>
 
+          {renderContent()}
+
           {/* ── STATS CARDS ── */}
-          <section className="stats-container">
-            <div className="stat-box" style={{ borderTop: `4px solid ${getAvailableColor(totalAvailable)}` }}>
-              <h3 className="stat-title">Vaccines Available</h3>
-              <p className="stat-number" style={{ color: getAvailableColor(totalAvailable) }}>{totalAvailable.toLocaleString()}</p>
-              <p className="stat-note">{getAvailableLabel(totalAvailable)}</p>
-            </div>
-            <div className="stat-box" style={{ borderTop: '4px solid #e53935' }}>
-              <h3 className="stat-title">Vaccines to Order</h3>
-              <p className="stat-number" style={{ color: '#e53935' }}>{totalToOrder.toLocaleString()}</p>
-              <p className="stat-note">💊 {vaccinesToOrder.length} vaccine types need restocking</p>
-            </div>
-            <div className="stat-box" style={{ borderTop: `4px solid ${getLowStockColor(lowStockCount)}` }}>
-              <h3 className="stat-title">Low Stock</h3>
-              <p className="stat-number" style={{ color: getLowStockColor(lowStockCount) }}>{lowStockCount}</p>
-              <p className="stat-note">{getLowStockLabel(lowStockCount)}</p>
-            </div>
-            <div className="stat-box" style={{ borderTop: `4px solid ${getOutOfStockColor(outOfStockCount)}` }}>
-              <h3 className="stat-title">Out of Stock</h3>
-              <p className="stat-number" style={{ color: getOutOfStockColor(outOfStockCount) }}>{outOfStockCount}</p>
-              <p className="stat-note">{getOutOfStockLabel(outOfStockCount)}</p>
-            </div>
-          </section>
+          {!loading && !error && (
+            <section className="stats-container">
+              <div className="stat-box" style={{ borderTop: `4px solid ${getAvailableColor(totalAvailable)}` }}>
+                <h3 className="stat-title">Vaccines Available</h3>
+                <p className="stat-number" style={{ color: getAvailableColor(totalAvailable) }}>{totalAvailable.toLocaleString()}</p>
+                <p className="stat-note">{getAvailableLabel(totalAvailable)}</p>
+              </div>
+              <div className="stat-box" style={{ borderTop: '4px solid #e53935' }}>
+                <h3 className="stat-title">Vaccines to Order</h3>
+                <p className="stat-number" style={{ color: '#e53935' }}>{totalToOrder.toLocaleString()}</p>
+                <p className="stat-note">💊 {vaccinesToOrder.length} vaccine types need restocking</p>
+              </div>
+              <div className="stat-box" style={{ borderTop: `4px solid ${getLowStockColor(lowStockCount)}` }}>
+                <h3 className="stat-title">Low Stock</h3>
+                <p className="stat-number" style={{ color: getLowStockColor(lowStockCount) }}>{lowStockCount}</p>
+                <p className="stat-note">{getLowStockLabel(lowStockCount)}</p>
+              </div>
+              <div className="stat-box" style={{ borderTop: `4px solid ${getOutOfStockColor(outOfStockCount)}` }}>
+                <h3 className="stat-title">Out of Stock</h3>
+                <p className="stat-number" style={{ color: getOutOfStockColor(outOfStockCount) }}>{outOfStockCount}</p>
+                <p className="stat-note">{getOutOfStockLabel(outOfStockCount)}</p>
+              </div>
+            </section>
+          )}
 
           {/* ── DAILY ANALYTICS ── */}
           <DailyAnalytics />
@@ -153,7 +206,7 @@ const Dashboard = () => {
 
             <div style={{ marginTop:'16px', paddingTop:'14px', borderTop:'1px solid #f0f0f0', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'8px' }}>
               <span style={{ fontSize:'12px', color:'#aaa' }}>
-                Showing top 3 of {vaccineData.length} vaccines by urgency · Full management in Demand Forecast
+                Showing top 3 of {vaccines.length || '—'} vaccines by urgency · Full management in Demand Forecast
               </span>
               <button onClick={() => navigate('/demand-forecast')}
                 style={{ fontSize:'12px', color:'#26a69a', background:'none', border:'none', cursor:'pointer', fontWeight:'600', textDecoration:'underline' }}>
@@ -163,34 +216,36 @@ const Dashboard = () => {
           </section>
 
           {/* ── VACCINE AVAILABILITY TABLE ── */}
-          <section className="middle-row">
-            <article className="vaccine-card">
-              <h2 className="section-title">💉 Vaccine Availability</h2>
-              <div className="table-wrapper">
-                <table className="data-table">
-                  <thead>
-                    <tr><th>Vaccine</th><th>Available</th><th>Status</th></tr>
-                  </thead>
-                  <tbody>
-                    {vaccineData.map(vaccine => (
-                      <tr key={vaccine.id}>
-                        <td>{vaccine.vaccine}</td>
-                        <td>{vaccine.available.toLocaleString()}</td>
-                        <td><span className={getVaccineStatusClass(vaccine.status)}>{vaccine.status}</span></td>
+          {!loading && !error && (
+            <section className="middle-row">
+              <article className="vaccine-card">
+                <h2 className="section-title">💉 Vaccine Availability</h2>
+                <div className="table-wrapper">
+                  <table className="data-table">
+                    <thead>
+                      <tr><th>Vaccine</th><th>Available</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                      {vaccines.map(vaccine => (
+                        <tr key={vaccine.id}>
+                          <td>{vaccine.name ?? vaccine.vaccine}</td>
+                          <td>{(vaccine.available ?? vaccine.quantity ?? 0).toLocaleString()}</td>
+                          <td><span className={getVaccineStatusClass(vaccine.status)}>{vaccine.status}</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="total-row">
+                        <td>Total</td>
+                        <td>{totalAvailable.toLocaleString()}</td>
+                        <td></td>
                       </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr className="total-row">
-                      <td>Total</td>
-                      <td>{vaccineData.reduce((sum, v) => sum + v.available, 0).toLocaleString()}</td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </article>
-          </section>
+                    </tfoot>
+                  </table>
+                </div>
+              </article>
+            </section>
+          )}
 
         </main>
       </section>
