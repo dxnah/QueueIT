@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:8000/api';
+const BASE_URL = 'http://127.0.0.1:8001/api';
 
 // ── Core request helper ───────────────────────────────────────────────────────
 const request = async (endpoint, method = 'GET', body = null) => {
@@ -44,7 +44,10 @@ export const orderAPI = {
 
 // ── Suppliers ─────────────────────────────────────────────────────────────────
 export const supplierAPI = {
-  getAll: () => request('/suppliers/'),
+  getAll:  ()         => request('/suppliers/'),
+  create:  (data)     => request('/suppliers/', 'POST', data),
+  update:  (id, data) => request(`/suppliers/${id}/`, 'PUT', data),
+  delete:  (id)       => request(`/suppliers/${id}/`, 'DELETE'),
 };
 
 // ── Patients ──────────────────────────────────────────────────────────────────

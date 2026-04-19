@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import '../styles/dashboard.css';
-
-const API_URL = 'http://127.0.0.1:8000/api/suppliers/';
+import { supplierAPI } from '../services/api';
 
 const statusStyle = (status) => ({
   padding:'3px 10px', borderRadius:'20px', fontSize:'12px', fontWeight:'700',
@@ -26,28 +25,24 @@ const Suppliers = () => {
   const emptyForm = { name:'', contact:'', phone:'', address:'', vaccines:'', status:'Active', lead_time_days:'', notes:'' };
   const [form, setForm] = useState(emptyForm);
 
-  // ── FETCH all suppliers on load ──────────────────────────────────────────
   useEffect(() => {
     fetchSuppliers();
   }, []);
 
-  const fetchSuppliers = () => {
+  const fetchSuppliers = async () => {
     setLoading(true);
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => {
-        // convert vaccines string back to array for display
-        const parsed = data.map(s => ({
-          ...s,
-          vaccines: s.vaccines ? s.vaccines.split(',').map(v => v.trim()) : []
-        }));
-        setSuppliers(parsed);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to load suppliers. Make sure backend is running.');
-        setLoading(false);
-      });
+    try {
+      const data = await supplierAPI.getAll();
+      const parsed = data.map(s => ({
+        ...s,
+        vaccines: s.vaccines ? s.vaccines.split(',').map(v => v.trim()) : []
+      }));
+      setSuppliers(parsed);
+    } catch {
+      setError('Failed to load suppliers. Make sure backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const openAdd  = () => { setEditingSupplier(null); setForm(emptyForm); setShowForm(true); };
@@ -57,50 +52,35 @@ const Suppliers = () => {
     setShowForm(true);
   };
 
-  // ── POST or PUT ───────────────────────────────────────────────────────────
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = {
-      ...form,
-      vaccines: form.vaccines,  // keep as string for backend
-      lead_time_days: parseInt(form.lead_time_days) || 0
-    };
-
-    const isEdit   = !!editingSupplier;
-    const url      = isEdit ? `${API_URL}${editingSupplier.id}/` : API_URL;
-    const method   = isEdit ? 'PUT' : 'POST';
-
-    fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    })
-      .then(res => res.json())
-      .then(() => {
-        setSaveMessage(isEdit ? '✅ Supplier updated!' : '✅ Supplier added!');
-        setShowForm(false);
-        fetchSuppliers();  // refresh the list
-        setTimeout(() => setSaveMessage(''), 3000);
-      })
-      .catch(() => {
-        setSaveMessage('❌ Failed to save. Try again.');
-        setTimeout(() => setSaveMessage(''), 3000);
-      });
+    const data = { ...form, lead_time_days: parseInt(form.lead_time_days) || 0 };
+    try {
+      if (editingSupplier) {
+        await supplierAPI.update(editingSupplier.id, data);
+        setSaveMessage('✅ Supplier updated!');
+      } else {
+        await supplierAPI.create(data);
+        setSaveMessage('✅ Supplier added!');
+      }
+      setShowForm(false);
+      fetchSuppliers();
+    } catch {
+      setSaveMessage('❌ Failed to save. Try again.');
+    }
+    setTimeout(() => setSaveMessage(''), 3000);
   };
 
-  // ── DELETE ────────────────────────────────────────────────────────────────
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm('Delete this supplier?')) return;
-    fetch(`${API_URL}${id}/`, { method: 'DELETE' })
-      .then(() => {
-        setSaveMessage('✅ Supplier deleted.');
-        fetchSuppliers();  // refresh the list
-        setTimeout(() => setSaveMessage(''), 3000);
-      })
-      .catch(() => {
-        setSaveMessage('❌ Failed to delete.');
-        setTimeout(() => setSaveMessage(''), 3000);
-      });
+    try {
+      await supplierAPI.delete(id);
+      setSaveMessage('✅ Supplier deleted.');
+      fetchSuppliers();
+    } catch {
+      setSaveMessage('❌ Failed to delete.');
+    }
+    setTimeout(() => setSaveMessage(''), 3000);
   };
 
   const filtered = suppliers.filter(s => {
@@ -118,7 +98,6 @@ const Suppliers = () => {
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
 
-      {/* Add/Edit Modal */}
       {showForm && (
         <div className="modal-overlay">
           <div className="modal-box modal-box--wide">
@@ -200,7 +179,6 @@ const Suppliers = () => {
 
           {saveMessage && <div className="alert alert-success">{saveMessage}</div>}
 
-          {/* Search + filter */}
           <div style={{ display:'flex', gap:'10px', marginBottom:'20px', flexWrap:'wrap', alignItems:'center' }}>
             <input type="text" placeholder="🔍 Search suppliers or vaccines..." value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
@@ -213,7 +191,6 @@ const Suppliers = () => {
             ))}
           </div>
 
-          {/* Loading / Error states */}
           {loading && (
             <div style={{ textAlign:'center', padding:'40px', color:'#26a69a', fontSize:'14px' }}>
               ⏳ Loading suppliers...
@@ -226,7 +203,6 @@ const Suppliers = () => {
             </div>
           )}
 
-          {/* Suppliers table */}
           {!loading && !error && (
             <div style={{ background:'white', borderRadius:'12px', overflow:'hidden', boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10)', marginBottom:'30px' }}>
               {filtered.length === 0 ? (
