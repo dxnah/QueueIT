@@ -24,14 +24,27 @@ const request = async (endpoint, method = 'GET', body = null) => {
 
 // ── Vaccines ──────────────────────────────────────────────────────────────────
 export const vaccineAPI = {
-  getAll:      ()                => request('/vaccines/'),
-  getById:     (id)              => request(`/vaccines/${id}/`),
-  create:      (data)            => request('/vaccines/', 'POST', data),
-  update:      (id, data)        => request(`/vaccines/${id}/`, 'PUT', data),
-  delete:      (id)              => request(`/vaccines/${id}/`, 'DELETE'),
-  addBatch:    (vaccineId, data) => request(`/vaccines/${vaccineId}/batches/`, 'POST', data),
-  updateBatch: (batchId, data)   => request(`/batches/${batchId}/`, 'PUT', data),
-  deleteBatch: (batchId)         => request(`/batches/${batchId}/`, 'DELETE'),
+  getAll:  () => request('/vaccines/'),
+  getById: (id) => request(`/vaccines/${id}/`),
+  create:  (data) => request('/vaccines/', 'POST', data),
+  update:  (id, data) => request(`/vaccines/${id}/`, 'PUT', data),
+  delete:  (id) => request(`/vaccines/${id}/`, 'DELETE'),
+
+  // ── Batches — flat FastAPI routes ─────────────────────────────────────────
+  // GET all batches (optionally filter by vaccine_id client-side)
+  getAllBatches: () => request('/batches/'),
+
+  // POST /api/batches/ — payload must include vaccine_id
+  addBatch: (vaccineId, data) =>
+    request('/batches/', 'POST', { ...data, vaccine_id: vaccineId }),
+
+  // PUT /api/batches/{id}/
+  updateBatch: (batchId, data) =>
+    request(`/batches/${batchId}/`, 'PUT', data),
+
+  // DELETE /api/batches/{id}/
+  deleteBatch: (batchId) =>
+    request(`/batches/${batchId}/`, 'DELETE'),
 };
 
 // ── Vaccine Orders ────────────────────────────────────────────────────────────
@@ -67,14 +80,12 @@ export const announcementAPI = {
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 export const notificationAPI = {
-  getAll:      ()         => request('/notifications/'),
-  markRead:    (id)       => request(`/notifications/${id}/`, 'PATCH', { read: true }),
-  markAllRead: ()         => request('/notifications/mark_all_read/', 'POST'),
-  delete:      (id)       => request(`/notifications/${id}/`, 'DELETE'),
-  clearAll:    ()         => request('/notifications/clear_all/', 'DELETE'),
+  getAll:      ()   => request('/notifications/'),
+  markRead:    (id) => request(`/notifications/${id}/`, 'PATCH', { read: true }),
+  markAllRead: ()   => request('/notifications/mark_all_read/', 'POST'),
+  delete:      (id) => request(`/notifications/${id}/`, 'DELETE'),
+  clearAll:    ()   => request('/notifications/clear_all/', 'DELETE'),
 };
-
-
 
 // ── Vaccine Usage Reports ─────────────────────────────────────────────────────
 export const usageReportAPI = {
