@@ -13,8 +13,8 @@ import {
 } from '../data/vaccineConstants';
 
 const calcStatus = (available) => {
-  if (available === 0)   return 'Out Stock';
-  if (available < 100)   return 'Low Stock';
+  if (available === 0)  return 'Out Stock';
+  if (available < 100)  return 'Low Stock';
   return 'In Stock';
 };
 
@@ -48,9 +48,9 @@ const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
 const getExpiryColor = (expiryDate) => {
   if (!expiryDate) return '#999';
   const daysLeft = Math.ceil((new Date(expiryDate) - new Date()) / (1000 * 60 * 60 * 24));
-  if (daysLeft < 0)    return '#b71c1c';
-  if (daysLeft <= 30)  return '#c62828';
-  if (daysLeft <= 90)  return '#f57f17';
+  if (daysLeft < 0)   return '#b71c1c';
+  if (daysLeft <= 30) return '#c62828';
+  if (daysLeft <= 90) return '#f57f17';
   return '#2e7d32';
 };
 
@@ -103,18 +103,23 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
 
   const handleBatchSubmit = async (e) => {
     e.preventDefault();
+    // Build payload matching FastAPI's VaccineBatchCreate schema.
+    // vaccine_id is required by the schema; vaccineAPI.addBatch injects it automatically.
+    // vaccineAPI.updateBatch sends the full object so vaccine_id must be present too.
     const payload = {
+      vaccine_id:     vaccineId,            // required by FastAPI schema
       batch_number:   batchForm.batchNumber,
       expiry_date:    batchForm.expiryDate    || null,
       available:      parseInt(batchForm.available) || 0,
       used:           parseInt(batchForm.used)      || 0,
       date_purchased: batchForm.datePurchased || null,
-      supplier:       batchForm.supplier,
+      supplier:       batchForm.supplier      || null,
       ml_recommended: mlRecommended,
     };
     if (editingBatch) {
       await onEditBatch(editingBatch.id, payload);
     } else {
+      // vaccineAPI.addBatch also merges vaccine_id, so it's safe either way
       await onAddBatch(vaccineId, payload);
     }
     setShowAddBatch(false);
@@ -217,18 +222,18 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
           <form onSubmit={handleBatchSubmit}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px', marginBottom: '16px' }}>
               {[
-                { label: 'Batch Number',    name: 'batchNumber',   type: 'text',   placeholder: 'e.g. AR-2025-006' },
-                { label: 'Expiry Date',     name: 'expiryDate',    type: 'date',   placeholder: '' },
-                { label: 'Available Doses', name: 'available',     type: 'number', placeholder: '320' },
-                { label: 'Used Doses',      name: 'used',          type: 'number', placeholder: '0' },
-                { label: 'Date Purchased',  name: 'datePurchased', type: 'date',   placeholder: '' },
+                { label: 'Batch Number',    name: 'batchNumber',   type: 'text',   placeholder: 'e.g. AR-2025-006', required: true  },
+                { label: 'Expiry Date',     name: 'expiryDate',    type: 'date',   placeholder: '',                  required: true  },
+                { label: 'Available Doses', name: 'available',     type: 'number', placeholder: '320',               required: true  },
+                { label: 'Used Doses',      name: 'used',          type: 'number', placeholder: '0',                 required: false },
+                { label: 'Date Purchased',  name: 'datePurchased', type: 'date',   placeholder: '',                  required: false },
               ].map(f => (
                 <div key={f.name}>
                   <label style={{ fontSize: '12px', fontWeight: '600', color: '#555', display: 'block', marginBottom: '5px' }}>{f.label}</label>
                   <input type={f.type} placeholder={f.placeholder}
                     value={batchForm[f.name]}
                     onChange={e => setBatchForm(p => ({ ...p, [f.name]: e.target.value }))}
-                    required={f.name !== 'used'}
+                    required={f.required}
                     style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', border: '1.5px solid #e0e0e0', fontSize: '13px', boxSizing: 'border-box', outline: 'none' }}
                     onFocus={e => e.target.style.borderColor = '#26a69a'}
                     onBlur={e => e.target.style.borderColor = '#e0e0e0'} />
@@ -390,23 +395,37 @@ const VaccineManagement = () => {
   const [newVaccineForm, setNewVaccineForm] = useState({
     name: '', batchNumber: '', expiryDate: '', available: '', datePurchased: '', supplier: '',
   });
-  // ml_recommended is auto-set to 200 on create — not shown in form
 
+  // ── Load vaccines + batches from FastAPI ───────────────────────────────────
+  // FastAPI's GET /api/vaccines/ returns vaccine rows WITHOUT batches nested.
+  // FastAPI's GET /api/batches/ returns all batches with vaccine_id.
+  // We fetch both in parallel, then stitch batches onto their vaccine.
   const loadVaccines = useCallback(async () => {
     try {
       setLoading(true);
       setApiError(null);
-      const [vaccineData, supplierData] = await Promise.all([
-        vaccineAPI.getAll(),
-        supplierAPI.getAll(),
+
+      const [vaccineData, batchData, supplierData] = await Promise.all([
+        vaccineAPI.getAll(),        // GET /api/vaccines/
+        vaccineAPI.getAllBatches(),  // GET /api/batches/
+        supplierAPI.getAll(),       // GET /api/suppliers/
       ]);
-      setVaccinesFromAPI(vaccineData);
+
+      // Stitch batches onto their vaccine
+      const vaccinesWithBatches = vaccineData.map(vaccine => ({
+        ...vaccine,
+        batches: batchData.filter(b => b.vaccine_id === vaccine.id),
+      }));
+
+      setVaccinesFromAPI(vaccinesWithBatches);
       setSuppliersFromAPI(supplierData);
-      if (vaccineData.length > 0 && !selectedVaccine) {
-        setSelectedVaccine({ id: vaccineData[0].id, name: vaccineData[0].name });
+
+      // Keep selected vaccine selection stable across reloads
+      if (vaccinesWithBatches.length > 0 && !selectedVaccine) {
+        setSelectedVaccine({ id: vaccinesWithBatches[0].id, name: vaccinesWithBatches[0].name });
       }
     } catch (err) {
-      setApiError('Could not connect to server. Check that Django is running on localhost:8000.');
+      setApiError('Could not connect to server. Check that FastAPI is running on localhost:8001.');
     } finally {
       setLoading(false);
     }
@@ -439,46 +458,55 @@ const VaccineManagement = () => {
     || filteredVaccines[0]
     || null;
 
+  // ── Batch CRUD handlers ────────────────────────────────────────────────────
+  // vaccineAPI.addBatch(vaccineId, payload) → POST /api/batches/
+  // payload already includes vaccine_id (set in VaccineTable's handleBatchSubmit)
   const handleAddBatch = async (vaccineId, payload) => {
     try {
       await vaccineAPI.addBatch(vaccineId, payload);
-      setSaveMessage('✅ Batch added successfully!');
+      flash('✅ Batch added successfully!');
       await loadVaccines();
     } catch (err) {
-      setSaveMessage(`❌ Error: ${err.message}`);
+      flash(`❌ Error: ${err.message}`);
     }
-    setTimeout(() => setSaveMessage(''), 3000);
   };
 
+  // vaccineAPI.updateBatch(batchId, payload) → PUT /api/batches/{id}/
   const handleEditBatch = async (batchId, payload) => {
     try {
       await vaccineAPI.updateBatch(batchId, payload);
-      setSaveMessage('✅ Batch updated successfully!');
+      flash('✅ Batch updated successfully!');
       await loadVaccines();
     } catch (err) {
-      setSaveMessage(`❌ Error: ${err.message}`);
+      flash(`❌ Error: ${err.message}`);
     }
-    setTimeout(() => setSaveMessage(''), 3000);
   };
 
+  // vaccineAPI.deleteBatch(batchId) → DELETE /api/batches/{id}/
   const handleDeleteBatch = async (batchId) => {
     if (!window.confirm('Delete this batch?')) return;
     try {
       await vaccineAPI.deleteBatch(batchId);
-      setSaveMessage('✅ Batch deleted.');
+      flash('✅ Batch deleted.');
       await loadVaccines();
     } catch (err) {
-      setSaveMessage(`❌ Error: ${err.message}`);
+      flash(`❌ Error: ${err.message}`);
     }
-    setTimeout(() => setSaveMessage(''), 3000);
   };
 
+  const flash = (msg, ms = 3000) => {
+    setSaveMessage(msg);
+    setTimeout(() => setSaveMessage(''), ms);
+  };
+
+  // ── Add new vaccine (creates vaccine row + first batch) ────────────────────
   const handleAddNewVaccine = async (e) => {
     e.preventDefault();
     const name = newVaccineForm.name.trim();
     if (!name) { alert('Enter a vaccine name.'); return; }
     if (vaccinesFromAPI.some(v => v.name === name)) { alert('Vaccine already exists.'); return; }
     try {
+      // 1. Create the vaccine record
       const newVaccine = await vaccineAPI.create({
         name,
         available:      parseInt(newVaccineForm.available) || 0,
@@ -486,34 +514,34 @@ const VaccineManagement = () => {
         ml_recommended: 200,
         status:         'In Stock',
       });
+      // 2. Create the first batch — POST /api/batches/ with vaccine_id in body
       await vaccineAPI.addBatch(newVaccine.id, {
+        vaccine_id:     newVaccine.id,
         batch_number:   newVaccineForm.batchNumber,
         expiry_date:    newVaccineForm.expiryDate    || null,
         available:      parseInt(newVaccineForm.available) || 0,
         used:           0,
         date_purchased: newVaccineForm.datePurchased || null,
-        supplier:       newVaccineForm.supplier,
+        supplier:       newVaccineForm.supplier      || null,
         ml_recommended: 200,
       });
       setNewVaccineForm({ name: '', batchNumber: '', expiryDate: '', available: '', datePurchased: '', supplier: '' });
       setShowNewVaccine(false);
-      setSaveMessage(`✅ ${name} added to the system!`);
+      flash(`✅ ${name} added to the system!`);
       await loadVaccines();
       setSelectedVaccine({ id: newVaccine.id, name: newVaccine.name });
     } catch (err) {
-      setSaveMessage(`❌ Error: ${err.message}`);
+      flash(`❌ Error: ${err.message}`);
     }
-    setTimeout(() => setSaveMessage(''), 3000);
   };
 
   const handleOrderSubmit = async (orderPayload) => {
     try {
       await orderAPI.create(orderPayload);
-      setSaveMessage('✅ Order placed successfully! View in Vaccine Orders.');
+      flash('✅ Order placed successfully! View in Vaccine Orders.', 4000);
     } catch (err) {
-      setSaveMessage(`❌ Error placing order: ${err.message}`);
+      flash(`❌ Error placing order: ${err.message}`, 4000);
     }
-    setTimeout(() => setSaveMessage(''), 4000);
   };
 
   const periodBtnStyle = (active) => ({
@@ -648,9 +676,9 @@ const VaccineManagement = () => {
                 <div className="filter-buttons">
                   {[
                     { key: 'all',       label: `All (${vaccinesFromAPI.length})` },
-                    { key: 'In Stock',  label: 'In Stock'      },
-                    { key: 'Low Stock', label: 'Low Stock'     },
-                    { key: 'Out Stock', label: 'Out of Stock'  },
+                    { key: 'In Stock',  label: 'In Stock'     },
+                    { key: 'Low Stock', label: 'Low Stock'    },
+                    { key: 'Out Stock', label: 'Out of Stock' },
                   ].map(f => (
                     <button type="button" key={f.key}
                       className={filterStatus === f.key ? 'filter-btn active' : 'filter-btn'}
@@ -751,8 +779,8 @@ const VaccineManagement = () => {
                         <div style={{ padding: '10px 16px', fontSize: '13px', color: '#aaa' }}>No vaccines match filter</div>
                       )}
                       {filteredVaccines.map(v => {
-                        const vstatus   = getVaccineStatus(v);
-                        const dot       = vstatus === 'In Stock' ? '#26a69a' : vstatus === 'Low Stock' ? '#f57f17' : '#e53935';
+                        const vstatus    = getVaccineStatus(v);
+                        const dot        = vstatus === 'In Stock' ? '#26a69a' : vstatus === 'Low Stock' ? '#f57f17' : '#e53935';
                         const isSelected = v.id === displayVaccineObj?.id;
                         return (
                           <div key={v.id} style={dropItemStyle(isSelected)}
