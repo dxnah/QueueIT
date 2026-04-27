@@ -30,19 +30,11 @@ export const vaccineAPI = {
   update:  (id, data) => request(`/vaccines/${id}/`, 'PUT', data),
   delete:  (id) => request(`/vaccines/${id}/`, 'DELETE'),
 
-  // ── Batches — flat FastAPI routes ─────────────────────────────────────────
-  // GET all batches (optionally filter by vaccine_id client-side)
   getAllBatches: () => request('/batches/'),
-
-  // POST /api/batches/ — payload must include vaccine_id
   addBatch: (vaccineId, data) =>
     request('/batches/', 'POST', { ...data, vaccine_id: vaccineId }),
-
-  // PUT /api/batches/{id}/
   updateBatch: (batchId, data) =>
     request(`/batches/${batchId}/`, 'PUT', data),
-
-  // DELETE /api/batches/{id}/
   deleteBatch: (batchId) =>
     request(`/batches/${batchId}/`, 'DELETE'),
 };
@@ -70,6 +62,22 @@ export const patientAPI = {
   delete: (id)       => request(`/patients/${id}/`, 'DELETE'),
 };
 
+// ── Vaccination History ───────────────────────────────────────────────────────
+export const vaccinationHistoryAPI = {
+  getByPatient: (patientId) => request(`/vaccination-history/patient/${patientId}/`),
+  create:       (data)      => request('/vaccination-history/', 'POST', data),
+  update:       (id, data)  => request(`/vaccination-history/${id}/`, 'PUT', data),
+  delete:       (id)        => request(`/vaccination-history/${id}/`, 'DELETE'),
+};
+
+// ── Dose Schedules ────────────────────────────────────────────────────────────
+export const doseScheduleAPI = {
+  getByPatient: (patientId) => request(`/dose-schedules/patient/${patientId}/`),
+  create:       (data)      => request('/dose-schedules/', 'POST', data),
+  update:       (id, data)  => request(`/dose-schedules/${id}/`, 'PUT', data),
+  delete:       (id)        => request(`/dose-schedules/${id}/`, 'DELETE'),
+};
+
 // ── Announcements ─────────────────────────────────────────────────────────────
 export const announcementAPI = {
   getAll:  ()         => request('/announcements/'),
@@ -93,6 +101,15 @@ export const usageReportAPI = {
   create: (data)     => request('/usage-reports/', 'POST', data),
   update: (id, data) => request(`/usage-reports/${id}/`, 'PUT', data),
   delete: (id)       => request(`/usage-reports/${id}/`, 'DELETE'),
+};
+
+// ── Registrations ─────────────────────────────────────────────────────────────
+export const registrationAPI = {
+  getAll:       ()         => request('/registrations/'),
+  getByPatient: (patientId) => request(`/registrations/patient/${patientId}/`),
+  create:       (data)     => request('/registrations/', 'POST', data),
+  update:       (id, data) => request(`/registrations/${id}/`, 'PUT', data),
+  delete:       (id)       => request(`/registrations/${id}/`, 'DELETE'),
 };
 
 // ── Stock Level Reports ───────────────────────────────────────────────────────
