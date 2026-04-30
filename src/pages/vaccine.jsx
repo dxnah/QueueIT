@@ -11,6 +11,7 @@ import {
   DAYS_IN_MONTH,
   MONTH_START_DAYS,
 } from '../data/vaccineConstants';
+import usePolling from '../hooks/usePolling'; 
 
 const calcStatus = (available) => {
   if (available === 0)  return 'Out Stock';
@@ -432,7 +433,7 @@ const VaccineManagement = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => { loadVaccines(); }, [loadVaccines]);
+  usePolling(loadVaccines, 15_000);
 
   useEffect(() => {
     const handler = (e) => {

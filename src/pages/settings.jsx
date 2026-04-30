@@ -33,19 +33,34 @@ const Settings = () => {
   });
 
   const handleToggle = (key) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }));
+    setSettings(prev => {
+      const next = { ...prev, [key]: !prev[key] };
+      if (key === 'autoRefresh') {
+        localStorage.setItem('autoRefresh', next.autoRefresh);
+      }
+      return next;
+    });
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSettings(prev => ({ ...prev, [name]: value }));
+    if (name === 'refreshInterval') {
+      localStorage.setItem('refreshInterval', value);
+    }
   };
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    setSaveMessage('✅ Settings saved successfully!');
-    setTimeout(() => setSaveMessage(''), 3000);
-  };
+const handleSave = (e) => {
+  e.preventDefault();
+
+  localStorage.setItem('autoRefresh', settings.autoRefresh);
+  localStorage.setItem('refreshInterval', settings.refreshInterval);
+
+  window.dispatchEvent(new StorageEvent('storage', { key: 'refreshInterval' }));
+
+  setSaveMessage('✅ Settings saved successfully!');
+  setTimeout(() => setSaveMessage(''), 3000);
+};
 
   const handleRefreshNow = () => {
     setIsRefreshing(true);

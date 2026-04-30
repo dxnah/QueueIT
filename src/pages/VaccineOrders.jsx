@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { orderAPI } from '../services/api';
+import usePolling from '../hooks/usePolling';
 import '../styles/dashboard.css';
 
 const STATUS_OPTIONS = ['Pending', 'Approved', 'Shipped', 'Delivered', 'Cancelled'];
@@ -31,9 +32,9 @@ const VaccineOrders = () => {
   const [loading,          setLoading]          = useState(true);
   const [apiError,         setApiError]         = useState(null);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     try {
-      setLoading(true);
+      setLoading(prev => prev ? true : false); 
       setApiError(null);
       const data = await orderAPI.getAll();
       setOrders(data);
@@ -42,9 +43,9 @@ const VaccineOrders = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { loadOrders(); }, []);
+  usePolling(loadOrders, 15_000);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -181,7 +182,6 @@ const VaccineOrders = () => {
                             <td style={{ padding: '12px 14px', fontWeight: '700', color: '#333' }}>{order.vaccine}</td>
                             <td style={{ padding: '12px 14px', color: '#555' }}>{order.supplier}</td>
                             <td style={{ padding: '12px 14px', fontWeight: '700', color: '#26a69a' }}>{order.amount?.toLocaleString()}</td>
-                            {/* Field is price_per_piece on both model and API response */}
                             <td style={{ padding: '12px 14px', color: '#555' }}>₱{Number(order.price_per_piece || 0).toLocaleString()}</td>
                             <td style={{ padding: '12px 14px', fontWeight: '800', color: '#26a69a' }}>₱{Number(order.total || 0).toLocaleString()}</td>
                             <td style={{ padding: '12px 14px', color: '#666', fontSize: '12px' }}>

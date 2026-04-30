@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
@@ -14,16 +14,51 @@ import Settings from './pages/settings';
 import Profile from './pages/profile';
 import UserManagement from './pages/patientmanagement';
 import Announcements from './pages/announcements';
+import { prefetchAll } from './services/api';
 
 function App() {
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("darkMode");
+  const intervalRef = useRef(null);
 
-    if (savedTheme === "true") {
-      document.body.classList.add("dark-mode");
+  const startInterval = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    const autoRefresh = localStorage.getItem('autoRefresh');
+    if (autoRefresh === 'false') return;
+
+    const seconds = parseInt(localStorage.getItem('refreshInterval') || '30', 10);
+    const ms = seconds * 1000;
+
+    intervalRef.current = setInterval(() => {
+      prefetchAll();
+    }, ms);
+  };
+
+  useEffect(() => {
+    prefetchAll();
+    startInterval();
+
+    const handleFocus = () => startInterval();
+    window.addEventListener('focus', handleFocus);
+
+    const handleStorage = (e) => {
+      if (e.key === 'refreshInterval' || e.key === 'autoRefresh') {
+        startInterval();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    const savedTheme = localStorage.getItem('darkMode');
+    if (savedTheme === 'true') {
+      document.body.classList.add('dark-mode');
     } else {
-      document.body.classList.remove("dark-mode");
+      document.body.classList.remove('dark-mode');
     }
+
+    return () => {
+      clearInterval(intervalRef.current);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   return (

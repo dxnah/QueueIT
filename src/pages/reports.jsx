@@ -21,20 +21,20 @@ const UsageReportModal = ({ vaccines, existing, onSave, onClose }) => {
   const [form, setForm] = useState(
     existing
       ? {
-          vaccine:      existing.vaccine,
+          vaccine_id:   existing.vaccine_id ?? '',
           administered: existing.administered,
           wasted:       existing.wasted,
           remaining:    existing.remaining,
           period:       existing.period || 'daily',
           report_date:  existing.report_date || '',
         }
-      : { vaccine: '', administered: '', wasted: '', remaining: '', period: 'daily', report_date: '' }
+      : { vaccine_id: '', administered: '', wasted: '', remaining: '', period: 'daily', report_date: '' }
   );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
-      vaccine:      parseInt(form.vaccine) || null,
+      vaccine_id:   parseInt(form.vaccine_id) || null,
       administered: parseInt(form.administered) || 0,
       wasted:       parseInt(form.wasted)        || 0,
       remaining:    parseInt(form.remaining)     || 0,
@@ -67,8 +67,11 @@ const UsageReportModal = ({ vaccines, existing, onSave, onClose }) => {
           <form onSubmit={handleSubmit}>
             <div className="modal-field">
               <label className="modal-label">Vaccine</label>
-              <select value={form.vaccine} onChange={e => setForm(p => ({ ...p, vaccine: e.target.value }))}
-                required style={{ ...inputStyle, background: 'white' }}>
+              <select
+                value={form.vaccine_id}
+                onChange={e => setForm(p => ({ ...p, vaccine_id: e.target.value }))}
+                required
+                style={{ ...inputStyle, background: 'white' }}>
                 <option value="">— Select Vaccine —</option>
                 {vaccines.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
               </select>
@@ -255,14 +258,12 @@ const exportToPDF = (title, rows, columns) => {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const Reports = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // Default is 'daily' to match what admin typically adds
-  const [selectedPeriod,  setSelectedPeriod]   = useState('daily');
-  const [selectedReport,  setSelectedReport]   = useState('vaccine-usage');
-  const [dateRange,       setDateRange]        = useState({ startDate: '', endDate: '' });
-  const [sortConfig,      setSortConfig]       = useState({ key: null, dir: 'asc' });
-  // Vaccine filter for usage chart/table — null means all vaccines
-  const [filterVaccineId, setFilterVaccineId] = useState('all');
-  const [vaccineDropOpen, setVaccineDropOpen] = useState(false);
+  const [selectedPeriod,   setSelectedPeriod]   = useState('all');
+  const [selectedReport,   setSelectedReport]   = useState('vaccine-usage');
+  const [dateRange,        setDateRange]        = useState({ startDate: '', endDate: '' });
+  const [sortConfig,       setSortConfig]       = useState({ key: null, dir: 'asc' });
+  const [filterVaccineId,  setFilterVaccineId]  = useState('all');
+  const [vaccineDropOpen,  setVaccineDropOpen]  = useState(false);
   const vaccineDropRef = useRef(null);
 
   // ── API data ──────────────────────────────────────────────────────────────
@@ -301,7 +302,6 @@ const Reports = () => {
 
   useEffect(() => { loadAll(); }, [loadAll]);
 
-  // Close vaccine dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (vaccineDropRef.current && !vaccineDropRef.current.contains(e.target))
@@ -311,13 +311,13 @@ const Reports = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // ── Lookup helper — uses vaccine_id ──────────────────────────────────────
   const getVaccineName = (vaccineId) => {
     const found = vaccines.find(v => v.id === vaccineId);
     return found ? found.name : `Vaccine #${vaccineId}`;
   };
 
-  // ── Filter usage reports ──────────────────────────────────────────────────
-  // Step 1: filter by period
+  // ── Filter by period ──────────────────────────────────────────────────────
   const periodFiltered = useMemo(() => {
     if (selectedPeriod === 'custom') {
       return usageReports.filter(r => {
@@ -328,14 +328,13 @@ const Reports = () => {
       });
     }
     if (selectedPeriod === 'all') return usageReports;
-    // Django stores period as lowercase string e.g. 'daily', 'monthly'
     return usageReports.filter(r => r.period === selectedPeriod);
   }, [usageReports, selectedPeriod, dateRange]);
 
-  // Step 2: filter by selected vaccine
+  // ── Filter by vaccine ─────────────────────────────────────────────────────
   const filteredUsage = useMemo(() => {
     if (filterVaccineId === 'all') return periodFiltered;
-    return periodFiltered.filter(r => r.vaccine === parseInt(filterVaccineId));
+    return periodFiltered.filter(r => r.vaccine_id === parseInt(filterVaccineId));
   }, [periodFiltered, filterVaccineId]);
 
   // ── Sort ──────────────────────────────────────────────────────────────────
@@ -350,13 +349,13 @@ const Reports = () => {
   const sortedUsage = useMemo(() => {
     if (!sortConfig.key) return filteredUsage;
     return [...filteredUsage].sort((a, b) => {
-      let aVal = sortConfig.key === 'vaccine'
-        ? getVaccineName(a.vaccine)
+      let aVal = sortConfig.key === 'vaccine_id'
+        ? getVaccineName(a.vaccine_id)
         : sortConfig.key === 'efficiency'
           ? parseFloat(calcEff(a.administered, a.wasted))
           : a[sortConfig.key];
-      let bVal = sortConfig.key === 'vaccine'
-        ? getVaccineName(b.vaccine)
+      let bVal = sortConfig.key === 'vaccine_id'
+        ? getVaccineName(b.vaccine_id)
         : sortConfig.key === 'efficiency'
           ? parseFloat(calcEff(b.administered, b.wasted))
           : b[sortConfig.key];
@@ -374,9 +373,9 @@ const Reports = () => {
     return <span className="sort-icon active">{sortConfig.dir === 'asc' ? '↑' : '↓'}</span>;
   };
 
-  // ── Chart data ────────────────────────────────────────────────────────────
+  // ── Chart data — uses vaccine_id ──────────────────────────────────────────
   const chartData = filteredUsage.map(r => ({
-    name:         getVaccineName(r.vaccine),
+    name:         getVaccineName(r.vaccine_id),
     Administered: r.administered,
     Wasted:       r.wasted,
     Remaining:    r.remaining,
@@ -387,12 +386,12 @@ const Reports = () => {
     if (selectedReport === 'vaccine-usage') {
       exportToCSV(
         sortedUsage.map(r => ({
-          Vaccine:      getVaccineName(r.vaccine),
-          Administered: r.administered,
-          Wasted:       r.wasted,
-          Remaining:    r.remaining,
-          Efficiency:   `${calcEff(r.administered, r.wasted)}%`,
-          Period:       r.period || '—',
+          Vaccine:       getVaccineName(r.vaccine_id),
+          Administered:  r.administered,
+          Wasted:        r.wasted,
+          Remaining:     r.remaining,
+          Efficiency:    `${calcEff(r.administered, r.wasted)}%`,
+          Period:        r.period || '—',
           'Report Date': r.report_date || '—',
         })),
         'vaccine-usage-report.csv'
@@ -400,11 +399,11 @@ const Reports = () => {
     } else {
       exportToCSV(
         stockReports.map(r => ({
-          Period:       r.period_label || '—',
-          Date:         r.date || '—',
-          'In Stock':   r.in_stock,
-          'Low Stock':  r.low_stock,
-          'Out of Stock': r.out_stock,
+          Period:           r.period_label || '—',
+          Date:             r.date || '—',
+          'In Stock':       r.in_stock,
+          'Low Stock':      r.low_stock,
+          'Out of Stock':   r.out_stock,
         })),
         'stock-level-report.csv'
       );
@@ -416,7 +415,7 @@ const Reports = () => {
       exportToPDF(
         `Vaccine Usage Report — ${selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1)}`,
         sortedUsage.map(r => ({
-          vaccine:      getVaccineName(r.vaccine),
+          vaccine:      getVaccineName(r.vaccine_id),
           administered: r.administered,
           wasted:       r.wasted,
           remaining:    r.remaining,
@@ -518,7 +517,6 @@ const Reports = () => {
     setDateRange(prev => ({ ...prev, [name]: value }));
   };
 
-  // The vaccine currently shown in the dropdown label
   const selectedVaccineName = filterVaccineId === 'all'
     ? 'All Vaccines'
     : (vaccines.find(v => v.id === parseInt(filterVaccineId))?.name || 'Select Vaccine');
@@ -532,7 +530,6 @@ const Reports = () => {
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} onMenuClose={() => setIsMobileMenuOpen(false)} />
       {isMobileMenuOpen && <div className="overlay" onClick={() => setIsMobileMenuOpen(false)} />}
 
-      {/* Modals */}
       {showUsageModal && (
         <UsageReportModal
           vaccines={vaccines}
@@ -565,7 +562,6 @@ const Reports = () => {
             </div>
           )}
 
-          {/* ── REPORT CONFIGURATION ── */}
           <section className="settings-card">
             <h2 className="section-title">📋 Report Configuration</h2>
             <div className="form-row">
@@ -581,7 +577,6 @@ const Reports = () => {
                 <label htmlFor="report-period">Time Period</label>
                 <select id="report-period" value={selectedPeriod}
                   onChange={e => setSelectedPeriod(e.target.value)} className="form-control">
-                  {/* Daily is first so it's the default highlight */}
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
                   <option value="monthly">Monthly</option>
@@ -608,7 +603,6 @@ const Reports = () => {
             )}
 
             <div className="form-actions">
-              {/* ── Add Report button ── */}
               {selectedReport === 'vaccine-usage' ? (
                 <button type="button" className="btn btn-primary"
                   onClick={() => { setEditingUsage(null); setShowUsageModal(true); }}>
@@ -620,8 +614,6 @@ const Reports = () => {
                   ➕ Add Stock Report
                 </button>
               )}
-
-              {/* ── Export buttons (restored from original design) ── */}
               <button type="button" className="btn btn-secondary" onClick={handleExportPDF}
                 style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 📄 Export PDF
@@ -639,10 +631,8 @@ const Reports = () => {
             </div>
           ) : (
             <>
-              {/* ── USAGE REPORT SECTION ── */}
               {selectedReport === 'vaccine-usage' && (
                 <>
-                  {/* Vaccine filter dropdown — same style as Vaccine Management page */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
                     <div ref={vaccineDropRef} style={{ position: 'relative' }}>
                       <button type="button"
@@ -689,7 +679,6 @@ const Reports = () => {
                     </span>
                   </div>
 
-                  {/* Bar chart */}
                   <section className="settings-card">
                     <h2 className="section-title">📊 Vaccine Usage Overview</h2>
                     {chartData.length === 0 ? (
@@ -720,7 +709,6 @@ const Reports = () => {
                 </>
               )}
 
-              {/* ── REPORT PREVIEW TABLE ── */}
               <section className="settings-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
                   <h2 className="section-title" style={{ margin: 0 }}>📋 Report Preview</h2>
@@ -731,7 +719,6 @@ const Reports = () => {
                   </span>
                 </div>
 
-                {/* Usage Reports Table */}
                 {selectedReport === 'vaccine-usage' && (
                   <div className="table-wrapper">
                     {sortedUsage.length === 0 ? (
@@ -743,8 +730,8 @@ const Reports = () => {
                       <table className="data-table">
                         <thead>
                           <tr>
-                            <th onClick={() => handleSort('vaccine')} className="sortable">
-                              Vaccine <SortIcon col="vaccine" />
+                            <th onClick={() => handleSort('vaccine_id')} className="sortable">
+                              Vaccine <SortIcon col="vaccine_id" />
                             </th>
                             <th onClick={() => handleSort('administered')} className="sortable">
                               Administered <SortIcon col="administered" />
@@ -769,7 +756,7 @@ const Reports = () => {
                             const rowClass = row.wasted > 10 ? 'row-critical' : row.wasted > 5 ? 'row-warning' : '';
                             return (
                               <tr key={row.id} className={rowClass}>
-                                <td><strong>{getVaccineName(row.vaccine)}</strong></td>
+                                <td><strong>{getVaccineName(row.vaccine_id)}</strong></td>
                                 <td>{row.administered} doses</td>
                                 <td>
                                   <span className={row.wasted > 5 ? 'waste-badge waste-high' : 'waste-badge waste-low'}>
@@ -821,10 +808,8 @@ const Reports = () => {
                   </div>
                 )}
 
-                {/* Stock Level Reports Table */}
                 {selectedReport === 'stock-levels' && (
                   <div className="table-wrapper">
-            
                     {stockReports.length === 0 ? (
                       <div style={{ textAlign: 'center', padding: '40px', color: '#aaa', fontSize: '14px' }}>
                         <div style={{ fontSize: '36px', marginBottom: '8px' }}>📭</div>

@@ -6,10 +6,7 @@ import '../styles/dashboard.css';
 import '../styles/topbar.css';
 import { useNavigate } from 'react-router-dom';
 import { vaccineAPI } from '../services/api';
-import {
-  PEAK_MONTHS,
-  generateForecastData,
-} from '../data/dashboardData';
+import { PEAK_MONTHS, generateForecastData } from '../data/dashboardData';
 import { MONTHS } from '../data/analyticsConstants';
 
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
@@ -45,7 +42,7 @@ const Dashboard = () => {
   const outOfStockCount = vaccines.filter(v => v.status === 'Out Stock').length;
 
   // mlRecommended may not be in backend; fall back to 0
-  const totalToOrder    = vaccines.reduce((sum, v) => sum + (v.mlRecommended ?? 0), 0);
+  const totalToOrder = vaccines.reduce((sum, v) => sum + (v.ml_recommended ?? 0), 0);
   const vaccinesToOrder = vaccines.filter(v => v.status === 'Low Stock' || v.status === 'Out Stock');
 
   // ── COLOR HELPERS ──────────────────────────────────────
@@ -57,10 +54,17 @@ const Dashboard = () => {
   const getOutOfStockLabel    = (c) => c === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
   const getVaccineStatusClass = (s) => s === 'In Stock' ? 'status-in-stock' : s === 'Low Stock' ? 'status-low-stock' : 'status-out-stock';
 
-  // ── TOP 3 URGENT VACCINES for snapshot card ───────────
-  // generateForecastData still uses local data; pass live vaccines if it accepts them
-  const actionOrder  = { order_now: 0, order_soon: 1, ok: 2 };
-  const snapshotData = generateForecastData(currentMonth)
+  const actionOrder = { order_now: 0, order_soon: 1, ok: 2 };
+
+  const mappedVaccines = vaccines.map(v => ({
+    vaccine:       v.name,
+    available:     v.available ?? v.quantity ?? 0,
+    mlRecommended: v.ml_recommended ?? 0,
+    status:        v.status,
+    id:            v.id,
+  }));
+
+  const snapshotData = generateForecastData(mappedVaccines, currentMonth)
     .sort((a, b) => actionOrder[a.action] - actionOrder[b.action])
     .slice(0, 3);
 

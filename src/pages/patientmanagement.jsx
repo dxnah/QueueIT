@@ -8,6 +8,7 @@ import {
   vaccinationHistoryAPI,
   doseScheduleAPI,
   registrationAPI,
+  warmPatientPanel 
 } from '../services/api';
 import '../styles/dashboard.css';
 import '../styles/patientmanagement.css';
@@ -1111,6 +1112,7 @@ const PatientManagement = () => {
                       <tr
                         key={user.id}
                         className="um-table-row"
+                        onMouseEnter={() => warmPatientPanel(user.id)}
                         onClick={() => setSelectedUser(user)}
                         title="Click to view patient details"
                       >

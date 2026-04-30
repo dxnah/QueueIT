@@ -1,27 +1,41 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import logo from '../images/logoit.png';
-import { authAPI } from '../services/api';
+import { authAPI, prefetchAll } from '../services/api'; 
 import '../styles/login.css';
 
 const LoginScreen = () => {
   const [username,     setUsername]     = useState('');
   const [password,     setPassword]     = useState('');
   const [error,        setError]        = useState('');
-  const [loading] = useState(false);
+  const [loading,      setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
 const handleLogin = async (e) => {
   e.preventDefault();
+  setLoading(true);
+  setError('');
   try {
-    const data = await authAPI.login(username, password);
-    localStorage.setItem('lastLogin', new Date().toISOString());
-    localStorage.setItem('adminUsername', data.username);
-    sessionStorage.setItem('sessionStarted', 'true');
-    navigate('/dashboard');
+    const res = await authAPI.login(username, password);
+
+    if (res.role !== 'admin') {
+      setError('Access denied. Admin accounts only.');
+      setLoading(false);
+      return;
+    }
+
+    localStorage.setItem('adminUsername', res.user.username);
+    localStorage.setItem('adminEmail',    res.user.email ?? '');
+    localStorage.setItem('adminId',       res.user.id);
+    localStorage.setItem('lastLogin',     new Date().toISOString());
+
+    await prefetchAll();       
+    navigate('/dashboard'); 
+
   } catch (err) {
-    setError(err.message || 'Invalid username or password');
+    setError('Invalid username or password');
+    setLoading(false);
   }
 };
 
@@ -105,8 +119,8 @@ const handleLogin = async (e) => {
           {error && <p className="error-message">{error}</p>}
 
           <button type="submit" className="login-button" disabled={loading}>
-            {loading ? 'Logging in...' : 'Log In'}
-          </button>
+              {loading ? 'Logging in...' : 'Log In'}
+            </button>
 
         </form>
 
