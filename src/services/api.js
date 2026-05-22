@@ -40,7 +40,8 @@ const request = async (endpoint, method = 'GET', body = null) => {
 
 async function doRequest(endpoint, method, body, cacheKey) {
   const controller = new AbortController();
-  const timeout    = setTimeout(() => controller.abort(), 8_000);
+  const isLogin = endpoint.includes('/login/') || endpoint.includes('/signup/');
+  const timeout = setTimeout(() => controller.abort(), isLogin ? 2_000 : 8_000);
 
   const options = {
     method,
