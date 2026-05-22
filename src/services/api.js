@@ -1,4 +1,4 @@
-const BASE_URL  = 'http://127.0.0.1:8000/api';
+const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://127.0.0.1:8000/api';
 const CACHE_TTL = 30_000;
 const SWR_TTL   = 60_000; 
 
