@@ -346,7 +346,19 @@
   }
 }
 
+/* ─── Greeting ──────────────────────────────────────────────────────────── */
+.topbar-greeting {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.5px;
+}
+
 /* ─── Dark mode ─────────────────────────────────────────────────────────── */
+body.dark-mode .topbar-greeting {
+  color: #e0e0e0;
+}
+
 body.dark-mode .topbar {
   background: #1e1e2a;
   border-bottom-color: #2e2e3e;

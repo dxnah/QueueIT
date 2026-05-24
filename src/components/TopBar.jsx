@@ -24,7 +24,7 @@ const TopBar = () => {
 
       {/* ── Greeting ── */}
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px' }}>
-        <span style={{ fontSize: '16px', fontWeight: '700', color: '#333', letterSpacing: '0.5px' }}>
+        <span className="topbar-greeting">
           Hello, Welcome Back, <span style={{ color: '#26a69a' }}>{adminUsername}</span>!
         </span>
       </div>
