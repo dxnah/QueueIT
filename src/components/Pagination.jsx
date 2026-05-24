@@ -6,21 +6,6 @@ const BORDER   = '#e0e0e0';
 const TEXT_MID = '#555';
 const TEXT_DIM = '#aaa';
 
-/**
- * Reusable pagination control for VaxFlow tables.
- *
- * Props:
- *  - totalItems      {number}  – total records (after filtering)
- *  - pageSize        {number}  – current rows-per-page selection
- *  - currentPage     {number}  – 1-based current page
- *  - onPageChange    {fn}      – called with new page number
- *  - onPageSizeChange{fn}      – called with new page size
- *  - pageSizeOptions {number[]}– defaults to [10, 15, 20]
- *  - sortKey         {string}  – current sort key (column id)
- *  - sortDir         {'asc'|'desc'} – current sort direction
- *  - onSortChange    {fn}      – called with (key, dir); optional
- *  - sortOptions     {Array}   – [{key, label}]; optional
- */
 const Pagination = ({
   totalItems,
   pageSize,
