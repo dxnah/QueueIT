@@ -5,7 +5,7 @@ import DailyAnalytics from '../components/DailyAnalytics';
 import '../styles/dashboard.css';
 import '../styles/topbar.css';
 import { useNavigate } from 'react-router-dom';
-import { vaccineAPI } from '../services/api';
+import { vaccineAPI, mlAPI } from '../services/api';
 import { PEAK_MONTHS, generateForecastData } from '../data/dashboardData';
 import { MONTHS } from '../data/analyticsConstants';
 
@@ -13,10 +13,21 @@ import { MONTHS } from '../data/analyticsConstants';
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const [vaccines, setVaccines]   = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(null);
+  const [vaccines,  setVaccines]  = useState([]);
+  const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState(null);
 
+  // ML forecast state
+  const [mlForecast,    setMlForecast]    = useState(null);
+  const [mlMetrics,     setMlMetrics]     = useState(null);
+  const [mlLoading,     setMlLoading]     = useState(true);
+
+  const currentMonthIdx = new Date().getMonth();
+  const currentMonth    = MONTHS[currentMonthIdx];
+  const currentYear     = new Date().getFullYear();
+  const isPeak          = PEAK_MONTHS.includes(currentMonth);
+
+  // Load vaccines
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
@@ -32,29 +43,32 @@ const Dashboard = () => {
     fetchVaccines();
   }, []);
 
-  const currentMonthIdx = new Date().getMonth();
-  const currentMonth    = MONTHS[currentMonthIdx];
-  const isPeak          = PEAK_MONTHS.includes(currentMonth);
+  // Load ML current month prediction + metrics
+useEffect(() => {
+  const fetchML = async () => {
+    try {
+      setMlLoading(true);
+      const [forecastRes, metricsRes] = await Promise.all([
+        mlAPI.predict(currentYear, currentMonthIdx + 1),
+        mlAPI.getMetrics(),
+      ]);
+      setMlForecast(forecastRes);
+      setMlMetrics(metricsRes);
+    } catch (e) {
+      console.error('ML fetch error:', e);
+    } finally {
+      setMlLoading(false);
+    }
+  };
+  fetchML();
+}, [currentMonthIdx, currentYear]);
 
-  // ── DYNAMIC CALCULATIONS from live data ───────────────
+  // ── Derived values ──────────────────────────────────────────────────────────
   const totalAvailable  = vaccines.reduce((sum, v) => sum + (v.available ?? v.quantity ?? 0), 0);
   const lowStockCount   = vaccines.filter(v => v.status === 'Low Stock').length;
   const outOfStockCount = vaccines.filter(v => v.status === 'Out Stock').length;
-
-  // mlRecommended may not be in backend; fall back to 0
-  const totalToOrder = vaccines.reduce((sum, v) => sum + (v.ml_recommended ?? 0), 0);
+  const totalToOrder    = vaccines.reduce((sum, v) => sum + (v.ml_recommended ?? 0), 0);
   const vaccinesToOrder = vaccines.filter(v => v.status === 'Low Stock' || v.status === 'Out Stock');
-
-  // ── COLOR HELPERS ──────────────────────────────────────
-  const getAvailableColor     = (t) => t > 500 ? '#26a69a' : t > 100 ? '#f57f17' : '#c62828';
-  const getLowStockColor      = (c) => c === 0 ? '#26a69a' : c <= 2 ? '#f57f17' : '#c62828';
-  const getOutOfStockColor    = (c) => c === 0 ? '#26a69a' : '#c62828';
-  const getAvailableLabel     = (t) => t > 500 ? '✅ Stock is sufficient' : t > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
-  const getLowStockLabel      = (c) => c === 0 ? '✅ All vaccines well stocked' : c <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
-  const getOutOfStockLabel    = (c) => c === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
-  const getVaccineStatusClass = (s) => s === 'In Stock' ? 'status-in-stock' : s === 'Low Stock' ? 'status-low-stock' : 'status-out-stock';
-
-  const actionOrder = { order_now: 0, order_soon: 1, ok: 2 };
 
   const mappedVaccines = vaccines.map(v => ({
     vaccine:       v.name,
@@ -64,45 +78,28 @@ const Dashboard = () => {
     id:            v.id,
   }));
 
+  const actionOrder  = { order_now: 0, order_soon: 1, ok: 2 };
   const snapshotData = generateForecastData(mappedVaccines, currentMonth)
     .sort((a, b) => actionOrder[a.action] - actionOrder[b.action])
     .slice(0, 3);
 
-  // ── RENDER HELPERS ─────────────────────────────────────
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px', color: '#888', fontSize: '15px' }}>
-          ⏳ Loading dashboard data...
-        </div>
-      );
-    }
+  // ── Color helpers ───────────────────────────────────────────────────────────
+  const getAvailableColor  = (t) => t > 500 ? '#26a69a' : t > 100 ? '#f57f17' : '#c62828';
+  const getLowStockColor   = (c) => c === 0 ? '#26a69a' : c <= 2 ? '#f57f17' : '#c62828';
+  const getOutOfStockColor = (c) => c === 0 ? '#26a69a' : '#c62828';
+  const getAvailableLabel  = (t) => t > 500 ? '✅ Stock is sufficient' : t > 100 ? '⚠️ Stock is getting low' : '🚨 Stock is critically low';
+  const getLowStockLabel   = (c) => c === 0 ? '✅ All vaccines well stocked' : c <= 2 ? '⚠️ Some vaccines running low' : '🚨 Many vaccines running low';
+  const getOutOfStockLabel = (c) => c === 0 ? '✅ All vaccines available' : '🚨 Immediate restocking needed';
+  const getVaccineStatusClass = (s) => s === 'In Stock' ? 'status-in-stock' : s === 'Low Stock' ? 'status-low-stock' : 'status-out-stock';
 
-    if (error) {
-      return (
-        <div style={{ background: '#ffebee', border: '1px solid #ef9a9a', borderRadius: '10px', padding: '18px 22px', color: '#c62828', marginBottom: '24px' }}>
-          <strong>⚠️ Could not load vaccine data:</strong> {error}
-          <br />
-          <button
-            onClick={() => window.location.reload()}
-            style={{ marginTop: '10px', padding: '6px 14px', borderRadius: '6px', border: '1.5px solid #c62828', background: 'white', color: '#c62828', cursor: 'pointer', fontWeight: '600' }}>
-            Retry
-          </button>
-        </div>
-      );
-    }
-
-    return null;
-  };
+  const predictedDoses   = mlForecast?.prediction?.predicted_doses;
+  const recommendedOrder = mlForecast?.prediction?.recommended_order;
 
   return (
     <section className="dashboard-container">
-
       <Sidebar />
-
       <section className="main-wrapper">
         <TopBar />
-
         <main className="main-content">
 
           <header>
@@ -110,29 +107,91 @@ const Dashboard = () => {
             <p className="dashboard-subheading">Welcome back, Admin</p>
           </header>
 
-          {renderContent()}
+          {/* Error */}
+          {error && (
+            <div style={{ background:'#ffebee', border:'1px solid #ef9a9a', borderRadius:'10px', padding:'18px 22px', color:'#c62828', marginBottom:'24px' }}>
+              <strong>⚠️ Could not load vaccine data:</strong> {error}
+              <br/>
+              <button onClick={() => window.location.reload()}
+                style={{ marginTop:'10px', padding:'6px 14px', borderRadius:'6px', border:'1.5px solid #c62828', background:'white', color:'#c62828', cursor:'pointer', fontWeight:'600' }}>
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Loading */}
+          {loading && (
+            <div style={{ display:'flex', justifyContent:'center', alignItems:'center', height:'200px', color:'#888', fontSize:'15px' }}>
+              ⏳ Loading dashboard data...
+            </div>
+          )}
+
+          {/* ── ML FORECAST BANNER ── */}
+          {!mlLoading && mlForecast && (
+            <section style={{
+              background: 'linear-gradient(135deg, #1a7a74 0%, #26a69a 100%)',
+              borderRadius: '14px', padding: '20px 24px', marginBottom: '24px',
+              boxShadow: '0 4px 16px rgba(38,166,154,0.25)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              flexWrap: 'wrap', gap: '16px',
+            }}>
+              <div>
+                <p style={{ margin:'0 0 4px', fontSize:12, color:'rgba(255,255,255,0.75)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px' }}>
+                  🤖 ML Forecast — {currentMonth} {currentYear}
+                  {isPeak && <span style={{ marginLeft:8, background:'rgba(255,255,255,0.2)', padding:'1px 8px', borderRadius:10, fontSize:10 }}>🔥 PEAK MONTH</span>}
+                </p>
+                <p style={{ margin:0, fontSize:13, color:'rgba(255,255,255,0.85)' }}>
+                  {mlMetrics?.model_name || 'Linear Regression'} · R² {mlMetrics?.test_metrics?.R2} · MAPE {mlMetrics?.test_metrics?.MAPE_pct}%
+                </p>
+              </div>
+
+              <div style={{ display:'flex', gap:16, flexWrap:'wrap' }}>
+                <div style={{ textAlign:'center', background:'rgba(255,255,255,0.15)', borderRadius:10, padding:'10px 18px' }}>
+                  <p style={{ margin:'0 0 2px', fontSize:11, color:'rgba(255,255,255,0.75)', fontWeight:600, textTransform:'uppercase' }}>Predicted Doses</p>
+                  <p style={{ margin:0, fontSize:28, fontWeight:800, color:'white', lineHeight:1 }}>
+                    {predictedDoses?.toLocaleString() || '—'}
+                  </p>
+                  <p style={{ margin:'2px 0 0', fontSize:10, color:'rgba(255,255,255,0.6)' }}>ARV doses this month</p>
+                </div>
+                <div style={{ textAlign:'center', background:'rgba(255,255,255,0.15)', borderRadius:10, padding:'10px 18px' }}>
+                  <p style={{ margin:'0 0 2px', fontSize:11, color:'rgba(255,255,255,0.75)', fontWeight:600, textTransform:'uppercase' }}>Recommended Order</p>
+                  <p style={{ margin:0, fontSize:28, fontWeight:800, color:'white', lineHeight:1 }}>
+                    {recommendedOrder?.toLocaleString() || '—'}
+                  </p>
+                  <p style={{ margin:'2px 0 0', fontSize:10, color:'rgba(255,255,255,0.6)' }}>incl. 12% safety buffer</p>
+                </div>
+              </div>
+
+              <button onClick={() => navigate('/demand-forecast')}
+                style={{ padding:'9px 18px', borderRadius:8, border:'1.5px solid rgba(255,255,255,0.6)', background:'transparent', color:'white', fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap', transition:'background 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                View Full Forecast →
+              </button>
+            </section>
+          )}
 
           {/* ── STATS CARDS ── */}
           {!loading && !error && (
             <section className="stats-container">
-              <div className="stat-box" style={{ borderTop: `4px solid ${getAvailableColor(totalAvailable)}` }}>
+              <div className="stat-box" style={{ borderTop:`4px solid ${getAvailableColor(totalAvailable)}` }}>
                 <h3 className="stat-title">Vaccines Available</h3>
-                <p className="stat-number" style={{ color: getAvailableColor(totalAvailable) }}>{totalAvailable.toLocaleString()}</p>
+                <p className="stat-number" style={{ color:getAvailableColor(totalAvailable) }}>{totalAvailable.toLocaleString()}</p>
                 <p className="stat-note">{getAvailableLabel(totalAvailable)}</p>
               </div>
-              <div className="stat-box" style={{ borderTop: '4px solid #e53935' }}>
+              <div className="stat-box" style={{ borderTop:'4px solid #e53935' }}>
                 <h3 className="stat-title">Vaccines to Order</h3>
-                <p className="stat-number" style={{ color: '#e53935' }}>{totalToOrder.toLocaleString()}</p>
+                <p className="stat-number" style={{ color:'#e53935' }}>{totalToOrder.toLocaleString()}</p>
                 <p className="stat-note">💊 {vaccinesToOrder.length} vaccine types need restocking</p>
               </div>
-              <div className="stat-box" style={{ borderTop: `4px solid ${getLowStockColor(lowStockCount)}` }}>
+              <div className="stat-box" style={{ borderTop:`4px solid ${getLowStockColor(lowStockCount)}` }}>
                 <h3 className="stat-title">Low Stock</h3>
-                <p className="stat-number" style={{ color: getLowStockColor(lowStockCount) }}>{lowStockCount}</p>
+                <p className="stat-number" style={{ color:getLowStockColor(lowStockCount) }}>{lowStockCount}</p>
                 <p className="stat-note">{getLowStockLabel(lowStockCount)}</p>
               </div>
-              <div className="stat-box" style={{ borderTop: `4px solid ${getOutOfStockColor(outOfStockCount)}` }}>
+              <div className="stat-box" style={{ borderTop:`4px solid ${getOutOfStockColor(outOfStockCount)}` }}>
                 <h3 className="stat-title">Out of Stock</h3>
-                <p className="stat-number" style={{ color: getOutOfStockColor(outOfStockCount) }}>{outOfStockCount}</p>
+                <p className="stat-number" style={{ color:getOutOfStockColor(outOfStockCount) }}>{outOfStockCount}</p>
                 <p className="stat-note">{getOutOfStockLabel(outOfStockCount)}</p>
               </div>
             </section>
@@ -143,20 +202,24 @@ const Dashboard = () => {
 
           {/* ── ML DEMAND SNAPSHOT CARD ── */}
           <section style={{
-            background: 'white', borderRadius: '12px', padding: '22px 24px', marginBottom: '28px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)',
-            borderTop: '4px solid #26a69a',
+            background:'white', borderRadius:'12px', padding:'22px 24px', marginBottom:'28px',
+            boxShadow:'0 2px 4px rgba(0,0,0,0.06),0 6px 16px rgba(0,0,0,0.10),0 12px 28px rgba(0,0,0,0.07)',
+            borderTop:'4px solid #26a69a',
           }}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'16px', flexWrap:'wrap', gap:'10px' }}>
               <div>
                 <h2 className="section-title">🤖 ML Demand Snapshot — {currentMonth}</h2>
                 <p className="ml-subtitle">
-                  Top {snapshotData.length} most urgent vaccines right now
+                  Top {snapshotData.length} most urgent vaccines by stock urgency
                   {isPeak ? ' · 🔥 Peak Season active' : ''}
+                  {predictedDoses && (
+                    <span style={{ marginLeft:8, color:'#26a69a', fontWeight:700 }}>
+                      · ML predicts {predictedDoses.toLocaleString()} doses needed
+                    </span>
+                  )}
                 </p>
               </div>
-              <button
-                onClick={() => navigate('/demand-forecast')}
+              <button onClick={() => navigate('/demand-forecast')}
                 style={{ display:'inline-flex', alignItems:'center', gap:'6px', padding:'8px 16px', borderRadius:'8px', fontSize:'13px', fontWeight:'600', cursor:'pointer', border:'1.5px solid #26a69a', background:'white', color:'#26a69a', transition:'all 0.2s' }}
                 onMouseEnter={e => { e.currentTarget.style.background='#26a69a'; e.currentTarget.style.color='white'; }}
                 onMouseLeave={e => { e.currentTarget.style.background='white'; e.currentTarget.style.color='#26a69a'; }}>
@@ -166,23 +229,19 @@ const Dashboard = () => {
 
             <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
               {snapshotData.map(v => {
-                const bg    = v.action === 'order_now' ? '#ffebee' : v.action === 'order_soon' ? '#fff8e1' : '#e8f5e9';
-                const color = v.action === 'order_now' ? '#c62828' : v.action === 'order_soon' ? '#f57f17' : '#2e7d32';
-                const bdr   = v.action === 'order_now' ? '#ef9a9a' : v.action === 'order_soon' ? '#ffe082' : '#a5d6a7';
-                const lbl   = v.action === 'order_now' ? '🚨 Order Now' : v.action === 'order_soon' ? '⚠️ Order Soon' : '✅ Sufficient';
-                const pct   = v.neededBase > 0 ? Math.min(100, Math.round((v.available / v.neededBase) * 100)) : 100;
+                const bg    = v.action==='order_now' ? '#ffebee' : v.action==='order_soon' ? '#fff8e1' : '#e8f5e9';
+                const color = v.action==='order_now' ? '#c62828' : v.action==='order_soon' ? '#f57f17' : '#2e7d32';
+                const bdr   = v.action==='order_now' ? '#ef9a9a' : v.action==='order_soon' ? '#ffe082' : '#a5d6a7';
+                const lbl   = v.action==='order_now' ? '🚨 Order Now' : v.action==='order_soon' ? '⚠️ Order Soon' : '✅ Sufficient';
+                const pct   = v.neededBase>0 ? Math.min(100, Math.round((v.available/v.neededBase)*100)) : 100;
                 return (
                   <div key={v.id} style={{ display:'flex', alignItems:'center', gap:'14px', padding:'14px 16px', borderRadius:'10px', background:bg, border:`1.5px solid ${bdr}`, flexWrap:'wrap' }}>
                     <div style={{ flex:'1 1 160px', minWidth:0 }}>
                       <div style={{ fontSize:'14px', fontWeight:'700', color:'#333', marginBottom:'3px' }}>{v.vaccine}</div>
-                      <span style={{ fontSize:'11px', fontWeight:'700', color, background:'white', padding:'2px 8px', borderRadius:'10px', border:`1px solid ${bdr}` }}>
-                        {lbl}
-                      </span>
+                      <span style={{ fontSize:'11px', fontWeight:'700', color, background:'white', padding:'2px 8px', borderRadius:'10px', border:`1px solid ${bdr}` }}>{lbl}</span>
                     </div>
                     <div style={{ textAlign:'center', flex:'0 0 auto' }}>
-                      <div style={{ fontSize:'18px', fontWeight:'800', color: v.available === 0 ? '#c62828' : v.available < v.minStock ? '#f57f17' : '#26a69a' }}>
-                        {v.available.toLocaleString()}
-                      </div>
+                      <div style={{ fontSize:'18px', fontWeight:'800', color:v.available===0?'#c62828':'#26a69a' }}>{v.available.toLocaleString()}</div>
                       <div style={{ fontSize:'10px', color:'#999', textTransform:'uppercase', letterSpacing:'0.4px' }}>doses left</div>
                     </div>
                     <div style={{ flex:'1 1 120px', minWidth:'100px' }}>
@@ -191,13 +250,13 @@ const Dashboard = () => {
                         <span style={{ fontSize:'10px', fontWeight:'700', color }}>{pct}%</span>
                       </div>
                       <div style={{ background:'rgba(0,0,0,0.08)', borderRadius:'99px', height:'8px', overflow:'hidden' }}>
-                        <div style={{ width:`${pct}%`, height:'100%', borderRadius:'99px', background: v.action === 'order_now' ? '#e53935' : v.action === 'order_soon' ? '#f57f17' : '#26a69a', transition:'width 0.4s ease' }} />
+                        <div style={{ width:`${pct}%`, height:'100%', borderRadius:'99px', background:v.action==='order_now'?'#e53935':v.action==='order_soon'?'#f57f17':'#26a69a', transition:'width 0.4s ease' }}/>
                       </div>
                       <div style={{ fontSize:'10px', color:'#888', marginTop:'3px' }}>
                         {v.available.toLocaleString()} / {v.neededBase.toLocaleString()} doses needed
                       </div>
                     </div>
-                    {v.mlRecommended > 0 && (
+                    {v.mlRecommended>0&&(
                       <div style={{ flex:'0 0 auto', padding:'8px 12px', borderRadius:'8px', background:'white', border:`1px solid ${bdr}`, textAlign:'center' }}>
                         <div style={{ fontSize:'13px', fontWeight:'800', color:'#5c6bc0' }}>{v.mlRecommended.toLocaleString()}</div>
                         <div style={{ fontSize:'10px', color:'#999' }}>ML order rec.</div>
@@ -210,7 +269,7 @@ const Dashboard = () => {
 
             <div style={{ marginTop:'16px', paddingTop:'14px', borderTop:'1px solid #f0f0f0', display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'8px' }}>
               <span style={{ fontSize:'12px', color:'#aaa' }}>
-                Showing top 3 of {vaccines.length || '—'} vaccines by urgency · Full management in Demand Forecast
+                Showing top 3 of {vaccines.length||'—'} vaccines by urgency · Full management in Demand Forecast
               </span>
               <button onClick={() => navigate('/demand-forecast')}
                 style={{ fontSize:'12px', color:'#26a69a', background:'none', border:'none', cursor:'pointer', fontWeight:'600', textDecoration:'underline' }}>

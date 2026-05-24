@@ -112,6 +112,24 @@ export const prefetchAll = () =>
     request('/stock-reports/'),
   ]).catch(() => {});  
 
+// ── ML Forecast (FastAPI port 8001) ───────────────────────────────────────────
+const ML_URL = process.env.REACT_APP_ML_URL || 'http://127.0.0.1:8000';
+
+const mlRequest = async (endpoint, method = 'GET') => {
+  const res = await fetch(`${ML_URL}${endpoint}`, { method });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+};
+
+export const mlAPI = {
+  getForecastByYear: (year)         => mlRequest(`/api/ml/forecast/year/${year}/`),
+  getYearlySummary:  ()             => mlRequest('/api/ml/forecast/summary/'),
+  getAvailableYears: ()             => mlRequest('/api/ml/forecast/years/'),
+  getMetrics:        ()             => mlRequest('/api/ml/forecast/metrics/'),
+  predict:           (year, month)  => mlRequest(`/api/ml/predict/?year=${year}&month=${month}`, 'POST'),
+  getCurrentMonth:   (year, month)  => mlRequest(`/api/ml/forecast/?year=${year}&month=${month}`),
+};
+
 // ── Vaccines ──────────────────────────────────────────────────────────────────
 export const vaccineAPI = {
   getAll:  ()         => request('/vaccines/'),

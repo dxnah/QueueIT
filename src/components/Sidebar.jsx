@@ -99,7 +99,7 @@ const Sidebar = ({ isMobileMenuOpen, onMenuClose }) => {
         <div style={{ fontWeight: 'bold', fontSize: '13px' }}>VaxFlow</div>
         <div style={{ opacity: 0.8 }}>ML Vaccine Management System</div>
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.3)', margin: '6px 0' }} />
-        <div>© {new Date().getFullYear()} VaxFlow. All rights reserved.</div>
+        <div>© {new Date().getFullYear()} VaxFlow.</div>
         <div style={{ opacity: 0.7, fontStyle: 'italic' }}>Developed by Group 6</div>
       </footer>
 

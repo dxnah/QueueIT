@@ -1,7 +1,6 @@
 import React, { useState, useContext, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationsContext } from '../pages/notifications';
-import useClock from '../hooks/useClock';
 import useClickOutside from '../hooks/useClickOutside';
 
 const TopBar = () => {
@@ -11,7 +10,6 @@ const TopBar = () => {
   const unreadCount = context?.unreadCount ?? 0;
 
   // ── Hooks ──────────────────────────────────────────────
-  const now         = useClock();
   const [showProfile, setShowProfile] = useState(false);
   const profileRef  = useRef(null);
   useClickOutside(profileRef, () => setShowProfile(false));
@@ -21,22 +19,13 @@ const TopBar = () => {
   const initials      = adminUsername.slice(0, 2).toUpperCase();
   const isOnProfile   = location.pathname === '/profile';
 
-  const formatTime = (date) =>
-    date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-  const formatDate = (date) =>
-    date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
   return (
     <div className="topbar">
 
-      {/* ── Date & Time ── */}
+      {/* ── Greeting ── */}
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '2px' }}>
         <span style={{ fontSize: '16px', fontWeight: '700', color: '#333', letterSpacing: '0.5px' }}>
-          {formatTime(now)}
-        </span>
-        <span style={{ fontSize: '11px', color: '#999' }}>
-          {formatDate(now)}
+          Hello, Welcome Back, <span style={{ color: '#26a69a' }}>{adminUsername}</span>!
         </span>
       </div>
 
