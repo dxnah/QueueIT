@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { announcementAPI } from '../services/api';
+import Pagination from '../components/Pagination';
 import '../styles/dashboard.css';
 import '../styles/announcements.css';
 
@@ -195,6 +196,10 @@ const Announcements = () => {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting,     setDeleting]     = useState(false);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize,    setPageSize]    = useState(10);
+
   const fetchAnnouncements = useCallback(async () => {
     try {
       setLoading(true);
@@ -214,6 +219,9 @@ const Announcements = () => {
     const q = searchTerm.toLowerCase();
     return !q || a.title.toLowerCase().includes(q) || a.message.toLowerCase().includes(q);
   });
+
+  // Paginate announcements
+  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handleOpenCreate = () => { setEditTarget(null); setShowModal(true); };
   const handleOpenEdit   = (a) => { setEditTarget(a);   setShowModal(true); };
@@ -315,16 +323,25 @@ const Announcements = () => {
 
               {/* CARDS */}
               {filtered.length > 0 ? (
-                <div className="ann-list">
-                  {filtered.map(a => (
-                    <AnnouncementCard
-                      key={a.id}
-                      announcement={a}
-                      onEdit={handleOpenEdit}
-                      onDelete={handleOpenDelete}
-                    />
-                  ))}
-                </div>
+                <>
+                  <div className="ann-list">
+                    {paginated.map(a => (
+                      <AnnouncementCard
+                        key={a.id}
+                        announcement={a}
+                        onEdit={handleOpenEdit}
+                        onDelete={handleOpenDelete}
+                      />
+                    ))}
+                  </div>
+                  <Pagination
+                    totalItems={filtered.length}
+                    pageSize={pageSize}
+                    currentPage={currentPage}
+                    onPageChange={(p) => setCurrentPage(p)}
+                    onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+                  />
+                </>
               ) : (
                 <div className="empty-state">
                   <div className="ann-empty-icon">📢</div>

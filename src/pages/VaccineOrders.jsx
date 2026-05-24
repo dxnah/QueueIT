@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { orderAPI } from '../services/api';
 import usePolling from '../hooks/usePolling';
+import Pagination from '../components/Pagination';
 import '../styles/dashboard.css';
 
 const STATUS_OPTIONS = ['Pending', 'Approved', 'Shipped', 'Delivered', 'Cancelled'];
@@ -31,6 +32,27 @@ const VaccineOrders = () => {
   const [editingOrder,     setEditingOrder]     = useState(null);
   const [loading,          setLoading]          = useState(true);
   const [apiError,         setApiError]         = useState(null);
+
+  // Pagination & sort
+  const [currentPage,  setCurrentPage]  = useState(1);
+  const [pageSize,     setPageSize]     = useState(10);
+  const [sortKey,      setSortKey]      = useState('ordered_at');
+  const [sortDir,      setSortDir]      = useState('desc');
+
+  const ORDER_SORT_OPTIONS = [
+    { key: 'ordered_at', label: 'Date Ordered' },
+    { key: 'vaccine',    label: 'Vaccine (A–Z)' },
+    { key: 'supplier',   label: 'Supplier (A–Z)' },
+    { key: 'amount',     label: 'Amount' },
+    { key: 'total',      label: 'Total Value' },
+    { key: 'status',     label: 'Status' },
+  ];
+
+  const handleSortChange = (key, dir) => {
+    setSortKey(key);
+    setSortDir(dir);
+    setCurrentPage(1);
+  };
 
   const loadOrders = useCallback(async () => {
     try {
@@ -76,6 +98,33 @@ const VaccineOrders = () => {
       || String(o.id).includes(q);
     return matchStatus && matchSearch;
   });
+
+  // Sort
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal = a[sortKey];
+    let bVal = b[sortKey];
+    // Numeric fields
+    if (sortKey === 'amount' || sortKey === 'total') {
+      aVal = Number(aVal) || 0;
+      bVal = Number(bVal) || 0;
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+    // Date
+    if (sortKey === 'ordered_at') {
+      aVal = aVal ? new Date(aVal).getTime() : 0;
+      bVal = bVal ? new Date(bVal).getTime() : 0;
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+    // String
+    aVal = (aVal || '').toString().toLowerCase();
+    bVal = (bVal || '').toString().toLowerCase();
+    if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Paginate
+  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const counts = STATUS_OPTIONS.reduce((acc, s) => {
     acc[s] = orders.filter(o => o.status === s).length;
@@ -173,7 +222,7 @@ const VaccineOrders = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {filtered.map((order, i) => (
+                        {paginated.map((order, i) => (
                           <tr key={order.id}
                             style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : 'white', transition: 'background 0.12s' }}
                             onMouseEnter={e => e.currentTarget.style.background = '#f0fffe'}
@@ -227,6 +276,17 @@ const VaccineOrders = () => {
                     </table>
                   </div>
                 )}
+                <Pagination
+                  totalItems={sorted.length}
+                  pageSize={pageSize}
+                  currentPage={currentPage}
+                  onPageChange={(p) => setCurrentPage(p)}
+                  onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+                  sortKey={sortKey}
+                  sortDir={sortDir}
+                  onSortChange={handleSortChange}
+                  sortOptions={ORDER_SORT_OPTIONS}
+                />
               </div>
             </>
           )}

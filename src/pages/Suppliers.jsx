@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import '../styles/dashboard.css';
 import { supplierAPI } from '../services/api';
+import Pagination from '../components/Pagination';
 
 const statusStyle = (status) => ({
   padding:'3px 10px', borderRadius:'20px', fontSize:'12px', fontWeight:'700',
@@ -21,6 +22,24 @@ const Suppliers = () => {
   const [filterStatus, setFilterStatus]         = useState('all');
   const [searchQuery, setSearchQuery]           = useState('');
   const [saveMessage, setSaveMessage]           = useState('');
+
+  // Pagination & sort
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize,    setPageSize]    = useState(10);
+  const [sortKey,     setSortKey]     = useState('name');
+  const [sortDir,     setSortDir]     = useState('asc');
+
+  const SUPPLIER_SORT_OPTIONS = [
+    { key: 'name',           label: 'Name (A–Z)' },
+    { key: 'status',         label: 'Status' },
+    { key: 'lead_time_days', label: 'Lead Time' },
+  ];
+
+  const handleSortChange = (key, dir) => {
+    setSortKey(key);
+    setSortDir(dir);
+    setCurrentPage(1);
+  };
 
   const emptyForm = { name:'', contact:'', phone:'', address:'', vaccines:'', status:'Active', lead_time_days:'', notes:'' };
   const [form, setForm] = useState(emptyForm);
@@ -89,6 +108,25 @@ const Suppliers = () => {
       s.vaccines.some(v => v.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchStatus && matchSearch;
   });
+
+  // Sort
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal = a[sortKey];
+    let bVal = b[sortKey];
+    if (sortKey === 'lead_time_days') {
+      aVal = Number(aVal) || 0;
+      bVal = Number(bVal) || 0;
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+    aVal = (aVal || '').toString().toLowerCase();
+    bVal = (bVal || '').toString().toLowerCase();
+    if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Paginate
+  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const inputStyle = { width:'100%', padding:'9px 12px', borderRadius:'8px', border:'1.5px solid #e0e0e0', fontSize:'13px', boxSizing:'border-box', outline:'none' };
 
@@ -221,7 +259,7 @@ const Suppliers = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filtered.map((s, i) => (
+                      {paginated.map((s, i) => (
                         <tr key={s.id} style={{ borderBottom:'1px solid #f0f0f0', background:i%2===0?'#fafafa':'white' }}
                           onMouseEnter={e => e.currentTarget.style.background='#f0fffe'}
                           onMouseLeave={e => e.currentTarget.style.background=i%2===0?'#fafafa':'white'}>
@@ -261,6 +299,17 @@ const Suppliers = () => {
                   </table>
                 </div>
               )}
+              <Pagination
+                totalItems={sorted.length}
+                pageSize={pageSize}
+                currentPage={currentPage}
+                onPageChange={(p) => setCurrentPage(p)}
+                onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onSortChange={handleSortChange}
+                sortOptions={SUPPLIER_SORT_OPTIONS}
+              />
             </div>
           )}
 

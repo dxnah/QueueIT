@@ -6,6 +6,7 @@ import {
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { usageReportAPI, stockReportAPI, vaccineAPI } from '../services/api';
+import Pagination from '../components/Pagination';
 import '../styles/dashboard.css';
 import '../styles/reports.css';
 
@@ -278,6 +279,12 @@ const Reports = () => {
   const [showUsageModal, setShowUsageModal] = useState(false);
   const [showStockModal, setShowStockModal] = useState(false);
   const [editingUsage,   setEditingUsage]   = useState(null);
+
+  // Pagination
+  const [usagePage,     setUsagePage]     = useState(1);
+  const [usagePageSize, setUsagePageSize] = useState(10);
+  const [stockPage,     setStockPage]     = useState(1);
+  const [stockPageSize, setStockPageSize] = useState(10);
   const [editingStock,   setEditingStock]   = useState(null);
 
   // ── Load all data ─────────────────────────────────────────────────────────
@@ -751,7 +758,7 @@ const Reports = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {sortedUsage.map((row) => {
+                          {sortedUsage.slice((usagePage - 1) * usagePageSize, usagePage * usagePageSize).map((row) => {
                             const eff      = parseFloat(calcEff(row.administered, row.wasted));
                             const rowClass = row.wasted > 10 ? 'row-critical' : row.wasted > 5 ? 'row-warning' : '';
                             return (
@@ -805,6 +812,15 @@ const Reports = () => {
                         </tbody>
                       </table>
                     )}
+                    {sortedUsage.length > 0 && (
+                      <Pagination
+                        totalItems={sortedUsage.length}
+                        pageSize={usagePageSize}
+                        currentPage={usagePage}
+                        onPageChange={(p) => setUsagePage(p)}
+                        onPageSizeChange={(s) => { setUsagePageSize(s); setUsagePage(1); }}
+                      />
+                    )}
                   </div>
                 )}
 
@@ -829,7 +845,7 @@ const Reports = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {stockReports.map((row) => (
+                          {stockReports.slice((stockPage - 1) * stockPageSize, stockPage * stockPageSize).map((row) => (
                             <tr key={row.id}>
                               <td><strong>{row.period_label || '—'}</strong></td>
                               <td style={{ color: '#888', fontSize: '12px' }}>{row.date || '—'}</td>
@@ -867,6 +883,15 @@ const Reports = () => {
                           ))}
                         </tbody>
                       </table>
+                    )}
+                    {stockReports.length > 0 && (
+                      <Pagination
+                        totalItems={stockReports.length}
+                        pageSize={stockPageSize}
+                        currentPage={stockPage}
+                        onPageChange={(p) => setStockPage(p)}
+                        onPageSizeChange={(s) => { setStockPageSize(s); setStockPage(1); }}
+                      />
                     )}
                   </div>
                 )}
