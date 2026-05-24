@@ -52,6 +52,21 @@ const CustomTooltip = ({active,payload,label}) => {
   );
 };
 
+// ─── Field row helper for the actuals form ────────────────────────────────────
+const FormField = ({ label, hint, children }) => (
+  <div style={{marginBottom:14}}>
+    <label style={{display:'block',fontSize:12,fontWeight:700,color:'#444',marginBottom:3}}>{label}</label>
+    {hint && <p style={{margin:'0 0 5px',fontSize:11,color:'#aaa',fontStyle:'italic'}}>{hint}</p>}
+    {children}
+  </div>
+);
+
+const inputStyle = {
+  width:'100%', padding:'8px 11px', borderRadius:8,
+  border:'1.5px solid #e0e0e0', fontSize:13, color:'#333',
+  background:'white', boxSizing:'border-box', outline:'none',
+};
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 const DemandForecast = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -75,6 +90,38 @@ const DemandForecast = () => {
   const [mlLoading,      setMlLoading]      = useState(true);
   const [yearLoading,    setYearLoading]    = useState(false);
   const [mlError,        setMlError]        = useState(null);
+
+  // Actuals form state
+  const currentYear  = new Date().getFullYear();
+  const currentMonth = new Date().getMonth(); // 0-indexed — last month
+  const defaultActualYear  = currentMonth === 0 ? currentYear - 1 : currentYear;
+  const defaultActualMonth = currentMonth === 0 ? 12 : currentMonth; // last completed month
+
+  const [actualForm, setActualForm] = useState({
+    year:  defaultActualYear,
+    month: defaultActualMonth,
+    arv_doses_administered:        '',
+    bite_cases_total:              '',
+    category_1_cases:              '',
+    category_2_cases:              '',
+    category_3_cases:              '',
+    temperature_c:                 '',
+    rainfall_mm:                   '',
+    humidity_percent:              '',
+    heat_index_c:                  '',
+    pep_completion_rate:           '',
+    rig_availability_rate:         '',
+    stockout_flag:                 '0',
+    procurement_delay_days:        '0',
+    dog_vaccination_campaign_flag: '0',
+    extreme_weather_flag:          '0',
+    holiday_season_flag:           '0',
+    school_vacation_flag:          '0',
+  });
+  const [submitting,    setSubmitting]    = useState(false);
+  const [submitResult,  setSubmitResult]  = useState(null); // {success, message, retraining}
+  const [submitError,   setSubmitError]   = useState(null);
+  const [retrainStatus, setRetrainStatus] = useState(null);
 
   // Initial load
   useEffect(()=>{
@@ -112,6 +159,27 @@ const DemandForecast = () => {
     load();
   },[selectedYear]);
 
+  // Poll retrain status after submission
+  useEffect(()=>{
+    if (!submitResult?.retraining) return;
+    const poll = setInterval(async () => {
+      try {
+        const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        const res = await fetch(`${BASE_URL}/api/ml/retrain/status/`);
+        if (res.ok) {
+          const status = await res.json();
+          setRetrainStatus(status);
+          // Refresh metrics after retrain
+          const newMetrics = await mlAPI.getMetrics();
+          setMetrics(newMetrics);
+        }
+      } catch(e) { /* silent */ }
+    }, 5000);
+    // Stop polling after 60 seconds
+    const timeout = setTimeout(() => clearInterval(poll), 60000);
+    return () => { clearInterval(poll); clearTimeout(timeout); };
+  }, [submitResult]);
+
   // Predict handler
   const handlePredict = async () => {
     try {
@@ -121,6 +189,68 @@ const DemandForecast = () => {
     } catch(e){ setPredictError(e.message); }
     finally { setPredicting(false); }
   };
+
+  // Submit actuals handler
+  const handleSubmitActuals = async (e) => {
+    e.preventDefault();
+    setSubmitting(true); setSubmitError(null); setSubmitResult(null); setRetrainStatus(null);
+
+    // Validate required fields
+    const required = ['arv_doses_administered','bite_cases_total','category_1_cases',
+      'category_2_cases','category_3_cases','temperature_c','rainfall_mm',
+      'humidity_percent','heat_index_c','pep_completion_rate','rig_availability_rate'];
+    const missing = required.filter(f => actualForm[f] === '' || actualForm[f] === null);
+    if (missing.length > 0) {
+      setSubmitError(`Please fill in: ${missing.map(f=>f.replace(/_/g,' ')).join(', ')}`);
+      setSubmitting(false);
+      return;
+    }
+
+    try {
+      const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const payload = {
+        year:  parseInt(actualForm.year),
+        month: parseInt(actualForm.month),
+        arv_doses_administered:        parseInt(actualForm.arv_doses_administered),
+        bite_cases_total:              parseInt(actualForm.bite_cases_total),
+        category_1_cases:              parseInt(actualForm.category_1_cases),
+        category_2_cases:              parseInt(actualForm.category_2_cases),
+        category_3_cases:              parseInt(actualForm.category_3_cases),
+        temperature_c:                 parseFloat(actualForm.temperature_c),
+        rainfall_mm:                   parseFloat(actualForm.rainfall_mm),
+        humidity_percent:              parseFloat(actualForm.humidity_percent),
+        heat_index_c:                  parseFloat(actualForm.heat_index_c),
+        pep_completion_rate:           parseFloat(actualForm.pep_completion_rate),
+        rig_availability_rate:         parseFloat(actualForm.rig_availability_rate),
+        stockout_flag:                 parseInt(actualForm.stockout_flag),
+        procurement_delay_days:        parseInt(actualForm.procurement_delay_days),
+        dog_vaccination_campaign_flag: parseInt(actualForm.dog_vaccination_campaign_flag),
+        extreme_weather_flag:          parseInt(actualForm.extreme_weather_flag),
+        holiday_season_flag:           parseInt(actualForm.holiday_season_flag),
+        school_vacation_flag:          parseInt(actualForm.school_vacation_flag),
+      };
+
+      const res = await fetch(`${BASE_URL}/api/ml/actuals/`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || `HTTP ${res.status}`);
+      }
+
+      const result = await res.json();
+      setSubmitResult(result);
+    } catch(e) {
+      setSubmitError(e.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const setField = (key, val) => setActualForm(prev => ({...prev, [key]: val}));
 
   const months      = yearData?.months||[];
   const yearSummary = yearData?.summary||null;
@@ -147,6 +277,14 @@ const DemandForecast = () => {
     boxShadow:active?'0 2px 8px rgba(38,166,154,0.3)':'0 1px 3px rgba(0,0,0,0.08)',
   });
 
+  const flagSelect = (key) => (
+    <select value={actualForm[key]} onChange={e=>setField(key, e.target.value)}
+      style={{...inputStyle, cursor:'pointer'}}>
+      <option value="0">No</option>
+      <option value="1">Yes</option>
+    </select>
+  );
+
   return (
     <div className="dashboard-container">
       <style>{`@keyframes vf-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`}</style>
@@ -168,9 +306,10 @@ const DemandForecast = () => {
               {metrics&&(
                 <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
                   {[
-                    {label:'Model', value:metrics.model_name,               color:'#26a69a'},
-                    {label:'R²',    value:metrics.test_metrics?.R2,          color:'#2e7d32'},
+                    {label:'Model', value:metrics.model_name,                  color:'#26a69a'},
+                    {label:'R²',    value:metrics.test_metrics?.R2,             color:'#2e7d32'},
                     {label:'MAPE',  value:`${metrics.test_metrics?.MAPE_pct}%`, color:'#f57f17'},
+                    {label:'MAE',   value:`±${metrics.test_metrics?.MAE} doses`,color:'#5c6bc0'},
                   ].map(({label,value,color})=>(
                     <div key={label} style={{display:'inline-flex',alignItems:'center',gap:5,background:`${color}15`,border:`1.5px solid ${color}40`,borderRadius:20,padding:'4px 12px'}}>
                       <span style={{fontSize:10,color:'#888',fontWeight:600}}>{label}</span>
@@ -182,7 +321,6 @@ const DemandForecast = () => {
             </div>
           </header>
 
-          {/* Error */}
           {mlError&&(
             <div style={{marginBottom:16,padding:'12px 18px',background:'#ffebee',borderRadius:10,border:'1px solid #ef9a9a',fontSize:13,color:'#c62828',fontWeight:600}}>
               ⚠️ {mlError}
@@ -191,12 +329,9 @@ const DemandForecast = () => {
 
           {/* Tabs */}
           <div style={{display:'flex',gap:8,marginBottom:20,flexWrap:'wrap',borderBottom:'2px solid #f0f0f0',paddingBottom:12}}>
-            <button onClick={()=>setActiveTab('arv')} style={btnStyle(activeTab==='arv')}>
-              📈 ARV Demand Forecast
-            </button>
-            <button onClick={()=>setActiveTab('predict')} style={btnStyle(activeTab==='predict')}>
-              🔮 Live Predict
-            </button>
+            <button onClick={()=>setActiveTab('arv')}     style={btnStyle(activeTab==='arv')}>📈 ARV Demand Forecast</button>
+            <button onClick={()=>setActiveTab('predict')} style={btnStyle(activeTab==='predict')}>🔮 Live Predict</button>
+            <button onClick={()=>setActiveTab('actuals')} style={btnStyle(activeTab==='actuals')}>📥 Submit Monthly Data</button>
           </div>
 
           {/* ══ TAB: ARV FORECAST ══ */}
@@ -206,20 +341,14 @@ const DemandForecast = () => {
                 ?<div style={{display:'flex',gap:16,marginBottom:24,flexWrap:'wrap'}}>{[1,2,3,4].map(i=><div key={i} style={{flex:'1 1 0',minWidth:0}}><Skeleton h={90}/></div>)}</div>
                 :yearSummary&&(
                   <div style={{display:'flex',gap:16,marginBottom:24,flexWrap:'wrap'}}>
-                    <StatCard icon="📅" label="Year"             value={selectedYear}
-                      note={`${months.length} months`} borderColor="#26a69a"/>
-                    <StatCard icon="💉" label="Total Predicted"  value={(yearSummary.total_predicted||yearSummary.totalPredicted||0).toLocaleString()}
-                      note="ARV doses forecast" borderColor="#5c6bc0"
-                      sub={`Avg ${(yearSummary.avg_per_month||yearSummary.avgPerMonth||0).toLocaleString()}/mo`}/>
-                    <StatCard icon="📦" label="Recommended Order" value={(yearSummary.total_recommended||yearSummary.totalRecommended||0).toLocaleString()}
-                      note="incl. 12% safety buffer" borderColor="#f57f17"/>
-                    <StatCard icon="✅" label="Model Accuracy"   value={metrics?`${(metrics.test_metrics?.R2*100).toFixed(1)}%`:'—'}
-                      note={`MAE ±${metrics?.test_metrics?.MAE||'—'} doses`} borderColor="#2e7d32"/>
+                    <StatCard icon="📅" label="Year" value={selectedYear} note={`${months.length} months`} borderColor="#26a69a"/>
+                    <StatCard icon="💉" label="Total Predicted" value={(yearSummary.total_predicted||yearSummary.totalPredicted||0).toLocaleString()} note="ARV doses forecast" borderColor="#5c6bc0" sub={`Avg ${(yearSummary.avg_per_month||yearSummary.avgPerMonth||0).toLocaleString()}/mo`}/>
+                    <StatCard icon="📦" label="Recommended Order" value={(yearSummary.total_recommended||yearSummary.totalRecommended||0).toLocaleString()} note="incl. 12% safety buffer" borderColor="#f57f17"/>
+                    <StatCard icon="✅" label="Model Accuracy" value={metrics?`${(metrics.test_metrics?.R2*100).toFixed(1)}%`:'—'} note={`MAE ±${metrics?.test_metrics?.MAE||'—'} doses`} borderColor="#2e7d32"/>
                   </div>
                 )
               }
 
-              {/* Year selector + view toggle */}
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:18,flexWrap:'wrap',gap:12}}>
                 <div style={{position:'relative'}}>
                   <button onClick={()=>setYearDropOpen(v=>!v)} style={btnStyle(true)}>
@@ -245,13 +374,11 @@ const DemandForecast = () => {
                 </div>
               </div>
 
-              {/* Content card */}
               <div style={{background:'white',borderRadius:14,padding:22,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:28}}>
                 <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16,flexWrap:'wrap'}}>
                   <h3 style={{margin:0,fontSize:16,fontWeight:700,color:'#333'}}>🤖 ARV Dose Forecast — {selectedYear}</h3>
                   <span style={{fontSize:11,color:'#999',fontStyle:'italic',marginLeft:'auto'}}>Linear Regression · 70/15/15 chronological split</span>
                 </div>
-
                 {yearLoading
                   ?<div style={{display:'flex',flexDirection:'column',gap:10}}>{[1,2,3,4].map(i=><Skeleton key={i} h={36}/>)}</div>
                   :months.length===0
@@ -313,7 +440,6 @@ const DemandForecast = () => {
                           </table>
                         </div>
                       )}
-
                       {activeView==='bar'&&(
                         <>
                           <p style={{margin:'0 0 16px',fontSize:12,color:'#999'}}>Monthly predicted vs actual vs recommended — {selectedYear}</p>
@@ -331,7 +457,6 @@ const DemandForecast = () => {
                           </ResponsiveContainer>
                         </>
                       )}
-
                       {activeView==='line'&&(
                         <>
                           <p style={{margin:'0 0 16px',fontSize:12,color:'#999'}}>Full year trend with recommended safety-stock band — {selectedYear}</p>
@@ -354,7 +479,6 @@ const DemandForecast = () => {
                 }
               </div>
 
-              {/* Year-over-year */}
               {yearlySummary.length>0&&(
                 <div style={{background:'white',borderRadius:14,padding:22,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:28}}>
                   <h3 style={{margin:'0 0 16px',fontSize:16,fontWeight:700,color:'#333'}}>📊 Year-over-Year ARV Demand (All Years)</h3>
@@ -381,53 +505,48 @@ const DemandForecast = () => {
               <div style={{background:'white',borderRadius:14,padding:28,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:24}}>
                 <h3 style={{margin:'0 0 6px',fontSize:16,fontWeight:700,color:'#333'}}>🔮 Live ARV Demand Prediction</h3>
                 <p style={{margin:'0 0 22px',fontSize:12,color:'#999'}}>
-                  Enter any year and month — the trained Linear Regression model will predict ARV dose demand in real time.
+                  Enter any year and month — the trained model predicts ARV dose demand automatically.
                 </p>
-
                 <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
                   <div style={{flex:'1 1 160px'}}>
                     <label style={{display:'block',fontSize:12,fontWeight:600,color:'#555',marginBottom:6}}>Year</label>
                     <input type="number" value={predictYear}
                       onChange={e=>setPredictYear(parseInt(e.target.value)||new Date().getFullYear())}
                       min={2010} max={2040}
-                      style={{width:'100%',padding:'9px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:14,color:'#333',boxSizing:'border-box',outline:'none'}}
+                      style={{...inputStyle,fontSize:14}}
                       onFocus={e=>e.target.style.borderColor='#26a69a'}
                       onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
                   </div>
                   <div style={{flex:'1 1 160px'}}>
                     <label style={{display:'block',fontSize:12,fontWeight:600,color:'#555',marginBottom:6}}>Month</label>
                     <select value={predictMonth} onChange={e=>setPredictMonth(parseInt(e.target.value))}
-                      style={{width:'100%',padding:'9px 12px',borderRadius:8,border:'1.5px solid #e0e0e0',fontSize:14,color:'#333',background:'white',boxSizing:'border-box',cursor:'pointer',outline:'none'}}
+                      style={{...inputStyle,fontSize:14,cursor:'pointer'}}
                       onFocus={e=>e.target.style.borderColor='#26a69a'}
                       onBlur={e=>e.target.style.borderColor='#e0e0e0'}>
                       {MONTHS.map((m,i)=><option key={m} value={i+1}>{m}</option>)}
                     </select>
                   </div>
                 </div>
-
                 <button onClick={handlePredict} disabled={predicting}
                   style={{width:'100%',padding:'12px',borderRadius:9,border:'none',background:predicting?'#a5d6a7':'#26a69a',color:'white',fontSize:15,fontWeight:700,cursor:predicting?'not-allowed':'pointer',transition:'background 0.2s'}}>
                   {predicting?'⏳ Predicting...':'🔮 Predict ARV Demand'}
                 </button>
-
                 {predictError&&(
                   <div style={{marginTop:14,padding:'10px 14px',background:'#ffebee',borderRadius:8,border:'1px solid #ef9a9a',fontSize:13,color:'#c62828',fontWeight:600}}>
                     ⚠️ {predictError}
                   </div>
                 )}
               </div>
-
               {predictResult&&(
                 <div style={{background:'white',borderRadius:14,padding:28,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)'}}>
                   <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20,flexWrap:'wrap'}}>
                     <h3 style={{margin:0,fontSize:16,fontWeight:700,color:'#333'}}>
-                      Prediction Result — {predictResult.input.monthName} {predictResult.input.year}
+                      Prediction — {predictResult.input.monthName} {predictResult.input.year}
                     </h3>
                     {PEAK_MONTHS.includes(predictResult.input.monthName)&&(
                       <span style={{fontSize:10,background:'#fff3e0',color:'#e65100',padding:'2px 8px',borderRadius:10,fontWeight:700,border:'1px solid #ffcc80'}}>🔥 HIGH DEMAND MONTH</span>
                     )}
                   </div>
-
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:20}}>
                     <div style={{background:'#e0f7f4',borderRadius:12,padding:'18px 20px',textAlign:'center',border:'2px solid #26a69a'}}>
                       <p style={{margin:'0 0 6px',fontSize:11,color:'#26a69a',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.5px'}}>💉 Predicted Doses</p>
@@ -440,7 +559,6 @@ const DemandForecast = () => {
                       <p style={{margin:'6px 0 0',fontSize:11,color:'#f57f17',opacity:0.7}}>incl. {predictResult.prediction.safety_buffer_pct}% safety buffer</p>
                     </div>
                   </div>
-
                   <div style={{background:'#f5f5f5',borderRadius:10,padding:'14px 16px'}}>
                     <p style={{margin:'0 0 8px',fontSize:11,color:'#888',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.5px'}}>Model Info</p>
                     <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
@@ -457,6 +575,227 @@ const DemandForecast = () => {
                     </div>
                   </div>
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* ══ TAB: SUBMIT MONTHLY ACTUALS ══ */}
+          {activeTab==='actuals'&&(
+            <div style={{maxWidth:720}}>
+
+              {/* Explainer banner */}
+              <div style={{background:'linear-gradient(135deg,#1a7a74 0%,#26a69a 100%)',borderRadius:12,padding:'18px 22px',marginBottom:24,color:'white'}}>
+                <h3 style={{margin:'0 0 6px',fontSize:15,fontWeight:700,color:'white'}}>📥 Monthly Data Submission</h3>
+                <p style={{margin:0,fontSize:12,color:'rgba(255,255,255,0.85)',lineHeight:1.6}}>
+                  Submit actual data from your ABTC monthly report after each month ends.
+                  The model will <strong>automatically retrain</strong> and update predictions — no manual steps needed.
+                  Do this once a month to improve forecast accuracy over time.
+                </p>
+              </div>
+
+              {/* Success state */}
+              {submitResult&&(
+                <div style={{background:'#e8f5e9',border:'1.5px solid #a5d6a7',borderRadius:12,padding:'18px 20px',marginBottom:20}}>
+                  <p style={{margin:'0 0 6px',fontSize:14,fontWeight:700,color:'#2e7d32'}}>
+                    ✅ Data {submitResult.status} for {MONTHS[submitResult.month-1]} {submitResult.year}
+                  </p>
+                  <p style={{margin:'0 0 10px',fontSize:12,color:'#388e3c'}}>
+                    {submitResult.arv_doses_administered?.toLocaleString()} doses submitted · Model is retraining in the background (~10–15 seconds)
+                  </p>
+                  {retrainStatus&&(
+                    <div style={{background:'white',borderRadius:8,padding:'10px 14px',border:'1px solid #a5d6a7'}}>
+                      <p style={{margin:'0 0 4px',fontSize:11,color:'#888',fontWeight:700,textTransform:'uppercase'}}>Updated Model Metrics</p>
+                      <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
+                        {[
+                          {label:'R²',   value:retrainStatus.test_r2},
+                          {label:'MAPE', value:`${retrainStatus.test_mape}%`},
+                          {label:'MAE',  value:`±${retrainStatus.test_mae} doses`},
+                          {label:'Trained on', value:`${retrainStatus.trained_on?.samples} rows`},
+                        ].map(({label,value})=>(
+                          <div key={label}>
+                            <span style={{fontSize:11,color:'#999'}}>{label}: </span>
+                            <span style={{fontSize:12,color:'#2e7d32',fontWeight:700}}>{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {!retrainStatus&&(
+                    <p style={{margin:0,fontSize:11,color:'#666',fontStyle:'italic'}}>
+                      ⏳ Waiting for retrain to complete... metrics will update here automatically.
+                    </p>
+                  )}
+                  <button onClick={()=>{setSubmitResult(null);setRetrainStatus(null);}}
+                    style={{marginTop:12,padding:'6px 14px',borderRadius:7,border:'1.5px solid #2e7d32',background:'white',color:'#2e7d32',fontSize:12,fontWeight:600,cursor:'pointer'}}>
+                    Submit Another Month
+                  </button>
+                </div>
+              )}
+
+              {/* Error */}
+              {submitError&&(
+                <div style={{background:'#ffebee',border:'1px solid #ef9a9a',borderRadius:10,padding:'12px 16px',marginBottom:16,fontSize:13,color:'#c62828',fontWeight:600}}>
+                  ⚠️ {submitError}
+                </div>
+              )}
+
+              {/* Form */}
+              {!submitResult&&(
+                <form onSubmit={handleSubmitActuals}>
+                  <div style={{background:'white',borderRadius:14,padding:24,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:16}}>
+
+                    {/* Period */}
+                    <h4 style={{margin:'0 0 16px',fontSize:13,fontWeight:700,color:'#333',borderBottom:'1px solid #f0f0f0',paddingBottom:10}}>
+                      📅 Reporting Period
+                    </h4>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:4}}>
+                      <FormField label="Year" hint="The year this data is for">
+                        <input type="number" value={actualForm.year}
+                          onChange={e=>setField('year',e.target.value)}
+                          min={2020} max={2040} style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                      <FormField label="Month" hint="The month that just ended">
+                        <select value={actualForm.month} onChange={e=>setField('month',e.target.value)}
+                          style={{...inputStyle,cursor:'pointer'}}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}>
+                          {MONTHS.map((m,i)=><option key={m} value={i+1}>{m}</option>)}
+                        </select>
+                      </FormField>
+                    </div>
+                  </div>
+
+                  {/* Clinical data */}
+                  <div style={{background:'white',borderRadius:14,padding:24,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:16}}>
+                    <h4 style={{margin:'0 0 4px',fontSize:13,fontWeight:700,color:'#333'}}>💉 Clinical Data</h4>
+                    <p style={{margin:'0 0 16px',fontSize:11,color:'#999',fontStyle:'italic'}}>From your ABTC monthly logbook and patient register</p>
+
+                    <FormField label="ARV Doses Administered *" hint="Total anti-rabies vaccine doses given this month — most important field">
+                      <input type="number" value={actualForm.arv_doses_administered}
+                        onChange={e=>setField('arv_doses_administered',e.target.value)}
+                        placeholder="e.g. 1712" style={{...inputStyle,borderColor:'#26a69a'}}
+                        onFocus={e=>e.target.style.borderColor='#26a69a'}
+                        onBlur={e=>e.target.style.borderColor='#26a69a'}/>
+                    </FormField>
+
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:12}}>
+                      <FormField label="Total Bite Cases *" hint="All animal bite patients">
+                        <input type="number" value={actualForm.bite_cases_total}
+                          onChange={e=>setField('bite_cases_total',e.target.value)}
+                          placeholder="e.g. 340" style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                      <FormField label="Category I *" hint="Licks on intact skin">
+                        <input type="number" value={actualForm.category_1_cases}
+                          onChange={e=>setField('category_1_cases',e.target.value)}
+                          placeholder="e.g. 65" style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                      <FormField label="Category II *" hint="Minor scratches">
+                        <input type="number" value={actualForm.category_2_cases}
+                          onChange={e=>setField('category_2_cases',e.target.value)}
+                          placeholder="e.g. 140" style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                      <FormField label="Category III *" hint="Transdermal bites">
+                        <input type="number" value={actualForm.category_3_cases}
+                          onChange={e=>setField('category_3_cases',e.target.value)}
+                          placeholder="e.g. 135" style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                    </div>
+
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:4}}>
+                      <FormField label="PEP Completion Rate *" hint="Decimal 0–1 (e.g. 0.82 = 82%)">
+                        <input type="number" step="0.01" min="0" max="1" value={actualForm.pep_completion_rate}
+                          onChange={e=>setField('pep_completion_rate',e.target.value)}
+                          placeholder="e.g. 0.82" style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                      <FormField label="RIG Availability Rate *" hint="Decimal 0–1 (e.g. 0.93 = 93% of days available)">
+                        <input type="number" step="0.01" min="0" max="1" value={actualForm.rig_availability_rate}
+                          onChange={e=>setField('rig_availability_rate',e.target.value)}
+                          placeholder="e.g. 0.93" style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                    </div>
+                  </div>
+
+                  {/* Climate */}
+                  <div style={{background:'white',borderRadius:14,padding:24,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:16}}>
+                    <h4 style={{margin:'0 0 4px',fontSize:13,fontWeight:700,color:'#333'}}>🌤️ Climate Data</h4>
+                    <p style={{margin:'0 0 16px',fontSize:11,color:'#999',fontStyle:'italic'}}>From PAGASA CDO monthly report</p>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:12}}>
+                      {[
+                        {key:'temperature_c',    label:'Avg Temp (°C) *',    placeholder:'e.g. 29.2'},
+                        {key:'rainfall_mm',      label:'Total Rainfall (mm) *',placeholder:'e.g. 145'},
+                        {key:'humidity_percent', label:'Avg Humidity (%) *',  placeholder:'e.g. 80.5'},
+                        {key:'heat_index_c',     label:'Heat Index (°C) *',   placeholder:'e.g. 33.1'},
+                      ].map(({key,label,placeholder})=>(
+                        <FormField key={key} label={label}>
+                          <input type="number" step="0.1" value={actualForm[key]}
+                            onChange={e=>setField(key,e.target.value)}
+                            placeholder={placeholder} style={inputStyle}
+                            onFocus={e=>e.target.style.borderColor='#26a69a'}
+                            onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                        </FormField>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Flags */}
+                  <div style={{background:'white',borderRadius:14,padding:24,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:16}}>
+                    <h4 style={{margin:'0 0 4px',fontSize:13,fontWeight:700,color:'#333'}}>🚩 Monthly Events & Flags</h4>
+                    <p style={{margin:'0 0 16px',fontSize:11,color:'#999',fontStyle:'italic'}}>Did any of these happen this month?</p>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                      <FormField label="Stockout Occurred?" hint="Did you run out of ARV any day this month?">
+                        {flagSelect('stockout_flag')}
+                      </FormField>
+                      <FormField label="Procurement Delay (days)" hint="How many days were orders delayed?">
+                        <input type="number" min="0" value={actualForm.procurement_delay_days}
+                          onChange={e=>setField('procurement_delay_days',e.target.value)}
+                          placeholder="0" style={inputStyle}
+                          onFocus={e=>e.target.style.borderColor='#26a69a'}
+                          onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                      </FormField>
+                      <FormField label="Dog Vaccination Campaign?" hint="Was there a Rabies Month / vaccination drive?">
+                        {flagSelect('dog_vaccination_campaign_flag')}
+                      </FormField>
+                      <FormField label="Extreme Weather Event?" hint="Typhoon, flooding, or other disaster?">
+                        {flagSelect('extreme_weather_flag')}
+                      </FormField>
+                      <FormField label="Holiday Season?" hint="Major holidays (Christmas, New Year)?">
+                        {flagSelect('holiday_season_flag')}
+                      </FormField>
+                      <FormField label="School Vacation?" hint="April, May, June, October, November">
+                        {flagSelect('school_vacation_flag')}
+                      </FormField>
+                    </div>
+                  </div>
+
+                  {/* Submit */}
+                  <button type="submit" disabled={submitting}
+                    style={{width:'100%',padding:'14px',borderRadius:10,border:'none',
+                      background:submitting?'#a5d6a7':'#26a69a',color:'white',
+                      fontSize:15,fontWeight:700,cursor:submitting?'not-allowed':'pointer',
+                      transition:'background 0.2s',
+                      boxShadow:submitting?'none':'0 4px 14px rgba(38,166,154,0.4)'}}>
+                    {submitting
+                      ? '⏳ Saving data and starting retrain...'
+                      : `📥 Submit ${MONTHS[actualForm.month-1]} ${actualForm.year} Data & Retrain Model`}
+                  </button>
+                  <p style={{textAlign:'center',margin:'10px 0 0',fontSize:11,color:'#aaa'}}>
+                    The model will automatically retrain after submission (~10–15 seconds). You can navigate away.
+                  </p>
+                </form>
               )}
             </div>
           )}
