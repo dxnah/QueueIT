@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import { PEAK_MONTHS } from '../data/dashboardData';
 import { vaccineAPI, orderAPI, supplierAPI } from '../services/api';
+import Pagination from '../components/Pagination';
 import '../styles/dashboard.css';
 import '../styles/vaccine.css';
 import {
@@ -63,6 +64,27 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
     batchNumber: '', expiryDate: '', available: '', used: '', datePurchased: '', supplier: '',
   });
 
+  // Pagination & sort
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize,    setPageSize]    = useState(10);
+  const [sortKey,     setSortKey]     = useState('batch_number');
+  const [sortDir,     setSortDir]     = useState('asc');
+
+  const BATCH_SORT_OPTIONS = [
+    { key: 'batch_number',   label: 'Batch Number' },
+    { key: 'expiry_date',    label: 'Expiry Date' },
+    { key: 'available',      label: 'Available Doses' },
+    { key: 'used',           label: 'Used' },
+    { key: 'date_purchased', label: 'Date Purchased' },
+    { key: 'supplier',       label: 'Supplier (A–Z)' },
+  ];
+
+  const handleSortChange = (key, dir) => {
+    setSortKey(key);
+    setSortDir(dir);
+    setCurrentPage(1);
+  };
+
   const totalAvailable = batches.reduce((s, b) => s + (b.available || 0), 0);
   const overallStatus  = calcStatus(totalAvailable);
 
@@ -74,6 +96,30 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
       (b.supplier     || '').toLowerCase().includes(q)
     );
   });
+
+  // Sort batches
+  const sortedBatches = [...filteredBatches].sort((a, b) => {
+    let aVal = a[sortKey];
+    let bVal = b[sortKey];
+    if (sortKey === 'available' || sortKey === 'used') {
+      aVal = Number(aVal) || 0;
+      bVal = Number(bVal) || 0;
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+    if (sortKey === 'expiry_date' || sortKey === 'date_purchased') {
+      aVal = aVal ? new Date(aVal).getTime() : 0;
+      bVal = bVal ? new Date(bVal).getTime() : 0;
+      return sortDir === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+    aVal = (aVal || '').toString().toLowerCase();
+    bVal = (bVal || '').toString().toLowerCase();
+    if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Paginate
+  const paginatedBatches = sortedBatches.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const statusStyle = (s) => ({
     padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '700',
@@ -159,7 +205,7 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
                 </td>
               </tr>
             )}
-            {filteredBatches.map((batch, i) => {
+            {paginatedBatches.map((batch, i) => {
               const batchNum  = batch.batch_number   || '—';
               const expiry    = batch.expiry_date    || '';
               const datePurch = batch.date_purchased || '—';
@@ -214,6 +260,18 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
           </tfoot>
         </table>
       </div>
+
+      <Pagination
+        totalItems={sortedBatches.length}
+        pageSize={pageSize}
+        currentPage={currentPage}
+        onPageChange={(p) => setCurrentPage(p)}
+        onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+        sortKey={sortKey}
+        sortDir={sortDir}
+        onSortChange={handleSortChange}
+        sortOptions={BATCH_SORT_OPTIONS}
+      />
 
       {showAddBatch && (
         <div style={{ padding: '20px 24px', borderTop: '2px solid #26a69a', background: '#f8fffe' }}>

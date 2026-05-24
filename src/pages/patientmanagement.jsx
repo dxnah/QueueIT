@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
+import Pagination from '../components/Pagination';
 import {
   patientAPI,
   vaccinationHistoryAPI,
@@ -987,6 +988,24 @@ const PatientManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [searchQuery, setSearchQuery]   = useState('');
 
+  // Pagination & sort
+  const [currentPage,  setCurrentPage]  = useState(1);
+  const [pageSize,     setPageSize]     = useState(10);
+  const [sortKey,      setSortKey]      = useState('name');
+  const [sortDir,      setSortDir]      = useState('asc');
+
+  const PATIENT_SORT_OPTIONS = [
+    { key: 'name',       label: 'Name (A–Z)' },
+    { key: 'username',   label: 'Username' },
+    { key: 'last_login', label: 'Last Login' },
+  ];
+
+  const handleSortChange = (key, dir) => {
+    setSortKey(key);
+    setSortDir(dir);
+    setCurrentPage(1);
+  };
+
   const showMsg = (text) => {
     setSaveMessage(text);
     setTimeout(() => setSaveMessage(''), 3000);
@@ -1030,6 +1049,18 @@ const PatientManagement = () => {
       || (u.username || '').toLowerCase().includes(q)
       || (u.phone    || '').toLowerCase().includes(q);
   });
+
+  // Sort
+  const sorted = [...filtered].sort((a, b) => {
+    let aVal = (a[sortKey] || '').toString().toLowerCase();
+    let bVal = (b[sortKey] || '').toString().toLowerCase();
+    if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+    if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Paginate
+  const paginated = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   return (
     <section className="dashboard-container">
@@ -1078,7 +1109,7 @@ const PatientManagement = () => {
                 className="um-search-input"
                 placeholder="Search by name, email, username..."
                 value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
+                onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               />
               {searchQuery && (
                 <button className="um-search-clear" onClick={() => setSearchQuery('')} type="button">✕</button>
@@ -1108,7 +1139,7 @@ const PatientManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.length > 0 ? filtered.map(user => (
+                    {paginated.length > 0 ? paginated.map(user => (
                       <tr
                         key={user.id}
                         className="um-table-row"
@@ -1171,6 +1202,17 @@ const PatientManagement = () => {
                   </tbody>
                 </table>
               </div>
+              <Pagination
+                totalItems={sorted.length}
+                pageSize={pageSize}
+                currentPage={currentPage}
+                onPageChange={(p) => setCurrentPage(p)}
+                onPageSizeChange={(s) => { setPageSize(s); setCurrentPage(1); }}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onSortChange={handleSortChange}
+                sortOptions={PATIENT_SORT_OPTIONS}
+              />
             </div>
           )}
 
