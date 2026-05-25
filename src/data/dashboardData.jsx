@@ -1,8 +1,22 @@
-export const PEAK_MONTHS = ['June', 'July', 'August'];
+export const PEAK_MONTHS = ['January', 'February', 'March'];
+
+export const MODEL_SEASONAL_MULTIPLIERS = {
+  1: 1.0946,  // Jan
+  2: 1.0963,  // Feb
+  3: 1.1182,  // Mar
+  4: 0.9656,  // Apr
+  5: 0.9277,  // May
+  6: 0.9372,  // Jun
+  7: 0.8928,  // Jul
+  8: 0.9041,  // Aug
+  9: 1.0307,  // Sep
+  10: 1.0401, // Oct
+  11: 0.9620, // Nov
+  12: 1.0307, // Dec
+};
 
 export const generateForecastData = (vaccineList = [], month = 'January') => {
-  const PEAK_MONTHS = ['June', 'July', 'August'];
-  const monthMult = PEAK_MONTHS.includes(month) ? 1.55 : 1.0;
+  const monthMult = PEAK_MONTHS.includes(month) ? 1.35 : 1.0;
 
   return vaccineList.map((v) => {
     const neededBase = Math.round((v.mlRecommended || 0) * monthMult);

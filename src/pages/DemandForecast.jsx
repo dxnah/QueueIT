@@ -1,6 +1,6 @@
 // src/pages/DemandForecast.jsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   BarChart, Bar, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -123,6 +123,16 @@ const DemandForecast = () => {
   const [submitError,   setSubmitError]   = useState(null);
   const [retrainStatus, setRetrainStatus] = useState(null);
 
+const hasPredicted = useRef(false);
+
+// Auto-predict when year/month change after first prediction
+useEffect(() => {
+  if (hasPredicted.current) {
+    handlePredict();
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [predictYear, predictMonth]);
+
   // Initial load
   useEffect(()=>{
     const init = async () => {
@@ -160,25 +170,57 @@ const DemandForecast = () => {
   },[selectedYear]);
 
   // Poll retrain status after submission
-  useEffect(()=>{
+useEffect(() => {
     if (!submitResult?.retraining) return;
+ 
+    let attempts = 0;
+    const MAX_ATTEMPTS = 18;   // 18 × 5s = 90 seconds max
+ 
     const poll = setInterval(async () => {
+      attempts++;
       try {
         const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+ 
+        // 1. Check if retrain finished (R² will have changed)
         const res = await fetch(`${BASE_URL}/api/ml/retrain/status/`);
-        if (res.ok) {
-          const status = await res.json();
+        if (!res.ok) return;
+        const status = await res.json();
+ 
+        // 2. Only act if R² is now positive (i.e. retrain produced a good model)
+        if (status.test_r2 !== null && status.test_r2 > 0) {
           setRetrainStatus(status);
-          // Refresh metrics after retrain
-          const newMetrics = await mlAPI.getMetrics();
+ 
+          // 3. Refresh all ML data so header badges + charts update
+          const [newMetrics, newSummary, newYearData] = await Promise.all([
+            mlAPI.getMetrics(),
+            mlAPI.getYearlySummary(),
+            mlAPI.getForecastByYear(selectedYear),
+          ]);
           setMetrics(newMetrics);
+          setYearlySummary(newSummary);
+          setYearData(newYearData);
+ 
+          // 4. If a prediction is shown, re-run it so model_info badges update
+          if (hasPredicted.current) {
+            handlePredict();
+          }
+ 
+          clearInterval(poll);
         }
-      } catch(e) { /* silent */ }
+ 
+        if (attempts >= MAX_ATTEMPTS) {
+          console.warn('Retrain poll timed out after 90s');
+          clearInterval(poll);
+        }
+      } catch (e) {
+        // silent — backend may still be retraining
+      }
     }, 5000);
-    // Stop polling after 60 seconds
-    const timeout = setTimeout(() => clearInterval(poll), 60000);
-    return () => { clearInterval(poll); clearTimeout(timeout); };
+ 
+    return () => clearInterval(poll);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [submitResult]);
+ 
 
   // Predict handler
   const handlePredict = async () => {
@@ -186,6 +228,7 @@ const DemandForecast = () => {
       setPredicting(true); setPredictError(null); setPredictResult(null);
       const result = await mlAPI.predict(predictYear, predictMonth);
       setPredictResult(result);
+      hasPredicted.current = true;
     } catch(e){ setPredictError(e.message); }
     finally { setPredicting(false); }
   };
@@ -285,6 +328,35 @@ const DemandForecast = () => {
     </select>
   );
 
+    // 12-month trend from real API calls
+  const [trendData,    setTrendData]    = useState([]);
+  const [trendLoading, setTrendLoading] = useState(false);
+
+  // Fetch all 12 months from backend whenever a prediction exists
+  useEffect(() => {
+    if (!predictResult) return;
+    const fetchTrend = async () => {
+      setTrendLoading(true);
+      try {
+        const results = await Promise.all(
+          MONTHS.map((_, i) => mlAPI.predict(predictResult.input.year, i + 1))
+        );
+        setTrendData(results.map((r, i) => ({
+          name:        MONTH_SHORT[i],
+          Predicted:   r.prediction.predicted_doses,
+          Recommended: r.prediction.recommended_order,
+          isPeak:      PEAK_MONTHS.includes(MONTHS[i]),
+          isSelected:  i + 1 === predictResult.input.month,
+        })));
+      } catch(e) {
+        console.error('Trend fetch failed:', e);
+      } finally {
+        setTrendLoading(false);
+      }
+    };
+    fetchTrend();
+  }, [predictResult]);
+
   return (
     <div className="dashboard-container">
       <style>{`@keyframes vf-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`}</style>
@@ -303,14 +375,43 @@ const DemandForecast = () => {
                 <h1 className="dashboard-heading">🤖 Demand Forecast</h1>
                 <p className="dashboard-subheading">ML-powered ARV dose predictions and restock planning</p>
               </div>
-              {metrics&&(
-                <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
-                  {[
-                    {label:'Model', value:metrics.model_name,                  color:'#26a69a'},
-                    {label:'R²',    value:metrics.test_metrics?.R2,             color:'#2e7d32'},
-                    {label:'MAPE',  value:`${metrics.test_metrics?.MAPE_pct}%`, color:'#f57f17'},
-                    {label:'MAE',   value:`±${metrics.test_metrics?.MAE} doses`,color:'#5c6bc0'},
-                  ].map(({label,value,color})=>(
+                {(metrics || predictResult)&&(
+                  <div style={{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}}>
+                    {/* Show a subtle "live" badge when prediction is active */}
+                    {predictResult && (
+                      <span style={{fontSize:10,background:'#e0f7f4',color:'#26a69a',padding:'2px 8px',
+                        borderRadius:20,fontWeight:700,border:'1px solid #b2dfdb'}}>
+                        ⚡ LIVE
+                      </span>
+                    )}
+                    {(() => {
+                        // Compute adjusted metrics based on prediction horizon (same logic as confidence card)
+                        const baseR2   = predictResult?.model_info?.test_r2   ?? metrics?.test_metrics?.R2;
+                        const baseMape = parseFloat(predictResult?.model_info?.test_mape ?? metrics?.test_metrics?.MAPE_pct);
+                        const baseMae  = parseFloat(predictResult?.model_info?.test_mae  ?? metrics?.test_metrics?.MAE);
+
+                        let displayR2   = baseR2;
+                        let displayMape = baseMape;
+                        let displayMae  = baseMae;
+
+                        if (predictResult) {
+                          const now         = new Date();
+                          const monthsAhead = (predictResult.input.year - now.getFullYear()) * 12
+                                            + (predictResult.input.month - (now.getMonth() + 1));
+                          const ahead = Math.max(0, monthsAhead);
+
+                          displayMape = Math.min(parseFloat((baseMape + ahead * 0.8).toFixed(2)), 60);
+                          displayR2   = Math.max(0, parseFloat((baseR2  - ahead * 0.008).toFixed(4)));
+                          displayMae  = Math.round(baseMae + ahead * 1.5); // ~1.5 doses wider per month ahead
+                        }
+
+                        return [
+                          {label:'Model', value: predictResult?.model_info?.model_name ?? metrics?.model_name,  color:'#26a69a'},
+                          {label:'R²',    value: displayR2,                                                      color:'#2e7d32'},
+                          {label:'MAPE',  value: `${displayMape}%`,                                              color:'#f57f17'},
+                          {label:'MAE',   value: `±${displayMae} doses`,                                         color:'#5c6bc0'},
+                        ];
+                      })().map(({label,value,color})=>(
                     <div key={label} style={{display:'inline-flex',alignItems:'center',gap:5,background:`${color}15`,border:`1.5px solid ${color}40`,borderRadius:20,padding:'4px 12px'}}>
                       <span style={{fontSize:10,color:'#888',fontWeight:600}}>{label}</span>
                       <span style={{fontSize:12,color,fontWeight:800}}>{value}</span>
@@ -501,81 +602,297 @@ const DemandForecast = () => {
 
           {/* ══ TAB: LIVE PREDICT ══ */}
           {activeTab==='predict'&&(
-            <div style={{maxWidth:560}}>
-              <div style={{background:'white',borderRadius:14,padding:28,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',marginBottom:24}}>
-                <h3 style={{margin:'0 0 6px',fontSize:16,fontWeight:700,color:'#333'}}>🔮 Live ARV Demand Prediction</h3>
-                <p style={{margin:'0 0 22px',fontSize:12,color:'#999'}}>
-                  Enter any year and month — the trained model predicts ARV dose demand automatically.
-                </p>
-                <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
-                  <div style={{flex:'1 1 160px'}}>
-                    <label style={{display:'block',fontSize:12,fontWeight:600,color:'#555',marginBottom:6}}>Year</label>
-                    <input type="number" value={predictYear}
-                      onChange={e=>setPredictYear(parseInt(e.target.value)||new Date().getFullYear())}
-                      min={2010} max={2040}
-                      style={{...inputStyle,fontSize:14}}
-                      onFocus={e=>e.target.style.borderColor='#26a69a'}
-                      onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+            <div>
+
+              {/* Top row — form + prediction cards side by side */}
+              <div style={{display:'flex',gap:20,marginBottom:20,flexWrap:'wrap'}}>
+
+                {/* Left — form */}
+                <div style={{flex:'1 1 300px',background:'white',borderRadius:14,padding:28,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',display:'flex',flexDirection:'column'}}>
+                  <h3 style={{margin:'0 0 6px',fontSize:16,fontWeight:700,color:'#333'}}>🔮 Live ARV Demand Prediction</h3>
+                  <p style={{margin:'0 0 22px',fontSize:12,color:'#999'}}>
+                    Enter any year and month — the trained model predicts ARV dose demand automatically.
+                  </p>
+                  <div style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
+                    <div style={{flex:'1 1 120px'}}>
+                      <label style={{display:'block',fontSize:12,fontWeight:600,color:'#555',marginBottom:6}}>Year</label>
+                      <input type="number" value={predictYear}
+                        onChange={e=>setPredictYear(parseInt(e.target.value)||new Date().getFullYear())}
+                        min={2010} max={2040}
+                        style={{...inputStyle,fontSize:14}}
+                        onFocus={e=>e.target.style.borderColor='#26a69a'}
+                        onBlur={e=>e.target.style.borderColor='#e0e0e0'}/>
+                    </div>
+                    <div style={{flex:'1 1 120px'}}>
+                      <label style={{display:'block',fontSize:12,fontWeight:600,color:'#555',marginBottom:6}}>Month</label>
+                      <select value={predictMonth} onChange={e=>setPredictMonth(parseInt(e.target.value))}
+                        style={{...inputStyle,fontSize:14,cursor:'pointer'}}
+                        onFocus={e=>e.target.style.borderColor='#26a69a'}
+                        onBlur={e=>e.target.style.borderColor='#e0e0e0'}>
+                        {MONTHS.map((m,i)=><option key={m} value={i+1}>{m}</option>)}
+                      </select>
+                    </div>
                   </div>
-                  <div style={{flex:'1 1 160px'}}>
-                    <label style={{display:'block',fontSize:12,fontWeight:600,color:'#555',marginBottom:6}}>Month</label>
-                    <select value={predictMonth} onChange={e=>setPredictMonth(parseInt(e.target.value))}
-                      style={{...inputStyle,fontSize:14,cursor:'pointer'}}
-                      onFocus={e=>e.target.style.borderColor='#26a69a'}
-                      onBlur={e=>e.target.style.borderColor='#e0e0e0'}>
-                      {MONTHS.map((m,i)=><option key={m} value={i+1}>{m}</option>)}
-                    </select>
+                  <button onClick={handlePredict} disabled={predicting}
+                    style={{width:'100%',padding:'12px',borderRadius:9,border:'none',background:predicting?'#a5d6a7':'#26a69a',color:'white',fontSize:15,fontWeight:700,cursor:predicting?'not-allowed':'pointer',transition:'background 0.2s'}}>
+                    {predicting?'⏳ Predicting...':'🔮 Predict ARV Demand'}
+                  </button>
+
+                  {/* Info box below button */}
+                  <div style={{marginTop:16,padding:'14px 16px',background:'#f0fffe',borderRadius:10,border:'1px solid #b2dfdb',flex:1}}>
+                    <p style={{margin:'0 0 8px',fontSize:12,fontWeight:700,color:'#26a69a'}}>ℹ️ How this works</p>
+                    <ul style={{margin:0,paddingLeft:16,fontSize:12,color:'#666',lineHeight:1.8}}>
+                      <li>Select any year and month</li>
+                      <li>The ML model estimates ARV dose demand</li>
+                      <li>A 12% safety buffer is added for the recommended order</li>
+                      <li>Peak months typically show higher demand</li>
+                    </ul>
                   </div>
+
+                  {predictError&&(
+                    <div style={{marginTop:14,padding:'10px 14px',background:'#ffebee',borderRadius:8,border:'1px solid #ef9a9a',fontSize:13,color:'#c62828',fontWeight:600}}>
+                      ⚠️ {predictError}
+                    </div>
+                  )}
                 </div>
-                <button onClick={handlePredict} disabled={predicting}
-                  style={{width:'100%',padding:'12px',borderRadius:9,border:'none',background:predicting?'#a5d6a7':'#26a69a',color:'white',fontSize:15,fontWeight:700,cursor:predicting?'not-allowed':'pointer',transition:'background 0.2s'}}>
-                  {predicting?'⏳ Predicting...':'🔮 Predict ARV Demand'}
-                </button>
-                {predictError&&(
-                  <div style={{marginTop:14,padding:'10px 14px',background:'#ffebee',borderRadius:8,border:'1px solid #ef9a9a',fontSize:13,color:'#c62828',fontWeight:600}}>
-                    ⚠️ {predictError}
+
+                {/* Right — prediction result cards */}
+                {predictResult ? (
+                  <div style={{flex:'1 1 300px',background:'white',borderRadius:14,padding:28,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20,flexWrap:'wrap'}}>
+                      <h3 style={{margin:0,fontSize:16,fontWeight:700,color:'#333'}}>
+                        Prediction — {predictResult.input.monthName} {predictResult.input.year}
+                      </h3>
+                      {PEAK_MONTHS.includes(predictResult.input.monthName)&&(
+                        <span style={{fontSize:10,background:'#fff3e0',color:'#e65100',padding:'2px 8px',borderRadius:10,fontWeight:700,border:'1px solid #ffcc80'}}>🔥 HIGH DEMAND MONTH</span>
+                      )}
+                    </div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:20}}>
+                      <div style={{background:'#e0f7f4',borderRadius:12,padding:'18px 20px',textAlign:'center',border:'2px solid #26a69a'}}>
+                        <p style={{margin:'0 0 6px',fontSize:11,color:'#26a69a',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.5px'}}>💉 Predicted Doses</p>
+                        <p style={{margin:0,fontSize:36,fontWeight:800,color:'#26a69a',lineHeight:1}}>{predictResult.prediction.predicted_doses.toLocaleString()}</p>
+                        <p style={{margin:'6px 0 0',fontSize:11,color:'#80cbc4'}}>ARV doses expected</p>
+                      </div>
+                      <div style={{background:'#fff8e1',borderRadius:12,padding:'18px 20px',textAlign:'center',border:'2px solid #f57f17'}}>
+                        <p style={{margin:'0 0 6px',fontSize:11,color:'#f57f17',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.5px'}}>📦 Recommended Order</p>
+                        <p style={{margin:0,fontSize:36,fontWeight:800,color:'#f57f17',lineHeight:1}}>{predictResult.prediction.recommended_order.toLocaleString()}</p>
+                        <p style={{margin:'6px 0 0',fontSize:11,color:'#f57f17',opacity:0.7}}>incl. {predictResult.prediction.safety_buffer_pct}% safety buffer</p>
+                      </div>
+                    </div>
+                    {(() => {
+                      const mape = parseFloat(predictResult.model_info.test_mape);
+                      const r2   = parseFloat(predictResult.model_info.test_r2);
+
+                      // ── How far into the future is this prediction? ──────────────
+                      const now          = new Date();
+                      const nowYear      = now.getFullYear();
+                      const nowMonth     = now.getMonth() + 1;
+                      const monthsAhead  = (predictResult.input.year - nowYear) * 12
+                                        + (predictResult.input.month - nowMonth);
+
+                      // Decay confidence the further into the future
+                      // Base MAPE from model, then add penalty per month ahead
+                      const decayPenalty = Math.max(0, monthsAhead) * 0.8; // +0.8% per month ahead
+                      const adjustedMape = Math.min(mape + decayPenalty, 60); // cap at 60%
+
+                      // ── Confidence tier ────────────────────────────────────────────
+                      const confidence      = adjustedMape <= 6  ? 'High'
+                                            : adjustedMape <= 20 ? 'Moderate'
+                                            : adjustedMape <= 35 ? 'Low'
+                                            :                      'Very Low';
+                      const confidenceColor = adjustedMape <= 6  ? '#2e7d32'
+                                            : adjustedMape <= 20 ? '#f57f17'
+                                            : adjustedMape <= 35 ? '#e65100'
+                                            :                      '#c62828';
+                      const confidenceBg    = adjustedMape <= 6  ? '#e8f5e9'
+                                            : adjustedMape <= 20 ? '#fff8e1'
+                                            : adjustedMape <= 35 ? '#fff3e0'
+                                            :                      '#ffebee';
+                      const confidenceBdr   = adjustedMape <= 6  ? '#a5d6a7'
+                                            : adjustedMape <= 20 ? '#ffe082'
+                                            : adjustedMape <= 35 ? '#ffcc80'
+                                            :                      '#ef9a9a';
+                      const confidenceIcon  = adjustedMape <= 6  ? '🎯'
+                                            : adjustedMape <= 20 ? '📊'
+                                            : adjustedMape <= 35 ? '⚠️'
+                                            :                      '🔴';
+
+                      const avgError = Math.round(
+                        predictResult.prediction.predicted_doses * (adjustedMape / 100)
+                      );
+
+                      // R² decays with prediction horizon — further ahead = lower effective fit
+                      const r2DecayPenalty = Math.max(0, monthsAhead) * 0.008; // -0.008 per month ahead
+                      const effectiveR2    = Math.max(0, parseFloat((r2 - r2DecayPenalty).toFixed(4)));
+
+                      const r2Label = effectiveR2 >= 0.8 ? 'Strong fit'
+                                    : effectiveR2 >= 0.6 ? 'Moderate fit'
+                                    : effectiveR2 >= 0.4 ? 'Weak fit'
+                                    :                      'Poor fit — treat as estimate';
+
+                      // ── Context-aware description ─────────────────────────────────
+                      const timeContext = monthsAhead <= 0  ? 'current or past month'
+                                        : monthsAhead === 1 ? 'next month'
+                                        : monthsAhead <= 3  ? `${monthsAhead} months ahead`
+                                        : monthsAhead <= 6  ? `${monthsAhead} months ahead`
+                                        :                     `${monthsAhead} months into the future`;
+
+                      const description = adjustedMape <= 6
+                        ? `High confidence — predicting the ${timeContext}. The model is typically off by about ${avgError} doses (±${adjustedMape.toFixed(1)}%).`
+                        : adjustedMape <= 20
+                        ? `Moderate confidence for the ${timeContext}. Forecast uncertainty increases the further ahead we predict. Expect ±${avgError} doses variance (${adjustedMape.toFixed(1)}% error).`
+                        : adjustedMape <= 35
+                        ? `Low confidence — this is ${timeContext}. Long-range forecasts carry higher uncertainty. Use as a rough estimate only (±${avgError} doses, ${adjustedMape.toFixed(1)}% error).`
+                        : `Very low confidence — predicting ${timeContext} is highly uncertain. The model's accuracy degrades significantly this far out. Treat this as a rough planning figure only (±${avgError} doses, ${adjustedMape.toFixed(1)}% error).`;
+
+                      // ── Confidence bar ────────────────────────────────────────────
+                      const confidencePct = Math.max(5, 100 - adjustedMape * 1.5);
+
+                      return (
+                        <div style={{borderRadius:10,overflow:'hidden',border:`1.5px solid ${confidenceBdr}`}}>
+
+                          {/* Header */}
+                          <div style={{background:confidenceBg,padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,flexWrap:'wrap'}}>
+                            <div style={{display:'flex',alignItems:'center',gap:8}}>
+                              <span style={{fontSize:16}}>{confidenceIcon}</span>
+                              <span style={{fontSize:13,fontWeight:700,color:confidenceColor}}>
+                                {confidence} Confidence Prediction
+                              </span>
+                              {monthsAhead > 0 && (
+                                <span style={{fontSize:10,color:'#888',fontStyle:'italic'}}>
+                                  ({timeContext})
+                                </span>
+                              )}
+                            </div>
+                            <span style={{fontSize:11,fontWeight:700,color:confidenceColor,background:'white',padding:'2px 10px',borderRadius:20,border:`1px solid ${confidenceBdr}`}}>
+                              ±{adjustedMape.toFixed(1)}% est. error
+                            </span>
+                          </div>
+
+                          {/* Body */}
+                          <div style={{background:'white',padding:'12px 16px'}}>
+                            <p style={{margin:'0 0 10px',fontSize:12,color:'#555',lineHeight:1.6}}>
+                              {description}
+                            </p>
+
+                            {/* Confidence bar */}
+                            <div style={{marginBottom:12}}>
+                              <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                                <span style={{fontSize:10,color:'#aaa'}}>Prediction confidence</span>
+                                <span style={{fontSize:10,fontWeight:700,color:confidenceColor}}>{Math.round(confidencePct)}%</span>
+                              </div>
+                              <div style={{height:6,background:'#f0f0f0',borderRadius:99,overflow:'hidden'}}>
+                                <div style={{
+                                  height:'100%',
+                                  width:`${confidencePct}%`,
+                                  background: adjustedMape<=6?'#26a69a':adjustedMape<=20?'#f57f17':adjustedMape<=35?'#e65100':'#e53935',
+                                  borderRadius:99,
+                                  transition:'width 0.4s ease',
+                                }}/>
+                              </div>
+                            </div>
+
+                            {/* Metric pills */}
+                            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                              <div style={{background:'#f5f5f5',borderRadius:8,padding:'6px 12px'}}>
+                                <span style={{fontSize:10,color:'#999',display:'block',marginBottom:1}}>MAPE (ADJUSTED)</span>
+                                <span style={{fontSize:12,fontWeight:700,color:'#333'}}>±{adjustedMape.toFixed(2)}%</span>
+                                <span style={{fontSize:10,color:'#aaa',marginLeft:4}}>incl. future penalty</span>
+                              </div>
+                              {monthsAhead > 0 && (
+                                <div style={{background:'#f5f5f5',borderRadius:8,padding:'6px 12px'}}>
+                                  <span style={{fontSize:10,color:'#999',display:'block',marginBottom:1}}>FUTURE PENALTY</span>
+                                  <span style={{fontSize:12,fontWeight:700,color:'#e65100'}}>+{decayPenalty.toFixed(1)}%</span>
+                                  <span style={{fontSize:10,color:'#aaa',marginLeft:4}}>{monthsAhead} mo ahead</span>
+                                </div>
+                              )}
+                              <div style={{background:'#f5f5f5',borderRadius:8,padding:'6px 12px'}}>
+                                <span style={{fontSize:10,color:'#999',display:'block',marginBottom:1}}>MODEL FIT (R²)</span>
+                                <span style={{fontSize:12,fontWeight:700,color:effectiveR2>=0.7?'#2e7d32':effectiveR2>=0.4?'#f57f17':'#e53935'}}>
+                                  {effectiveR2}
+                                </span>
+                                <span style={{fontSize:10,color:'#aaa',marginLeft:4}}>{r2Label}</span>
+                              </div>
+                              <div style={{background:'#f5f5f5',borderRadius:8,padding:'6px 12px'}}>
+                                <span style={{fontSize:10,color:'#999',display:'block',marginBottom:1}}>MODEL</span>
+                                <span style={{fontSize:12,fontWeight:700,color:'#333'}}>{predictResult.model_info.model_name}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  /* Placeholder when no prediction yet */
+                  <div style={{flex:'1 1 300px',background:'white',borderRadius:14,padding:28,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',textAlign:'center',color:'#ccc'}}>
+                    <div style={{fontSize:48,marginBottom:12}}>🔮</div>
+                    <p style={{margin:0,fontSize:14,fontWeight:600,color:'#bbb'}}>Prediction will appear here</p>
+                    <p style={{margin:'6px 0 0',fontSize:12,color:'#ddd'}}>Select a year and month, then click Predict</p>
                   </div>
                 )}
               </div>
+
+              {/* Bottom — 12-month trend chart */}
               {predictResult&&(
                 <div style={{background:'white',borderRadius:14,padding:28,boxShadow:'0 2px 6px rgba(0,0,0,0.07),0 8px 24px rgba(0,0,0,0.09)'}}>
-                  <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20,flexWrap:'wrap'}}>
-                    <h3 style={{margin:0,fontSize:16,fontWeight:700,color:'#333'}}>
-                      Prediction — {predictResult.input.monthName} {predictResult.input.year}
-                    </h3>
-                    {PEAK_MONTHS.includes(predictResult.input.monthName)&&(
-                      <span style={{fontSize:10,background:'#fff3e0',color:'#e65100',padding:'2px 8px',borderRadius:10,fontWeight:700,border:'1px solid #ffcc80'}}>🔥 HIGH DEMAND MONTH</span>
-                    )}
-                  </div>
-                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:20}}>
-                    <div style={{background:'#e0f7f4',borderRadius:12,padding:'18px 20px',textAlign:'center',border:'2px solid #26a69a'}}>
-                      <p style={{margin:'0 0 6px',fontSize:11,color:'#26a69a',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.5px'}}>💉 Predicted Doses</p>
-                      <p style={{margin:0,fontSize:36,fontWeight:800,color:'#26a69a',lineHeight:1}}>{predictResult.prediction.predicted_doses.toLocaleString()}</p>
-                      <p style={{margin:'6px 0 0',fontSize:11,color:'#80cbc4'}}>ARV doses expected</p>
+                  <h3 style={{margin:'0 0 4px',fontSize:15,fontWeight:700,color:'#333'}}>
+                    📈 12-Month Prediction Trend — {predictResult.input.year}
+                  </h3>
+                  <p style={{margin:'0 0 20px',fontSize:11,color:'#999',fontStyle:'italic'}}>
+                    All 12 months predicted by the ML model · Real backend predictions · Selected month highlighted
+                  </p>
+                  {trendLoading ? (
+                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                      {[1,2,3].map(i=><Skeleton key={i} h={36}/>)}
                     </div>
-                    <div style={{background:'#fff8e1',borderRadius:12,padding:'18px 20px',textAlign:'center',border:'2px solid #f57f17'}}>
-                      <p style={{margin:'0 0 6px',fontSize:11,color:'#f57f17',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.5px'}}>📦 Recommended Order</p>
-                      <p style={{margin:0,fontSize:36,fontWeight:800,color:'#f57f17',lineHeight:1}}>{predictResult.prediction.recommended_order.toLocaleString()}</p>
-                      <p style={{margin:'6px 0 0',fontSize:11,color:'#f57f17',opacity:0.7}}>incl. {predictResult.prediction.safety_buffer_pct}% safety buffer</p>
-                    </div>
-                  </div>
-                  <div style={{background:'#f5f5f5',borderRadius:10,padding:'14px 16px'}}>
-                    <p style={{margin:'0 0 8px',fontSize:11,color:'#888',fontWeight:700,textTransform:'uppercase',letterSpacing:'0.5px'}}>Model Info</p>
-                    <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
-                      {[
-                        {label:'Model',     value:predictResult.model_info.model_name},
-                        {label:'Test R²',   value:predictResult.model_info.test_r2},
-                        {label:'Test MAPE', value:`${predictResult.model_info.test_mape}%`},
-                      ].map(({label,value})=>(
-                        <div key={label}>
-                          <span style={{fontSize:11,color:'#999'}}>{label}: </span>
-                          <span style={{fontSize:12,color:'#333',fontWeight:700}}>{value}</span>
+                  ) : (
+                    <>
+                      <ResponsiveContainer width="100%" height={260}>
+                        <ComposedChart data={trendData} margin={{top:5,right:20,left:0,bottom:5}}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f5f5f5"/>
+                          <XAxis dataKey="name" tick={{fontSize:12}}/>
+                          <YAxis tick={{fontSize:11}} width={50}/>
+                          <Tooltip content={<CustomTooltip/>}/>
+                          <Legend wrapperStyle={{fontSize:12,paddingTop:12}}/>
+                          <Area type="monotone" dataKey="Recommended" fill="#fff8e1" stroke="#f57f17"
+                            strokeWidth={1.5} strokeDasharray="4 2" dot={false} name="Recommended Order"/>
+                          <Line type="monotone" dataKey="Predicted" stroke="#26a69a" strokeWidth={2.5}
+                            dot={(props) => {
+                              const {cx, cy, payload} = props;
+                              if (payload.isSelected) return <circle key={`s${cx}`} cx={cx} cy={cy} r={7} fill="#26a69a" stroke="white" strokeWidth={2}/>;
+                              if (payload.isPeak)     return <circle key={`p${cx}`} cx={cx} cy={cy} r={4} fill="#e65100" stroke="white" strokeWidth={1.5}/>;
+                              return <circle key={`n${cx}`} cx={cx} cy={cy} r={3} fill="#26a69a"/>;
+                            }}
+                            name="ML Predicted"/>
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                      <div style={{display:'flex',gap:20,marginTop:12,flexWrap:'wrap'}}>
+                        {[
+                          {color:'#26a69a',label:'Selected month',ring:true, r:6},
+                          {color:'#e65100',label:'Peak month',    ring:false,r:4},
+                          {color:'#26a69a',label:'Normal month',  ring:false,r:3},
+                        ].map(({color,label,ring,r})=>(
+                          <div key={label} style={{display:'flex',alignItems:'center',gap:5}}>
+                            <svg width={14} height={14}>
+                              <circle cx={7} cy={7} r={r} fill={color} stroke={ring?'white':'none'} strokeWidth={ring?2:0}/>
+                            </svg>
+                            <span style={{fontSize:11,color:'#888'}}>{label}</span>
+                          </div>
+                        ))}
+                        <div style={{display:'flex',alignItems:'center',gap:5}}>
+                          <svg width={20} height={10}>
+                            <line x1={0} y1={5} x2={20} y2={5} stroke="#f57f17" strokeWidth={1.5} strokeDasharray="4 2"/>
+                          </svg>
+                          <span style={{fontSize:11,color:'#888'}}>Recommended order</span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               )}
+
             </div>
           )}
 
