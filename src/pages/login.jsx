@@ -75,7 +75,9 @@ const handleLogin = async (e) => {
         </section>
 
         <h2 className="login-heading">LOG IN</h2>
-        <p className="system-subtitle">Input admin credentials to continue</p>
+        <p className="system-subtitle" style={{ color: '#555555', marginBottom: '20px' }}>
+          Input admin credentials to continue
+        </p>
 
         <form onSubmit={handleLogin}>
 
@@ -119,8 +121,8 @@ const handleLogin = async (e) => {
           {error && <p className="error-message">{error}</p>}
 
           <button type="submit" className="login-button" disabled={loading}>
-              {loading ? 'Logging in...' : 'Log In'}
-            </button>
+            {loading ? 'Logging in...' : 'Log In'}
+          </button>
 
         </form>
 

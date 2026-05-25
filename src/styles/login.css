@@ -45,24 +45,35 @@
 .system-title {
   margin: 0 0 5px 0;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
 .system-subtitle {
   margin: 0;
   font-size: 12px;
   line-height: 1.4;
-  font-weight: normal;
+  font-weight: 500;
+  color: #444444;
 }
 
 /*  Login Heading  */
 .login-heading {
   margin: -30px 0 5px 0;
   font-size: 18px;
-  color: #333;
-  font-weight: 600;
+  color: #1a1a1a;
+  font-weight: 700;
   letter-spacing: 1px;
   text-align: center;
+}
+
+/* Subtitle below LOG IN */
+.login-heading + .system-subtitle {
+  color: #555555;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  display: block;
 }
 
 /*  Form Inputs  */
@@ -73,9 +84,9 @@
 
 .input-label {
   display: block;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 8px;
-  color: #333;
+  color: #1a1a1a;
   font-size: 14px;
 }
 
@@ -87,6 +98,11 @@
   font-size: 14px;
   box-sizing: border-box;
   transition: border-color 0.3s;
+  color: #1a1a1a;
+}
+
+.input-field::placeholder {
+  color: #aaaaaa;
 }
 
 .input-field:focus {
@@ -104,7 +120,7 @@
   border-radius: 6px;
   width: 100%;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   box-sizing: border-box;
   transition: all 0.3s ease;
   transform: scale(1);
