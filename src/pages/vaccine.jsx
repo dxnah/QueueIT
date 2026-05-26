@@ -9,8 +9,6 @@ import '../styles/vaccine.css';
 import {
   PRICE_PER_DOSE,
   MONTHS,
-  DAYS_IN_MONTH,
-  MONTH_START_DAYS,
 } from '../data/vaccineConstants';
 import usePolling from '../hooks/usePolling'; 
 
@@ -18,32 +16,6 @@ const calcStatus = (available) => {
   if (available === 0)  return 'Out Stock';
   if (available < 100)  return 'Low Stock';
   return 'In Stock';
-};
-
-// ── MiniCalendar ──────────────────────────────────────────────────────────────
-const MiniCalendar = ({ month, selectedDay, onSelectDay }) => {
-  const totalDays = DAYS_IN_MONTH[month] || 30;
-  const startDay  = MONTH_START_DAYS[month] || 0;
-  const dayNames  = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-  const cells     = [];
-  for (let i = 0; i < startDay; i++) cells.push(null);
-  for (let d = 1; d <= totalDays; d++) cells.push(d);
-  return (
-    <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 1000, background: 'white', border: '1px solid #e0e0e0', borderRadius: '12px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', padding: '16px', minWidth: '280px' }}>
-      <p style={{ margin: '0 0 12px 0', fontWeight: '700', color: '#333', fontSize: '14px', textAlign: 'center' }}>📅 {month}</p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '2px', textAlign: 'center' }}>
-        {dayNames.map(d => <div key={d} style={{ fontSize: '11px', fontWeight: '700', color: '#999', padding: '4px 0' }}>{d}</div>)}
-        {cells.map((d, i) => (
-          <div key={i} onClick={() => d && onSelectDay(d)}
-            style={{ padding: '6px 2px', fontSize: '12px', borderRadius: '6px', cursor: d ? 'pointer' : 'default', background: d === selectedDay ? '#26a69a' : 'transparent', color: d === selectedDay ? 'white' : d ? '#333' : 'transparent', transition: 'background 0.15s' }}
-            onMouseEnter={e => { if (d && d !== selectedDay) e.target.style.background = '#e0f7f4'; }}
-            onMouseLeave={e => { if (d !== selectedDay) e.target.style.background = 'transparent'; }}>
-            {d || ''}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 };
 
 // ── Expiry color ──────────────────────────────────────────────────────────────
@@ -150,11 +122,8 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
 
   const handleBatchSubmit = async (e) => {
     e.preventDefault();
-    // Build payload matching FastAPI's VaccineBatchCreate schema.
-    // vaccine_id is required by the schema; vaccineAPI.addBatch injects it automatically.
-    // vaccineAPI.updateBatch sends the full object so vaccine_id must be present too.
     const payload = {
-      vaccine_id:     vaccineId,            // required by FastAPI schema
+      vaccine_id:     vaccineId,
       batch_number:   batchForm.batchNumber,
       expiry_date:    batchForm.expiryDate    || null,
       available:      parseInt(batchForm.available) || 0,
@@ -166,7 +135,6 @@ const VaccineTable = ({ vaccineId, vaccineName, batches, onAddBatch, onEditBatch
     if (editingBatch) {
       await onEditBatch(editingBatch.id, payload);
     } else {
-      // vaccineAPI.addBatch also merges vaccine_id, so it's safe either way
       await onAddBatch(vaccineId, payload);
     }
     setShowAddBatch(false);
@@ -433,13 +401,8 @@ const VaccineManagement = () => {
   const [loading,          setLoading]          = useState(true);
   const [apiError,         setApiError]         = useState(null);
 
-  const [viewMode,      setViewMode]      = useState('monthly');
   const [selectedMonth, setSelectedMonth] = useState('January');
-  const [selectedWeek,  setSelectedWeek]  = useState(0);
-  const [selectedDay,   setSelectedDay]   = useState(1);
   const [monthDropOpen, setMonthDropOpen] = useState(false);
-  const [weekDropOpen,  setWeekDropOpen]  = useState(false);
-  const [calOpen,       setCalOpen]       = useState(false);
 
   const [vaccinesFromAPI,  setVaccinesFromAPI]  = useState([]);
   const [suppliersFromAPI, setSuppliersFromAPI] = useState([]);
@@ -456,21 +419,17 @@ const VaccineManagement = () => {
   });
 
   // ── Load vaccines + batches from FastAPI ───────────────────────────────────
-  // FastAPI's GET /api/vaccines/ returns vaccine rows WITHOUT batches nested.
-  // FastAPI's GET /api/batches/ returns all batches with vaccine_id.
-  // We fetch both in parallel, then stitch batches onto their vaccine.
   const loadVaccines = useCallback(async () => {
     try {
       setLoading(true);
       setApiError(null);
 
       const [vaccineData, batchData, supplierData] = await Promise.all([
-        vaccineAPI.getAll(),        // GET /api/vaccines/
-        vaccineAPI.getAllBatches(),  // GET /api/batches/
-        supplierAPI.getAll(),       // GET /api/suppliers/
+        vaccineAPI.getAll(),
+        vaccineAPI.getAllBatches(),
+        supplierAPI.getAll(),
       ]);
 
-      // Stitch batches onto their vaccine
       const vaccinesWithBatches = vaccineData.map(vaccine => ({
         ...vaccine,
         batches: batchData.filter(b => b.vaccine_id === vaccine.id),
@@ -479,7 +438,6 @@ const VaccineManagement = () => {
       setVaccinesFromAPI(vaccinesWithBatches);
       setSuppliersFromAPI(supplierData);
 
-      // Keep selected vaccine selection stable across reloads
       if (vaccinesWithBatches.length > 0 && !selectedVaccine) {
         setSelectedVaccine({ id: vaccinesWithBatches[0].id, name: vaccinesWithBatches[0].name });
       }
@@ -518,8 +476,6 @@ const VaccineManagement = () => {
     || null;
 
   // ── Batch CRUD handlers ────────────────────────────────────────────────────
-  // vaccineAPI.addBatch(vaccineId, payload) → POST /api/batches/
-  // payload already includes vaccine_id (set in VaccineTable's handleBatchSubmit)
   const handleAddBatch = async (vaccineId, payload) => {
     try {
       await vaccineAPI.addBatch(vaccineId, payload);
@@ -530,7 +486,6 @@ const VaccineManagement = () => {
     }
   };
 
-  // vaccineAPI.updateBatch(batchId, payload) → PUT /api/batches/{id}/
   const handleEditBatch = async (batchId, payload) => {
     try {
       await vaccineAPI.updateBatch(batchId, payload);
@@ -541,7 +496,6 @@ const VaccineManagement = () => {
     }
   };
 
-  // vaccineAPI.deleteBatch(batchId) → DELETE /api/batches/{id}/
   const handleDeleteBatch = async (batchId) => {
     if (!window.confirm('Delete this batch?')) return;
     try {
@@ -558,14 +512,13 @@ const VaccineManagement = () => {
     setTimeout(() => setSaveMessage(''), ms);
   };
 
-  // ── Add new vaccine (creates vaccine row + first batch) ────────────────────
+  // ── Add new vaccine ────────────────────────────────────────────────────────
   const handleAddNewVaccine = async (e) => {
     e.preventDefault();
     const name = newVaccineForm.name.trim();
     if (!name) { alert('Enter a vaccine name.'); return; }
     if (vaccinesFromAPI.some(v => v.name === name)) { alert('Vaccine already exists.'); return; }
     try {
-      // 1. Create the vaccine record
       const newVaccine = await vaccineAPI.create({
         name,
         available:      parseInt(newVaccineForm.available) || 0,
@@ -573,7 +526,6 @@ const VaccineManagement = () => {
         ml_recommended: 200,
         status:         'In Stock',
       });
-      // 2. Create the first batch — POST /api/batches/ with vaccine_id in body
       await vaccineAPI.addBatch(newVaccine.id, {
         vaccine_id:     newVaccine.id,
         batch_number:   newVaccineForm.batchNumber,
@@ -603,15 +555,13 @@ const VaccineManagement = () => {
     }
   };
 
-  const periodBtnStyle = (active) => ({
+  const monthBtnStyle = {
     display: 'inline-flex', alignItems: 'center', gap: '5px',
     padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
-    cursor: 'pointer', border: '1.5px solid', transition: 'all 0.18s',
-    background:  active ? '#26a69a' : 'white',
-    color:       active ? 'white'   : '#555',
-    borderColor: active ? '#26a69a' : '#ddd',
-    boxShadow:   active ? '0 2px 8px rgba(38,166,154,0.3)' : '0 1px 3px rgba(0,0,0,0.08)',
-  });
+    cursor: 'pointer', border: '1.5px solid #26a69a', transition: 'all 0.18s',
+    background: '#26a69a', color: 'white',
+    boxShadow: '0 2px 8px rgba(38,166,154,0.3)',
+  };
 
   const dropItemStyle = (active, isPeakItem = false) => ({
     padding: '8px 16px', cursor: 'pointer', fontSize: '13px',
@@ -763,12 +713,12 @@ const VaccineManagement = () => {
                 </div>
               </div>
 
-              {/* Period + Vaccine selector */}
+              {/* Month + Vaccine selector */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
                 <div style={{ position: 'relative' }}>
-                  <button type="button" style={periodBtnStyle(viewMode === 'monthly')}
-                    onClick={() => { setViewMode('monthly'); setMonthDropOpen(v => !v); setWeekDropOpen(false); setCalOpen(false); setVaccineDropOpen(false); }}>
-                    📅 Monthly {viewMode === 'monthly' ? `(${selectedMonth.slice(0, 3)})` : ''} ▾
+                  <button type="button" style={monthBtnStyle}
+                    onClick={() => { setMonthDropOpen(v => !v); setVaccineDropOpen(false); }}>
+                    📅 {selectedMonth} ▾
                   </button>
                   {monthDropOpen && (
                     <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 999, background: 'white', border: '1px solid #e0e0e0', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', minWidth: '180px', padding: '6px 0', overflow: 'hidden' }}>
@@ -778,7 +728,7 @@ const VaccineManagement = () => {
                           <div key={m} style={dropItemStyle(m === selectedMonth, isPeakM)}
                             onMouseEnter={e => e.currentTarget.style.background = isPeakM ? '#fff3e0' : '#f5f5f5'}
                             onMouseLeave={e => e.currentTarget.style.background = m === selectedMonth ? '#e0f7f4' : 'white'}
-                            onClick={() => { setSelectedMonth(m); setMonthDropOpen(false); setSelectedWeek(0); setSelectedDay(1); }}>
+                            onClick={() => { setSelectedMonth(m); setMonthDropOpen(false); }}>
                             <span>{m}</span>
                             {isPeakM && <span style={{ fontSize: '10px', background: '#ffebee', color: '#e53935', padding: '2px 6px', borderRadius: '10px', fontWeight: '700' }}>🔥 PEAK</span>}
                             {m === selectedMonth && !isPeakM && <span style={{ color: '#26a69a', fontSize: '12px' }}>✓</span>}
@@ -789,44 +739,12 @@ const VaccineManagement = () => {
                   )}
                 </div>
 
-                <div style={{ position: 'relative' }}>
-                  <button type="button" style={periodBtnStyle(viewMode === 'weekly')}
-                    onClick={() => { setViewMode('weekly'); setWeekDropOpen(v => !v); setMonthDropOpen(false); setCalOpen(false); setVaccineDropOpen(false); }}>
-                    📆 Weekly {viewMode === 'weekly' ? `(Wk ${selectedWeek + 1})` : ''} ▾
-                  </button>
-                  {weekDropOpen && (
-                    <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 999, background: 'white', border: '1px solid #e0e0e0', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', minWidth: '160px', padding: '6px 0', overflow: 'hidden' }}>
-                      {[0, 1, 2, 3].map(wi => (
-                        <div key={wi} style={dropItemStyle(selectedWeek === wi)}
-                          onMouseEnter={e => e.currentTarget.style.background = '#f5f5f5'}
-                          onMouseLeave={e => e.currentTarget.style.background = selectedWeek === wi ? '#e0f7f4' : 'white'}
-                          onClick={() => { setSelectedWeek(wi); setWeekDropOpen(false); }}>
-                          Week {wi + 1} {selectedWeek === wi && <span style={{ color: '#26a69a' }}>✓</span>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ position: 'relative' }}>
-                  <button type="button" style={periodBtnStyle(viewMode === 'daily')}
-                    onClick={() => { setViewMode('daily'); setCalOpen(v => !v); setMonthDropOpen(false); setWeekDropOpen(false); setVaccineDropOpen(false); }}>
-                    🗓️ Daily {viewMode === 'daily' ? `(${selectedMonth.slice(0, 3)} ${selectedDay})` : ''} ▾
-                  </button>
-                  {calOpen && (
-                    <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 999 }}>
-                      <MiniCalendar month={selectedMonth} selectedDay={selectedDay}
-                        onSelectDay={d => { setSelectedDay(d); setCalOpen(false); }} />
-                    </div>
-                  )}
-                </div>
-
                 <div style={{ width: '1px', height: '32px', background: '#e0e0e0', margin: '0 4px' }} />
 
                 <div ref={vaccineDropRef} style={{ position: 'relative' }}>
                   <button type="button"
-                    style={{ ...periodBtnStyle(true), background: 'white', color: '#333', borderColor: '#26a69a' }}
-                    onClick={() => { setVaccineDropOpen(v => !v); setMonthDropOpen(false); setWeekDropOpen(false); setCalOpen(false); }}>
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', border: '1.5px solid #26a69a', background: 'white', color: '#333', transition: 'all 0.18s', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}
+                    onClick={() => { setVaccineDropOpen(v => !v); setMonthDropOpen(false); }}>
                     💉 {displayVaccineObj?.name || 'Available Vaccines'} ▾
                   </button>
                   {vaccineDropOpen && (
@@ -860,14 +778,7 @@ const VaccineManagement = () => {
               </div>
 
               <div style={{ marginBottom: '18px', fontSize: '13px', color: '#888', fontWeight: '500' }}>
-                Showing urgency for:{' '}
-                <strong style={{ color: '#26a69a' }}>
-                  {viewMode === 'daily'
-                    ? `${selectedMonth} — Day ${selectedDay}`
-                    : viewMode === 'weekly'
-                    ? `${selectedMonth} — Week ${selectedWeek + 1}`
-                    : selectedMonth}
-                </strong>
+                Showing urgency for: <strong style={{ color: '#26a69a' }}>{selectedMonth}</strong>
               </div>
 
               {displayVaccineObj ? (
