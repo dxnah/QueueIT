@@ -1,4 +1,5 @@
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://127.0.0.1:8000/api';
+export const BASE_URL = import.meta.env.REACT_APP_BASE_URL 
+  ?? 'https://vaxflow-backend.onrender.com';
 const CACHE_TTL = 30_000;
 const SWR_TTL   = 60_000;
 
@@ -121,7 +122,7 @@ export const prefetchAll = () =>
   ]).catch(() => {});
 
 // ── ML Forecast ───────────────────────────────────────────────────────────────
-const ML_URL = process.env.REACT_APP_ML_URL || 'http://127.0.0.1:8000';
+export const ML_URL = import.meta.env.REACT_APP_ML_URL || 'http://127.0.0.1:8000';
 
 const mlRequest = async (endpoint, method = 'GET') => {
   const token = tokenStorage.get();
