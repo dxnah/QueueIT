@@ -16,6 +16,11 @@ function invalidateKeys(...bases) {
   }
 }
 
+// ── Token helpers ─────────────────────────────────────────────────────────────
+function getToken() {
+  return localStorage.getItem('authToken');
+}
+
 // ── Core request ──────────────────────────────────────────────────────────────
 const request = async (endpoint, method = 'GET', body = null) => {
   const cacheKey = normKey(method, endpoint);
@@ -36,18 +41,30 @@ const request = async (endpoint, method = 'GET', body = null) => {
 async function doRequest(endpoint, method, body, cacheKey) {
   const controller = new AbortController();
   const isAuth = endpoint.includes('/login/') || endpoint.includes('/signup/');
-  const timeout = setTimeout(() => controller.abort(), isAuth ? 2_000 : 8_000);
+  const timeout = setTimeout(() => controller.abort(), isAuth ? 10_000 : 15_000);
 
   const headers = { 'Content-Type': 'application/json' };
+
+  // Attach JWT token for all non-auth requests
+  const token = getToken();
+  if (token && !isAuth) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const options = { method, headers, signal: controller.signal };
   if (body) options.body = JSON.stringify(body);
 
+  // Prefix all endpoints with /api
+  const url = `${BASE_URL}/api${endpoint}`;
+
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, options);
+    const response = await fetch(url, options);
     clearTimeout(timeout);
 
     // Auto-logout on 401
     if (response.status === 401) {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('adminUsername');
       localStorage.removeItem('adminEmail');
       localStorage.removeItem('adminId');
@@ -133,11 +150,20 @@ export const mlAPI = {
 export const authAPI = {
   login: async (username, password) => {
     const data = await request('/login/', 'POST', { username, password });
+    // Store JWT tokens
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+    }
+    if (data.refresh_token) {
+      localStorage.setItem('refreshToken', data.refresh_token);
+    }
     return data;
   },
   register: (username, password, name) =>
     request('/signup/', 'POST', { username, password, name }),
   logout: () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('adminUsername');
     localStorage.removeItem('adminEmail');
     localStorage.removeItem('adminId');
