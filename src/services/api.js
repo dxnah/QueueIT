@@ -1,16 +1,9 @@
-export const BASE_URL = import.meta.env.REACT_APP_BASE_URL 
-  ?? 'https://vaxflow-backend.onrender.com';
+export const BASE_URL = process.env.REACT_APP_BASE_URL 
+  || 'https://vaxflow-backend.onrender.com';
 const CACHE_TTL = 30_000;
 const SWR_TTL   = 60_000;
 
 const cache = new Map();
-
-// ── Token helpers ─────────────────────────────────────────────────────────────
-export const tokenStorage = {
-  get:   ()      => localStorage.getItem('access_token'),
-  set:   (token) => localStorage.setItem('access_token', token),
-  clear: ()      => localStorage.removeItem('access_token'),
-};
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function normKey(method, endpoint) {
@@ -46,13 +39,6 @@ async function doRequest(endpoint, method, body, cacheKey) {
   const timeout = setTimeout(() => controller.abort(), isAuth ? 2_000 : 8_000);
 
   const headers = { 'Content-Type': 'application/json' };
-
-  // Attach JWT token for all non-auth endpoints
-  if (!isAuth) {
-    const token = tokenStorage.get();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-  }
-
   const options = { method, headers, signal: controller.signal };
   if (body) options.body = JSON.stringify(body);
 
@@ -62,7 +48,10 @@ async function doRequest(endpoint, method, body, cacheKey) {
 
     // Auto-logout on 401
     if (response.status === 401) {
-      tokenStorage.clear();
+      localStorage.removeItem('adminUsername');
+      localStorage.removeItem('adminEmail');
+      localStorage.removeItem('adminId');
+      localStorage.removeItem('lastLogin');
       window.location.href = '/login';
       throw new Error('Session expired. Please log in again.');
     }
@@ -122,13 +111,10 @@ export const prefetchAll = () =>
   ]).catch(() => {});
 
 // ── ML Forecast ───────────────────────────────────────────────────────────────
-export const ML_URL = import.meta.env.REACT_APP_ML_URL || 'http://127.0.0.1:8000';
+export const ML_URL = process.env.REACT_APP_ML_URL || 'http://127.0.0.1:8000';
 
 const mlRequest = async (endpoint, method = 'GET') => {
-  const token = tokenStorage.get();
   const headers = { 'Content-Type': 'application/json' };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-
   const res = await fetch(`${ML_URL}${endpoint}`, { method, headers });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
@@ -147,19 +133,19 @@ export const mlAPI = {
 export const authAPI = {
   login: async (username, password) => {
     const data = await request('/login/', 'POST', { username, password });
-    if (data?.access_token) {
-      tokenStorage.set(data.access_token);
-    }
     return data;
   },
   register: (username, password, name) =>
     request('/signup/', 'POST', { username, password, name }),
   logout: () => {
-    tokenStorage.clear();
+    localStorage.removeItem('adminUsername');
+    localStorage.removeItem('adminEmail');
+    localStorage.removeItem('adminId');
+    localStorage.removeItem('lastLogin');
     cache.clear();
     window.location.href = '/login';
   },
-  isAuthenticated: () => !!tokenStorage.get(),
+  isAuthenticated: () => !!localStorage.getItem('adminUsername'),
 };
 
 // ── Vaccines ──────────────────────────────────────────────────────────────────
